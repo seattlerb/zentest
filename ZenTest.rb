@@ -6,11 +6,6 @@ puts "# Created with ZenTest v. #{VERSION}"
 
 $AUTOTESTER = true
 
-class Blah
-  def blah
-  end
-end
-
 # this is really frustrating... testrunner has an at_exit handler
 module Kernel
   alias :old_at_exit :at_exit
@@ -21,6 +16,15 @@ end
 
 require 'test/unit'
 require 'test/unit/ui/console/testrunner'
+
+class ZenTest
+  # TODO: refactor into object design
+
+  def something
+    # TODO: write some code
+  end
+
+end
 
 files = ARGV.clone
 
