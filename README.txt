@@ -2,22 +2,22 @@ ZenTest
     http://www.zenspider.com/
     support@zenspider.com
 
-DESCRIPTION:
+** DESCRIPTION:
   
 ZenTest scans your target and unit-test code and writes your missing
 code based on simple naming rules, enabling XP at a much quicker
 pace. ZenTest only works with Ruby and Test::Unit.
 
-FEATURES/PROBLEMS:
+** FEATURES/PROBLEMS:
   
 + Scans your ruby code and tests and generates missing methods for you.
 
-SYNOPSYS:
+** SYNOPSYS:
 
   ZenTest.rb MyProject.rb TestMyProject.rb > missing.rb
   # edit missing.rb and merge appropriate parts into the above files.
 
-RULES:
+** RULES:
 
 ZenTest uses the following rules to figure out what code should be
 generated:
@@ -29,16 +29,16 @@ generated:
 	+ Example: A::B#blah vs TestA::TestB#test_blah_missing_file
 + All naming conventions are bidirectional with the exception of test extensions.
 
-REQUIREMENTS:
+** REQUIREMENTS:
 
 + Ruby 1.6+
 + Test::Unit
 
-INSTALL:
+** INSTALL:
 
 + No install instructions yet. TODO
 
-LICENSE:
+** LICENSE:
 
 (The MIT License)
 
