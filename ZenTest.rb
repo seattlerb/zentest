@@ -64,7 +64,7 @@ class ZenTest
   def get_methods_for(klass)
     klass = self.get_class(klass) if klass.kind_of? String
 
-    public_methods = klass.public_instance_methods
+    public_methods = klass.public_instance_methods - Kernel.methods
     klassmethods = {}
     public_methods.each do |meth|
       puts "# found method #{meth}" if $DEBUG
@@ -83,6 +83,7 @@ class ZenTest
       
       # generally we don't test Object's methods...
       the_methods -= Object.instance_methods(true)
+      the_methods -= Kernel.methods(true)
       
       the_methods.each do |meth|
 	klassmethods[meth] = true
