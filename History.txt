@@ -1,6 +1,24 @@
+*** 2.3.0 / 2004-11-18
+
++ 6 minor enhancements
+	+ Massively expanded the method name mappings.
+	+ Added -r flag to reverse map names, for Rails style testing.
+	+ Added -e to auto eval tests generated.
+	+ Added -b & -c flags in unit_diff (passed to diff)
+	+ Added install and uninstall rules to Makefile.
+	+ Added some more doco to README.txt
++ 7 bug fixes
+	+ Cleaned up and refactored tests.
+	+ Changed the way files are generated, to accomodate new flags.
+	+ Added some more tests.
+	+ Added $ZENTEST=true
+	+ Fixed the one-liner diff bug.
+	+ Cleaned up multi-line string diffs by unescaping \n
+	+ Cleaned result for flunks.
+
 *** 2.2.0 / 2004-10-18
 
-+ 4 minor enhancement
++ 4 minor enhancements
 	+ Added LinuxJournalArticle.txt! WOOT!
 	+ Added unit_diff.rb - a very cool filter for test output!
 	+ Extended ZenTest to work with standard input

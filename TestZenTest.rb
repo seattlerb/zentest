@@ -11,6 +11,7 @@ if __FILE__ == $0 then
 end
 
 # These are just classes set up for quick testing.
+# TODO: need to test a compound class name Mod::Cls
 
 class Cls1				# ZenTest SKIP
   def meth1; end
@@ -51,12 +52,66 @@ class TestZenTest < Test::Unit::TestCase
     @tester = ZenTest.new()
   end
 
-  def test_initialize
-    assert_not_nil(@tester, "Tester must be initialized")
+  ############################################################
+  # Utility Methods
+
+  def util_simple_setup
+    @tester.klasses = {
+      "Something" =>
+        {
+        "method1" => true,
+        "attrib" => true,
+        "attrib=" => true,
+        "equal?" => true,
+      },
+    }
+    @tester.test_klasses = {
+      "TestSomething" =>
+        {
+        "test_method2" => true,
+        "setup" => true,
+        "teardown" => true,
+      },
+    }
+    @tester.inherited_methods = @tester.test_klasses.merge(@tester.klasses)
+    @generated_code = "
+require 'test/unit' unless defined? $ZENTEST and $ZENTEST
+
+class Something
+  def method2
+    raise NotImplementedError, 'Need to write method2'
+  end
+end
+
+class TestSomething < Test::Unit::TestCase
+  def test_attrib
+    raise NotImplementedError, 'Need to write test_attrib'
+  end
+
+  def test_attrib_equals
+    raise NotImplementedError, 'Need to write test_attrib_equals'
+  end
+
+  def test_equal_eh
+    raise NotImplementedError, 'Need to write test_equal_eh'
+  end
+
+  def test_method1
+    raise NotImplementedError, 'Need to write test_method1'
+  end
+end
+
+# Number of errors detected: 5
+"
   end
 
   ############################################################
   # Accessors & Adders:
+
+  def test_initialize
+    assert_not_nil(@tester, "Tester must be initialized")
+    # TODO: should do more at this stage
+  end
 
   ############################################################
   # Converters and Testers:
@@ -145,19 +200,23 @@ class TestZenTest < Test::Unit::TestCase
     assert_equal({"SomeClass" => { "some_method" => true } }, missing)
   end
 
-  def util_simple_setup
-    @tester.klasses = {"Something" => { "method1" => true } }
-    @tester.test_klasses = {"TestSomething" => { "test_method2" => true, "setup" => true, "teardown" => true } }
-  end
-
   def test_analyze_simple
     self.util_simple_setup
 
     @tester.analyze
     missing = @tester.missing_methods
-    assert_equal({"Something" => { "method2" => true },
-		   "TestSomething" => { "test_method1" => true } },
-		 missing)
+    expected = {
+      "Something" => {
+        "method2" => true,
+      },
+      "TestSomething" => {
+        "test_attrib" => true,
+        "test_attrib_equals" => true,
+        "test_equal_eh" => true,
+        "test_method1" => true,
+      }
+    }
+    assert_equal(expected, missing)
   end
 
   def test_generate_code_simple
@@ -165,7 +224,7 @@ class TestZenTest < Test::Unit::TestCase
     
     @tester.analyze
     str = @tester.generate_code.join("\n")
-    exp = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\n# Number of errors detected: 2\n"
+    exp = @generated_code
 
     assert_equal(exp, str)
   end
@@ -226,7 +285,7 @@ class TestZenTest < Test::Unit::TestCase
     @tester.analyze
     @tester.generate_code
     str = @tester.result
-    exp = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\n# Number of errors detected: 2\n"
+    exp = @generated_code
 
     assert_equal(exp, str)
   end
@@ -237,6 +296,77 @@ class TestZenTest < Test::Unit::TestCase
 
   def test_scan_files
     # HACK raise NotImplementedError, 'Need to write test_scan_files'
+  end
+
+  def test_process_class
+    assert_equal({}, @tester.klasses)
+    assert_equal({}, @tester.test_klasses)
+    assert_equal(nil, @tester.inherited_methods["SuperDuper"])
+    @tester.process_class("SuperDuper")
+    assert_equal({"SuperDuper"=>{"inherited"=>true, "overridden"=>true}},
+                 @tester.klasses)
+    assert_equal({}, @tester.test_klasses)
+    assert_equal({}, @tester.inherited_methods["SuperDuper"])
+  end
+
+  def test_normal_to_test
+    self.util_simple_setup
+    assert_equal("test_method1",        @tester.normal_to_test("method1"))
+    assert_equal("test_method1_equals", @tester.normal_to_test("method1="))
+    assert_equal("test_method1_eh",     @tester.normal_to_test("method1?"))
+    assert_equal("test_method1_bang",   @tester.normal_to_test("method1!"))
+    assert_equal("test_times",          @tester.normal_to_test("*"))
+    assert_equal("test_index",          @tester.normal_to_test("[]"))
+    assert_equal("test_index_equals",   @tester.normal_to_test("[]="))
+  end
+
+  def test_normal_to_test_overlap
+    self.util_simple_setup
+    assert_equal("test_equals2",       @tester.normal_to_test("=="))
+    assert_equal("test_equals3",       @tester.normal_to_test("==="))
+    assert_equal("test_method",        @tester.normal_to_test("method"))
+    assert_equal("test_method_equals", @tester.normal_to_test("method="))
+  end
+
+  def test_test_to_normal
+    self.util_simple_setup
+    assert_equal("method1",  @tester.test_to_normal("test_method1", "Something"))
+    assert_equal("method1=", @tester.test_to_normal("test_method1_equals", "Something"))
+    assert_equal("method1?", @tester.test_to_normal("test_method1_eh", "Something"))
+    assert_equal("method1!", @tester.test_to_normal("test_method1_bang", "Something"))
+  end
+
+  def test_test_to_normal_extended
+    self.util_simple_setup
+    assert_equal("method1", @tester.test_to_normal("test_method1_extension", "Something"))
+    assert_equal("method1", @tester.test_to_normal("test_method1_extension_again", "Something"))
+    assert_equal("equal?", @tester.test_to_normal("test_equal_eh_extension", "Something"))
+    assert_equal("equal?", @tester.test_to_normal("test_equal_eh_extension_again", "Something"))
+  end
+
+  def test_test_to_normal_mapped
+    self.util_simple_setup
+    assert_equal("*",   @tester.test_to_normal("test_times", "Something"))
+    assert_equal("*",   @tester.test_to_normal("test_times_ext", "Something"))
+    assert_equal("==",  @tester.test_to_normal("test_equals2", "Something"))
+    assert_equal("==",  @tester.test_to_normal("test_equals2_ext", "Something"))
+    assert_equal("===", @tester.test_to_normal("test_equals3", "Something"))
+    assert_equal("===", @tester.test_to_normal("test_equals3_ext", "Something"))
+    assert_equal("[]",  @tester.test_to_normal("test_index", "Something"))
+    assert_equal("[]",  @tester.test_to_normal("test_index_ext", "Something"))
+    assert_equal("[]=", @tester.test_to_normal("test_index_equals", "Something"))
+    assert_equal("[]=", @tester.test_to_normal("test_index_equals_ext", "Something"))
+  end
+
+  def test_klasses_equals
+    self.util_simple_setup
+    assert_equal({"Something"=> {
+                     "equal?"=>true,
+                     "attrib="=>true,
+                     "method1"=>true,
+                     "attrib"=>true}}, @tester.klasses)
+    @tester.klasses= {"whoopie" => {}}
+    assert_equal({"whoopie"=> {}}, @tester.klasses)
   end
 
 end

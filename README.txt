@@ -50,6 +50,26 @@ generated:
 		+ TestA::TestB#test_blah_missing_file
 + All naming conventions are bidirectional with the exception of test extensions.
 
+** METHOD MAPPING:
+
+Method names are mapped bidirectionally in the following way:
+
+  method	test_method
+  method?	test_method_eh		(too much exposure to Canadians :)
+  method!	test_method_bang
+  method=	test_method_equals
+  []		test_index
+  *		test_times
+  ==		test_equals2
+  ===		test_equals3
+
+Further, any of the test methods should be able to have arbitrary
+extensions put on the name to distinguish edge cases:
+
+  method	test_method
+  method	test_method_simple
+  method	test_method_no_network
+
 ** REQUIREMENTS:
 
 + Ruby 1.6+
@@ -57,7 +77,8 @@ generated:
 
 ** INSTALL:
 
-+ No install instructions yet. TODO
++ make test
++ sudo make install
 
 ** LICENSE:
 
