@@ -11,22 +11,31 @@ pace. ZenTest only works with Ruby and Test::Unit.
 ** FEATURES/PROBLEMS:
   
 + Scans your ruby code and tests and generates missing methods for you.
++ Includes a very helpful filter for Test::Unit output called unit_diff.rb
++ Includes a LinuxJournal article on testing with ZenTest written by Pat Eyler.
 
 ** SYNOPSYS:
 
   ZenTest.rb MyProject.rb TestMyProject.rb > missing.rb
   # edit missing.rb and merge appropriate parts into the above files.
+  ./TestMyProject.rb | unit_diff.rb
+  # Use unit_diff.rb to show you the actual differences in your failures.
 
 ** RULES:
 
 ZenTest uses the following rules to figure out what code should be
 generated:
 
-+ Definition: CUT = class under test, TC = Test Class (for CUT)
++ Definition:
+	+ CUT = Class Under Test
+	+ TC = Test Class (for CUT)
 + TC's name is the same as CUT w/ "Test" prepended at every scope level.
 	+ Example: TestA::TestB vs A::B.
 + CUT method names are used in CT, with "test_" prependend and optional "_ext" extensions for differentiating test case edge boundaries.
-	+ Example: A::B#blah vs TestA::TestB#test_blah_missing_file
+	+ Example:
+		+ A::B#blah
+		+ TestA::TestB#test_blah_normal
+		+ TestA::TestB#test_blah_missing_file
 + All naming conventions are bidirectional with the exception of test extensions.
 
 ** REQUIREMENTS:
@@ -42,7 +51,7 @@ generated:
 
 (The MIT License)
 
-Copyright (c) 2001-2002 Ryan Davis, Zen Spider Software
+Copyright (c) 2001-2004 Ryan Davis, Zen Spider Software
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
