@@ -1,5 +1,8 @@
-*** 2.3.1 / 2005-03-21
+*** 2.4.0 / 2005-03-21
 
++ 2 minor enhancements
+	+ Able to audit standard class library (so now we can audit rubicon!).
+	+ Able to map against class methods (self.blah <=> test_class_blah).
 + 3 bug fixes
 	+ bug:1151 Fixed stupid problem w/ unit_diff.
 	+ bug:1454 code generation correctly matches class/module for nested classes.

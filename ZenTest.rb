@@ -1,5 +1,8 @@
 #!/usr/local/bin/ruby -swI .
 
+$stdlib = {}
+ObjectSpace.each_object(Module) { |m| $stdlib[m.name] = true }
+
 $r = false unless defined? $r # reverse mapping for testclass names
 
 $ZENTEST = true
@@ -8,7 +11,7 @@ require 'test/unit/testcase' # helps required modules
 
 class ZenTest
 
-  VERSION = '2.3.1'
+  VERSION = '2.4.0'
 
   if $TESTING then
     attr_reader :missing_methods
@@ -44,9 +47,8 @@ class ZenTest
 
   def get_class(klassname)
     begin
-      #	p Module.constants
       klass = Module.const_get(klassname.intern)
-      puts "# found #{klass.name}" if $DEBUG
+      puts "# found class #{klass.name}" if $DEBUG
     rescue NameError
       # TODO use catch/throw to exit block as soon as it's found?
       # TODO or do we want to look for potential dups?
@@ -72,6 +74,11 @@ class ZenTest
 
     # WTF? public_instance_methods: default vs true vs false = 3 answers
     public_methods = klass.public_instance_methods(false)
+    klass_methods = klass.public_methods(false)
+    klass_methods -= Class.public_methods(true)
+    klass_methods -= %w(suite new) # boy are thise HACKs
+    klass_methods = klass_methods.map { |m| "self." + m }
+    public_methods += klass_methods
     public_methods -= Kernel.methods unless full
     klassmethods = {}
     public_methods.each do |meth|
@@ -255,7 +262,6 @@ class ZenTest
     '*'   => 'times',
     '**'  => 'times2',
     '+'   => 'plus',
-    '+'   => 'plus',
     '-'   => 'minus',
     '/'   => 'div',
     '<'   => 'lt',
@@ -280,11 +286,13 @@ class ZenTest
   @@method_map = @@orig_method_map.merge(@@orig_method_map.invert)
 
   def normal_to_test(name)
+    name = name.dup # wtf?
+    is_cls_method = name.sub!(/^self\./, '')
     name = @@method_map[name] if @@method_map.has_key? name
     name = name.sub(/=$/, '_equals')
     name = name.sub(/\?$/, '_eh')
     name = name.sub(/\!$/, '_bang')
-    name = name.sub(/\[\]/, 'index')
+    name = "class_" + name if is_cls_method
     "test_#{name}"
   end
 
@@ -298,6 +306,7 @@ class ZenTest
     name = name.sub(/_equals/, '=') unless name =~ /index/
     name = name.sub(/_bang.*$/, '!') # FIX: deal w/ extensions separately
     name = name.sub(/_eh/, '?')
+    name = name.sub(/^class_/, 'self.')
 
     name = name.sub(/^(#{mapped_re})(.*)$/) {$1}
     name = name.sub(/^(#{known_methods_re})(.*)$/) {$1} unless known_methods_re.empty?
@@ -308,94 +317,104 @@ class ZenTest
     name
   end
 
+  def analyze_impl(klassname)
+    testklassname = self.convert_class_name(klassname)
+    if @test_klasses[testklassname] then
+      methods = @klasses[klassname]
+      testmethods = @test_klasses[testklassname]
+
+      # check that each method has a test method
+      @klasses[klassname].each_key do | methodname |
+        testmethodname = normal_to_test(methodname)
+        unless testmethods[testmethodname] then
+          unless testmethods.keys.find { |m| m =~ /#{testmethodname}(_\w+)+$/ } then
+            self.add_missing_method(testklassname, testmethodname)
+          end
+        end # testmethods[testmethodname]
+      end # @klasses[klassname].each_key
+    else # ! @test_klasses[testklassname]
+      puts "# ERROR test class #{testklassname} does not exist" if $DEBUG
+      @error_count += 1
+
+      @missing_methods[testklassname] ||= {}
+      @klasses[klassname].keys.each do | methodname |
+        testmethodname = normal_to_test(methodname)
+        @missing_methods[testklassname][testmethodname] = true
+      end
+    end # @test_klasses[testklassname]
+  end
+
+  def analyze_test(testklassname)
+    klassname = self.convert_class_name(testklassname)
+
+    # CUT might be against a core class, if so, slurp it and analyze it
+    if $stdlib[klassname] then
+      self.process_class(klassname, true)
+      self.analyze_impl(klassname)
+    end
+
+    if @klasses[klassname] then
+      methods = @klasses[klassname]
+      testmethods = @test_klasses[testklassname]
+
+      # check that each test method has a method
+      testmethods.each_key do | testmethodname |
+        # FIX: need to convert method name properly
+        if testmethodname =~ /^test_/ then
+
+          # TODO think about allowing test_misc_.*
+
+          # try the current name
+          @inherited_methods[klassname] ||= {}
+          methodname = test_to_normal(testmethodname, klassname)
+          orig_name = methodname.dup
+
+          found = false
+          until methodname == "" or methods[methodname] or @inherited_methods[klassname][methodname] do
+	      # try the name minus an option (ie mut_opt1 -> mut)
+            if methodname.sub!(/_[^_]+$/, '') then
+              if methods[methodname] or @inherited_methods[klassname][methodname] then
+                found = true
+              end
+            else
+              break # no more substitutions will take place
+            end
+          end # methodname == "" or ...
+          
+          unless found or methods[methodname] or methodname == "initialize" then
+            self.add_missing_method(klassname, orig_name)
+          end
+          
+        else # not a test_.* method
+          unless testmethodname =~ /^util_|test_\d+sanity/ then
+            puts "# WARNING Skipping #{testklassname}\##{testmethodname}" if $DEBUG
+          end
+        end # testmethodname =~ ...
+      end # testmethods.each_key
+    else # ! @klasses[klassname]
+      puts "# ERROR class #{klassname} does not exist" if $DEBUG
+      
+      @error_count += 1
+
+      @missing_methods[klassname] ||= {}
+      @test_klasses[testklassname].keys.each do |testmethodname|
+        # TODO: need to convert method name properly
+        methodname = test_to_normal(testmethodname)
+        @missing_methods[klassname][methodname] = true
+      end
+    end # @klasses[klassname]
+  end
+
   def analyze
     # walk each known class and test that each method has a test method
     @klasses.each_key do |klassname|
-      testklassname = self.convert_class_name(klassname)
-      if @test_klasses[testklassname] then
-	methods = @klasses[klassname]
-	testmethods = @test_klasses[testklassname]
+      self.analyze_impl(klassname)
+    end
 
-	# check that each method has a test method
-	@klasses[klassname].each_key do | methodname |
-	  testmethodname = normal_to_test(methodname)
-	  unless testmethods[testmethodname] then
-	    unless testmethods.keys.find { |m| m =~ /#{testmethodname}(_\w+)+$/ } then
-	      self.add_missing_method(testklassname, testmethodname)
-	    end
-	  end # testmethods[testmethodname]
-	end # @klasses[klassname].each_key
-      else # ! @test_klasses[testklassname]
-	puts "# ERROR test class #{testklassname} does not exist" if $DEBUG
-	@error_count += 1
-
-	@missing_methods[testklassname] ||= {}
-	@klasses[klassname].keys.each do | methodname |
-	  testmethodname = normal_to_test(methodname)
-	  @missing_methods[testklassname][testmethodname] = true
-	end
-      end # @test_klasses[testklassname]
-    end # @klasses.each_key
-
-    ############################################################
     # now do it in the other direction...
-
     @test_klasses.each_key do |testklassname|
-
-      klassname = self.convert_class_name(testklassname)
-
-      if @klasses[klassname] then
-	methods = @klasses[klassname]
-	testmethods = @test_klasses[testklassname]
-
-	# check that each test method has a method
-	testmethods.each_key do | testmethodname |
-	  # FIX: need to convert method name properly
-	  if testmethodname =~ /^test_/ then
-
-	    # TODO think about allowing test_misc_.*
-
-	    # try the current name
-	    @inherited_methods[klassname] ||= {}
-	    methodname = test_to_normal(testmethodname, klassname)
-	    orig_name = methodname.dup
-
-	    found = false
-	    until methodname == "" or
-                methods[methodname] or
-                @inherited_methods[klassname][methodname] do
-	      # try the name minus an option (ie mut_opt1 -> mut)
-	      if methodname.sub!(/_[^_]+$/, '') then
-		if methods[methodname] or @inherited_methods[klassname][methodname] then
-		  found = true
-		end
-	      else
-		break # no more substitutions will take place
-	      end
-	    end # methodname == "" or ...
-
-	    unless found or methods[methodname] or methodname == "initialize" then
-	      self.add_missing_method(klassname, orig_name)
-	    end
-
-	  else # not a test_.* method
-	    unless testmethodname =~ /^util_/ then
-	      puts "# WARNING Skipping #{testklassname}\##{testmethodname}" if $DEBUG
-	    end
-	  end # testmethodname =~ ...
-	end # testmethods.each_key
-      else # ! @klasses[klassname]
-	puts "# ERROR class #{klassname} does not exist" if $DEBUG
-	@error_count += 1
-
-	@missing_methods[klassname] ||= {}
-	@test_klasses[testklassname].keys.each do |testmethodname|
-	  # TODO: need to convert method name properly
-	  methodname = test_to_normal(testmethodname)
-	  @missing_methods[klassname][methodname] = true
-	end
-      end # @klasses[klassname]
-    end # @test_klasses.each_key
+      self.analyze_test(testklassname)
+    end
   end
 
   def generate_code
@@ -411,8 +430,10 @@ class ZenTest
     @missing_methods.keys.sort.each do |fullklasspath|
 
       methods = @missing_methods[fullklasspath] || {}
+      cls_methods = methods.keys.grep(/^(self\.|test_class_)/)
+      methods.delete_if {|k,v| cls_methods.include? k }
 
-      next if methods.empty?
+      next if methods.empty? and cls_methods.empty?
 
       indent = 0
       is_test_class = self.is_test_class(fullklasspath)
@@ -429,6 +450,17 @@ class ZenTest
       indent += 1
 
       meths = []
+
+      cls_methods.sort.each do |method|
+	meth = []
+	meth.push indentunit*indent + "def #{method}"
+	indent += 1
+	meth.push indentunit*indent + "raise NotImplementedError, 'Need to write #{method}'"
+	indent -= 1
+	meth.push indentunit*indent + "end"
+	meths.push meth.join("\n")
+      end
+
       methods.keys.sort.each do |method|
 	meth = []
 	meth.push indentunit*indent + "def #{method}"

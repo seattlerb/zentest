@@ -15,35 +15,24 @@ end
 
 class Cls1				# ZenTest SKIP
   def meth1; end
+  def self.meth2; end
 end
 
 class TestCls1				# ZenTest SKIP
-  def setup
-  end
-
-  def teardown
-  end
-
-  def test_meth1
-  end
-
-  def test_meth2
-    assert(true, "something")
-  end
+  def setup; end
+  def teardown; end
+  def test_meth1; end
+  def test_meth2; assert(true, "something"); end
 end
 
 class SuperDuper			# ZenTest SKIP
-  def inherited
-  end
-  def overridden
-  end
+  def inherited; end
+  def overridden; end
 end
 
 class LowlyOne < SuperDuper		# ZenTest SKIP
-  def overridden
-  end
-  def extended
-  end
+  def overridden; end
+  def extended; end
 end
 
 class TestZenTest < Test::Unit::TestCase
@@ -66,11 +55,13 @@ class TestZenTest < Test::Unit::TestCase
         "attrib" => true,
         "attrib=" => true,
         "equal?" => true,
+        "self.method3" => true,
       },
     }
     @tester.test_klasses = {
       "TestSomething" =>
         {
+        "test_class_method4" => true,
         "test_method2" => true,
         "setup" => true,
         "teardown" => true,
@@ -81,12 +72,20 @@ class TestZenTest < Test::Unit::TestCase
 require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
 class Something
+  def self.method4
+    raise NotImplementedError, 'Need to write self.method4'
+  end
+
   def method2
     raise NotImplementedError, 'Need to write method2'
   end
 end
 
 class TestSomething < Test::Unit::TestCase
+  def test_class_method3
+    raise NotImplementedError, 'Need to write test_class_method3'
+  end
+
   def test_attrib
     raise NotImplementedError, 'Need to write test_attrib'
   end
@@ -116,7 +115,7 @@ class TestSomething < Test::Unit::TestCase
   end
 end
 
-# Number of errors detected: 8
+# Number of errors detected: 10
 "
   end
 
@@ -223,8 +222,10 @@ end
     expected = {
       "Something" => {
         "method2" => true,
+        "self.method4" => true,
       },
       "TestSomething" => {
+        "test_class_method3" => true,
         "test_attrib" => true,
         "test_attrib_equals" => true,
         "test_equal_eh" => true,
@@ -335,6 +336,14 @@ end
     assert_equal("test_method1_equals", @tester.normal_to_test("method1="))
   end
 
+  def test_normal_to_test_cls
+    self.util_simple_setup
+    assert_equal("test_class_method1",        @tester.normal_to_test("self.method1"))
+    assert_equal("test_class_method1_bang",   @tester.normal_to_test("self.method1!"))
+    assert_equal("test_class_method1_eh",     @tester.normal_to_test("self.method1?"))
+    assert_equal("test_class_method1_equals", @tester.normal_to_test("self.method1="))
+  end
+
   def test_normal_to_test_operators
     self.util_simple_setup
     assert_equal("test_and",     @tester.normal_to_test("&"))
@@ -376,6 +385,14 @@ end
     assert_equal("method1",  @tester.test_to_normal("test_method1", "Something"))
     assert_equal("method1=", @tester.test_to_normal("test_method1_equals", "Something"))
     assert_equal("method1?", @tester.test_to_normal("test_method1_eh", "Something"))
+  end
+
+  def test_test_to_normal_cls
+    self.util_simple_setup
+    assert_equal("self.method1",  @tester.test_to_normal("test_class_method1"))
+    assert_equal("self.method1!", @tester.test_to_normal("test_class_method1_bang"))
+    assert_equal("self.method1?", @tester.test_to_normal("test_class_method1_eh"))
+    assert_equal("self.method1=", @tester.test_to_normal("test_class_method1_equals"))
   end
 
   def test_test_to_normal_extended
@@ -436,6 +453,7 @@ end
   def test_klasses_equals
     self.util_simple_setup
     assert_equal({"Something"=> {
+                     "self.method3"=>true,
                      "equal?"=>true,
                      "attrib="=>true,
                      "method1"=>true,

@@ -1,0 +1,4 @@
+
+class TestTrueClass
+
+end

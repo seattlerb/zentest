@@ -4,6 +4,10 @@
 require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
 class TestMyHash < Test::Unit::TestCase
+  def test_class_index
+    raise NotImplementedError, 'Need to write test_class_index'
+  end
+
   def test_index
     raise NotImplementedError, 'Need to write test_index'
   end
