@@ -25,6 +25,7 @@ class ZenTest
 
   def load_file(file)
     puts "# loading #{file} // #{$0}" if $DEBUG
+
     unless file == $0 then
       begin
 	require "#{file}"
@@ -80,14 +81,16 @@ class ZenTest
     klassmethods = {}
     if (klass.class.method_defined?(:superclass)) then
       superklass = klass.superclass
-      the_methods = superklass.instance_methods(true)
+      if superklass then
+        the_methods = superklass.instance_methods(true)
+        
+        # generally we don't test Object's methods...
+        the_methods -= Object.instance_methods(true)
+        the_methods -= Kernel.methods # FIX (true) - check 1.6 vs 1.8
       
-      # generally we don't test Object's methods...
-      the_methods -= Object.instance_methods(true)
-      the_methods -= Kernel.methods # FIX (true) - check 1.6 vs 1.8
-      
-      the_methods.each do |meth|
-	klassmethods[meth] = true
+        the_methods.each do |meth|
+          klassmethods[meth] = true
+        end
       end
     end
     return klassmethods
@@ -122,14 +125,18 @@ class ZenTest
     method_count.default = 0
     klassname = nil
 
-    files.each do |file|
+    files.each do |path|
       is_loaded = false
-      IO.foreach(file) do |line|
+
+      # if reading stdin, slurp the whole thing at once
+      file = (path == "-" ? $stdin.read : File.new(path))
+
+      file.each_line do |line|
 
 	method_count[klassname] += 1 if klassname and line =~ /^\s*def/
 	assert_count[klassname] += 1 if klassname and line =~ /assert|flunk/
 
-	if line =~ /^\s*(?:class|module)\s+(\S+)/ then
+	if line =~ /^\s*(?:class|module)\s+([\w:]+)/ then
 	  klassname = $1
 
 	  if line =~ /\#\s*ZenTest SKIP/ then
@@ -138,8 +145,13 @@ class ZenTest
 	  end
 
 	  unless is_loaded then
-	    self.load_file(file)
-	    is_loaded = true
+            unless path == "-" then
+              self.load_file(path)
+            else
+              # FIX: evals inside this module... don't want that scoping
+              eval file, TOPLEVEL_BINDING
+            end
+            is_loaded = true
 	  end
 
 	  klass = self.get_class(klassname)
@@ -198,12 +210,23 @@ class ZenTest
     @missing_methods[klassname][methodname] = true
   end
 
+  @@method_map = {
+    '[]' => 'index',
+    '[]=' => 'index_equals',
+    '<<' => 'append',
+  }
+
+  @@method_map.merge!(@@method_map.invert)
+
   def normal_to_test(name)
-    "test_#{name}".gsub(/\[\]=/, "index_equals").gsub(/\[\]/, "index")
+    name = @@method_map[name] if @@method_map.has_key? name
+    "test_#{name}"
   end
 
   def test_to_normal(name)
-    name.sub(/^test_/, '').gsub(/index_equals/, "[]=").gsub(/index/, "[]")
+    name = name.sub(/^test_/, '')
+    name = @@method_map[name] if @@method_map.has_key? name
+    name
   end
 
   def analyze
