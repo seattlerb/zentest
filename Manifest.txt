@@ -1,9 +1,10 @@
 History.txt
+LinuxJournalArticle.txt
+Makefile
 Manifest.txt
 README.txt
-ZenTest.rb
-Makefile
 TestZenTest.rb
+ZenTest.rb
 testcase0.rb
 testcase0.result
 testcase1.rb

@@ -1,6 +1,7 @@
 *** 2.2.0 / 2004-10-??
 
-+ 3 minor enhancement
++ 4 minor enhancement
+	+ Added LinuxJournalArticle.txt! WOOT!
 	+ Added unit_diff.rb - a very cool filter for test output!
 	+ Extended ZenTest to work with standard input
 	+ Added "ZenTest FULL" to force ZenTest to analyze inherited methods, for subclasses of the standard library.
