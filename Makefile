@@ -8,3 +8,6 @@ test:
 	-./ZenTest.rb testcase3.rb > tmp.txt; diff testcase3.result tmp.txt
 	-./ZenTest.rb testcase4.rb > tmp.txt; diff testcase4.result tmp.txt
 	-rm -f tmp.txt
+
+clean:
+	rm -f *~

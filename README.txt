@@ -17,6 +17,18 @@ SYNOPSYS:
   ZenTest.rb MyProject.rb TestMyProject.rb > missing.rb
   # edit missing.rb and merge appropriate parts into the above files.
 
+RULES:
+
+ZenTest uses the following rules to figure out what code should be
+generated:
+
++ Definition: CUT = class under test, TC = Test Class (for CUT)
++ TC's name is the same as CUT w/ "Test" prepended at every scope level.
+	+ Example: TestA::TestB vs A::B.
++ CUT method names are used in CT, with "test_" prependend and optional "_ext" extensions for differentiating test case edge boundaries.
+	+ Example: A::B#blah vs TestA::TestB#test_blah_missing_file
++ All naming conventions are bidirectional with the exception of test extensions.
+
 REQUIREMENTS:
 
 + Ruby 1.6+

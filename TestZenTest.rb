@@ -1,8 +1,8 @@
 #!/usr/local/bin/ruby -w
 
-require 'test/unit/testresult'
 require 'test/unit/testcase'
-load '../../ZenWeb/dev/zentestrunner.rb'
+require 'test/unit/ui/console/testrunner'
+require 'zentestrunner.rb'
 
 $TESTING = true
 
@@ -13,49 +13,27 @@ end
 
 # These are just classes set up for quick testing.
 
-class Cls1
+class Cls1				# ZenTest SKIP
   def meth1; end
 end
 
-class TestCls1
-  def test_meth1; end
-end
-
-class Cls2
-  def meth1; end
-end
-
-class TestCls2
-  # no test_meth1
-end
-
-class Cls3
-  # no meth1
-end
-
-class TestCls3
-  def test_meth1; end
-end
-
-class Cls4
-  def shutuparubyerror
+class TestCls1				# ZenTest SKIP
+  def test_meth1
   end
-end
-# no TestCls4
-# no Cls5
-class TestCls5
-  def shutuparubyerror
+
+  def test_meth2
+    assert(true, "something")
   end
 end
 
-class SuperDuper
+class SuperDuper			# ZenTest SKIP
   def inherited
   end
   def overridden
   end
 end
 
-class LowlyOne < SuperDuper
+class LowlyOne < SuperDuper		# ZenTest SKIP
   def overridden
   end
   def extended
@@ -70,10 +48,6 @@ class TestZenTest < Test::Unit::TestCase
 
   def test_initialize
     assert_not_nil(@tester, "Tester must be initialized")
-    # FIX found_classes = @tester.found_classes
-    # FIX found_test_classes = @tester.found_test_classes
-    # FIX assert_equal([], found_classes)
-    # FIX assert_equal([], found_test_classes)
   end
 
   ############################################################
@@ -157,7 +131,7 @@ class TestZenTest < Test::Unit::TestCase
     
     @tester.analyze
     str = @tester.generate_code.join("\n")
-    exp = "\nrequire 'test/unit'\nrequire 'test/unit/ui/console/testrunner'\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\n# Number of errors detected: 2\n"
+    exp = "\nrequire 'test/unit/testcase'\nrequire 'zentestrunner'\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\nif __FILE__ == $0 then\n  run_all_tests_with(ZenTestRunner)\nend\n\n# Number of errors detected: 2\n"
 
     assert_equal(exp, str)
   end
@@ -204,7 +178,7 @@ class TestZenTest < Test::Unit::TestCase
     @tester.analyze
     @tester.generate_code
     str = @tester.result
-    exp = "\nrequire 'test/unit'\nrequire 'test/unit/ui/console/testrunner'\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\n# Number of errors detected: 2\n"
+    exp = "\nrequire 'test/unit/testcase'\nrequire 'zentestrunner'\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\nif __FILE__ == $0 then\n  run_all_tests_with(ZenTestRunner)\nend\n\n# Number of errors detected: 2\n"
 
     assert_equal(exp, str)
   end
