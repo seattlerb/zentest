@@ -4,9 +4,52 @@
 # Copyright:: Copyright (c) 2000-2002 Nathaniel Talbott. All rights reserved.
 # License:: Ruby license.
 
+require 'test/unit/testcase'
+require 'test/unit/testsuite'
 require 'test/unit/testresult'
 require 'test/unit/ui/testrunnermediator'
 require 'test/unit/ui/testrunnerutilities'
+
+module Test
+  module Unit
+    class TestSuite
+      unless instance_methods.include?(:<<) then
+	$stderr.puts "Adding << alias"
+	alias :add :<<
+      end
+    end
+    class TestCase
+      if instance_methods.include?(:setup) then
+	$stderr.puts "You are using a newer Test::Unit. Adding a compatibility layer..."
+
+	alias :old_run :run
+	def run(result)
+	  set_up
+	  old_run(result)
+	  tear_down
+	end
+
+	def set_up; end
+	alias :old_setup :setup
+	def setup
+	  set_up
+	end
+
+	def tear_down; end
+	alias :old_teardown :teardown
+	def teardown
+	  
+	  tear_down
+	end
+      else
+	$stderr.puts "You are using an older version of Test::Unit. You should probably upgrade."
+      end
+      $stderr.puts "  TestSuite#add has been replaced by TestSuite#<<"
+      $stderr.puts "  TestCase#set_up has been replaced by TestCase#setup"
+      $stderr.puts "  TestCase#tear_down has been replaced by TestCase#teardown"
+    end
+  end
+end
 
 # Runs a Test::Unit::TestSuite on the console.
 class ZenTestRunner
