@@ -248,16 +248,36 @@ class ZenTest
     @missing_methods[klassname][methodname] = true
   end
 
-  @@method_map = {
-    '[]'  => 'index',
-    '<<'  => 'append',
+  @@orig_method_map = {
+    '!'   => 'bang',
+    '%'   => 'percent',
+    '&'   => 'and',
     '*'   => 'times',
+    '**'  => 'times2',
     '+'   => 'plus',
+    '+'   => 'plus',
+    '-'   => 'minus',
+    '/'   => 'div',
+    '<'   => 'lt',
+    '<='  => 'lte',
+    '<=>' => 'spaceship',
+    "<\<" => 'lt2',
     '=='  => 'equals2',
-    '==='  => 'equals3',
+    '===' => 'equals3',
+    '=~'  => 'match',
+    '>'   => 'gt',
+    '>='  => 'ge',
+    '>>'  => 'gt2',
+    '@+'  => 'unary_plus',
+    '@-'  => 'unary_minus',
+    '[]'  => 'index',
+    '[]=' => 'index_equals',
+    '^'   => 'carat',
+    '|'   => 'or',
+    '~'   => 'tilde',
   }
 
-  @@method_map.merge!(@@method_map.invert)
+  @@method_map = @@orig_method_map.merge(@@orig_method_map.invert)
 
   def normal_to_test(name)
     name = @@method_map[name] if @@method_map.has_key? name
@@ -270,19 +290,21 @@ class ZenTest
 
   def test_to_normal(name, klassname=nil)
     known_methods = (@inherited_methods[klassname] || {}).keys.sort.reverse
-    name = name.sub(/^test_/, '')
-    name = name.sub(/_equals$/, '=')
-    name = name.sub(/_eh(_\w+)?$/, '?')
-    name = name.sub(/_bang(_\w+)?$/, '!')
 
-    # these just strip the extension so the method map can work
-    name = name.sub(/index(_equals)?(_\w+)?/) { "[]#{$1 ? '=' : ''}" }
-    name = name.sub(/times(_\w+)?/, '*')
-    name = name.sub(/equals2(_\w+)?/, '==')
-    name = name.sub(/equals3(_\w+)?/, '===')
-    
+    mapped_re = @@orig_method_map.values.sort_by { |k| k.length }.map {|s| Regexp.escape(s)}.reverse.join("|")
     known_methods_re = known_methods.map {|s| Regexp.escape(s)}.join("|")
-    name = name.sub(/^(#{known_methods_re})(_\w+)?/) { $1 }
+
+    name = name.sub(/^test_/, '')
+    name = name.sub(/_equals/, '=') unless name =~ /index/
+    name = name.sub(/_bang.*$/, '!') # FIX: deal w/ extensions separately
+    name = name.sub(/_eh/, '?')
+
+    name = name.sub(/^(#{mapped_re})(.*)$/) {$1}
+    name = name.sub(/^(#{known_methods_re})(.*)$/) {$1} unless known_methods_re.empty?
+
+    # look up in method map
+    name = @@method_map[name] if @@method_map.has_key? name
+
     name
   end
 

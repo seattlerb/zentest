@@ -75,7 +75,7 @@ def temp_file(data)
   data = data.map { |l| '%3d) %s' % [count+=1, l] } if $l
   data = data.join('')
   # unescape newlines, strip <> from entire string
-  data = data.gsub(/\\n/, "\n").gsub!(/\A</, '').gsub!(/>\Z/, '')
+  data = data.gsub(/\\n/, "\n").gsub(/\A</, '').gsub(/>\Z/, '')
   temp.puts data
   temp.flush
   temp
