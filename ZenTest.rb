@@ -1,11 +1,17 @@
 #!/usr/local/bin/ruby -w -I.
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 puts "# Created with ZenTest v. #{VERSION}"
 
 $AUTOTESTER = true
 
+class Blah
+  def blah
+  end
+end
+
+# this is really frustrating... testrunner has an at_exit handler
 module Kernel
   alias :old_at_exit :at_exit
   def at_exit()
@@ -22,18 +28,25 @@ test_klasses = {}
 klasses = {}
 all_methods = {} # fallback
 
+puts "# run against: #{ARGV.join(', ')}"
 ARGV.each do |file|
 
-  begin
-    require "#{file}"
-  rescue LoadError => err
-    puts "Couldn't load #{file}: #{err}"
-    next
-  end
-
+  is_loaded = false
   IO.foreach(file) do |line|
     if line =~ /^\s*class\s+(\S+)/ then
       klassname = $1
+
+      unless is_loaded then
+	puts "# loading #{file}"
+	begin
+	  require "#{file}"
+	rescue LoadError => err
+	  puts "Couldn't load #{file}: #{err}"
+	  next
+	end
+	is_loaded = true
+      end
+
       klass = Module.const_get(klassname.intern)
       target = klassname =~ /^Test/ ? test_klasses : klasses
 
@@ -56,8 +69,15 @@ ARGV.each do |file|
   end
 end
 
-print "# "
-p all_methods
+puts "#"
+all_methods.each_key { |key|
+  puts "# #{key}:"
+  methods = all_methods[key]
+  methods.each_key { |meth|
+    puts "#     #{meth}"
+  }
+}
+puts "#"
 
 missing_methods = {} # key = klassname, val = array of methods
 
@@ -70,7 +90,7 @@ klasses.each_key do |klassname|
 
     # check that each method has a test method
     klasses[klassname].each_key do | methodname |
-      testmethodname = "test_#{methodname}".gsub(/\[\]=/, "index_equals").gsub(/\[\]/, "index_accessor")
+      testmethodname = "test_#{methodname}".gsub(/\[\]=/, "index_equals").gsub(/\[\]/, "index")
       unless testmethods[testmethodname] then
 	puts "# ERROR method #{testklassname}\##{testmethodname} does not exist (1)" if $VERBOSE
 	missing_methods[testklassname] ||= []
@@ -80,7 +100,9 @@ klasses.each_key do |klassname|
     # check that each test method has a method
     testmethods.each_key do | testmethodname |
       if testmethodname =~ /^test_(.*)/ then
-	methodname = $1.gsub(/index_equals/, "[]=").gsub(/index_accessor/, "[]")
+	methodname = $1.gsub(/index_equals/, "[]=").gsub(/index/, "[]")
+
+	# TODO think about allowing test_misc_.*
 
 	# try the current name
 	orig_name = methodname.dup
@@ -98,6 +120,7 @@ klasses.each_key do |klassname|
 
 	unless found or methods[methodname] or methodname == "initialize" then
 	  puts "# ERROR method #{klassname}\##{orig_name} does not exist (2)" if $VERBOSE
+	  print "# "; p methods
 	  missing_methods[klassname] ||= []
 	  missing_methods[klassname].push(orig_name)
 	end
@@ -140,4 +163,3 @@ missing_methods.keys.sort.each do |klass|
   puts "end"
   puts ""
 end
-
