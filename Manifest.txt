@@ -14,3 +14,5 @@ testcase3.rb
 testcase3.result
 testcase4.rb
 testcase4.result
+testcase5.rb
+testcase5.result
