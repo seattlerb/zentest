@@ -1,6 +1,6 @@
 #                 classname: asrt / meth =  ratio%
 
-require 'test/unit'
+require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
 class Blah
   def missingimpl

@@ -12,6 +12,9 @@ class Blah
 end
 
 class TestBlah < Test::Unit::TestCase
+  def setup; end
+  def teardown; end
+
   def test_notmissing1
     assert(true, "a test")
   end

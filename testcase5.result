@@ -1,7 +1,7 @@
 #                 classname: asrt / meth =  ratio%
 #                    MyHash:    0 /    2 =   0.00%
 
-require 'test/unit'
+require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
 class TestMyHash < Test::Unit::TestCase
   def test_index

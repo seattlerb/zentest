@@ -1,6 +1,10 @@
-#!/usr/local/bin/ruby -wI .
+#!/usr/local/bin/ruby -swI .
 
+$r = false unless defined? $r # reverse mapping for testclass names
+
+$ZENTEST = true
 $TESTING = false unless defined? $TESTING
+require 'test/unit/testcase' # helps required modules
 
 class ZenTest
 
@@ -102,7 +106,7 @@ class ZenTest
   def is_test_class(klass)
     klass = klass.to_s
     klasspath = klass.split(/::/)
-    a_bad_classpath = klasspath.find do |s| s !~ /^Test/ end
+    a_bad_classpath = klasspath.find do |s| s !~ ($r ? /Test$/ : /^Test/) end
     return a_bad_classpath.nil?
   end
 
@@ -110,9 +114,17 @@ class ZenTest
     name = name.to_s
 
     if self.is_test_class(name) then
-      name = name.gsub(/(^|::)Test/, '\1')
+      if $r then
+        name = name.gsub(/Test($|::)/, '\1') # FooTest::BlahTest => Foo::Blah
+      else
+        name = name.gsub(/(^|::)Test/, '\1') # TestFoo::TestBlah => Foo::Blah
+      end
     else
-      name = name.gsub(/(^|::)/, '\1Test')
+      if $r then
+        name = name.gsub(/($|::)/, 'Test\1') # Foo::Blah => FooTest::BlahTest
+      else
+        name = name.gsub(/(^|::)/, '\1Test') # Foo::Blah => TestFoo::TestBlah
+      end
     end
 
     return name
@@ -183,8 +195,8 @@ class ZenTest
 
       entry = {}
 
-      next if classname =~ /^Test/
-      testclassname = "Test#{classname}"
+      next if is_test_class(classname)
+      testclassname = convert_class_name(classname)
       a_count = assert_count[testclassname]
       m_count = method_count[classname]
       ratio = a_count.to_f / m_count.to_f * 100.0
@@ -331,7 +343,7 @@ class ZenTest
 
     if @missing_methods.size > 0 then
       @result.push ""
-      @result.push "require 'test/unit'"
+      @result.push "require 'test/unit' unless defined? $ZENTEST and $ZENTEST"
       @result.push ""
     end
 
@@ -397,5 +409,26 @@ end
 
 if __FILE__ == $0 then
   $TESTING = true # for ZenWeb and any other testing infrastructure code
-  print ZenTest.fix(*ARGV)
+
+  if defined? $v then
+    puts "#{File.basename $0} v#{ZenTest::VERSION}"
+    exit 0
+  end
+
+  if defined? $h then
+    puts "usage: #{File.basename $0} [-h -v] test-and-implementation-files..."
+    puts "  -h display this information"
+    puts "  -v display version information"
+    puts "  -r Reverse mapping (ClassTest instead of TestClass)"
+    puts "  -e (Rapid XP) eval the code generated instead of printing it"
+    exit 0
+  end
+
+  code = ZenTest.fix(*ARGV)
+  if defined? $e then
+    require 'test/unit'
+    eval code
+  else
+    print code
+  end
 end

@@ -8,6 +8,18 @@ ZenTest scans your target and unit-test code and writes your missing
 code based on simple naming rules, enabling XP at a much quicker
 pace. ZenTest only works with Ruby and Test::Unit.
 
+There are two strategies intended for ZenTest: test conformance
+auditing and rapid XP.
+
+For auditing, ZenTest provides an excellent means of finding methods
+that have slipped through the testing process. I've run it against my
+own software and found I missed a lot in a well tested
+package. Writing those tests found 4 bugs I had no idea existed.
+
+ZenTest can also be used to evaluate generated code and execute your
+tests, allowing for very rapid development of both tests and
+implementation.
+
 ** FEATURES/PROBLEMS:
   
 + Scans your ruby code and tests and generates missing methods for you.

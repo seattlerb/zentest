@@ -1,6 +1,6 @@
 #!/usr/local/bin/ruby -w
 
-require 'test/unit'
+require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
 $TESTING = true
 
@@ -17,6 +17,12 @@ class Cls1				# ZenTest SKIP
 end
 
 class TestCls1				# ZenTest SKIP
+  def setup
+  end
+
+  def teardown
+  end
+
   def test_meth1
   end
 
@@ -74,6 +80,18 @@ class TestZenTest < Test::Unit::TestCase
 	   "All names must start with Test to be test classes")
   end
 
+  def test_is_test_class_reversed
+    old = $r
+    $r = true
+    assert(@tester.is_test_class("Cls1Test"),
+           "Reversed: All test classes must end with Test")
+    assert(@tester.is_test_class("ModTest::Cls1Test"),
+           "Reversed: All test classes must end with Test")
+    assert(!@tester.is_test_class("TestMod::TestCls1"),
+           "Reversed: All test classes must end with Test")
+    $r = old
+  end
+
   def test_convert_class_name
 
     assert_equal('Cls1', @tester.convert_class_name(TestCls1))
@@ -86,6 +104,23 @@ class TestZenTest < Test::Unit::TestCase
 		 @tester.convert_class_name('Module::Cls1'))
     assert_equal('Module::Cls1',
 		 @tester.convert_class_name('TestModule::TestCls1'))
+  end
+
+  def test_convert_class_name_reversed
+    old = $r
+    $r = true
+
+    assert_equal('Cls1', @tester.convert_class_name("Cls1Test"))
+    assert_equal('Cls1Test', @tester.convert_class_name(Cls1))
+
+    assert_equal('Cls1', @tester.convert_class_name('Cls1Test'))
+    assert_equal('Cls1Test', @tester.convert_class_name('Cls1'))
+
+    assert_equal('ModuleTest::Cls1Test',
+		 @tester.convert_class_name('Module::Cls1'))
+    assert_equal('Module::Cls1',
+		 @tester.convert_class_name('ModuleTest::Cls1Test'))
+    $r = old
   end
 
   ############################################################
@@ -112,7 +147,7 @@ class TestZenTest < Test::Unit::TestCase
 
   def util_simple_setup
     @tester.klasses = {"Something" => { "method1" => true } }
-    @tester.test_klasses = {"TestSomething" => { "test_method2" => true } }
+    @tester.test_klasses = {"TestSomething" => { "test_method2" => true, "setup" => true, "teardown" => true } }
   end
 
   def test_analyze_simple
@@ -130,7 +165,7 @@ class TestZenTest < Test::Unit::TestCase
     
     @tester.analyze
     str = @tester.generate_code.join("\n")
-    exp = "\nrequire 'test/unit'\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\n# Number of errors detected: 2\n"
+    exp = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\n# Number of errors detected: 2\n"
 
     assert_equal(exp, str)
   end
@@ -191,7 +226,7 @@ class TestZenTest < Test::Unit::TestCase
     @tester.analyze
     @tester.generate_code
     str = @tester.result
-    exp = "\nrequire 'test/unit'\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\n# Number of errors detected: 2\n"
+    exp = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\n# Number of errors detected: 2\n"
 
     assert_equal(exp, str)
   end
