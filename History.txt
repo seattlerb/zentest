@@ -1,4 +1,10 @@
 ###############################################################################
+2002-10-29 2.0.0				   02 major / 00 minor / 00 bug
+
+	! Rewrite of ZenTest.rb into actual OO design.
+	! Added unit tests, finally...
+
+###############################################################################
 2002-09-28 1.0.1				   00 major / 01 minor / 03 bug
 
 	! Only loads when a class is detected, allows some scripts to
