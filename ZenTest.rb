@@ -4,7 +4,7 @@ $TESTING = false unless defined? $TESTING
 
 class ZenTest
 
-  VERSION = '2.1.0'
+  VERSION = '2.1.1'
 
   if $TESTING then
     attr_reader :missing_methods
@@ -83,7 +83,7 @@ class ZenTest
       
       # generally we don't test Object's methods...
       the_methods -= Object.instance_methods(true)
-      the_methods -= Kernel.methods(true)
+      the_methods -= Kernel.methods # FIX (true) - check 1.6 vs 1.8
       
       the_methods.each do |meth|
 	klassmethods[meth] = true

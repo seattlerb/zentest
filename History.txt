@@ -1,31 +1,41 @@
-###############################################################################
-2003-01-07 2.1.0				   02 major / 01 minor / 03 bug
 
-	! Output is runnable as-is thanks to zentestrunner.rb.
-	! Wrapped up all running functionality into ZenTest.fix
-	! Added simple statistic output... Thanks Dave & Andy!!!
+*** 2.1.1 / 2004-03-06
+
++ 3 bug fixes
+	+ Fixed a 1.8ism.
+	+ Removed zentestrunner. Older ruby users will just have to suffer.
+	+ Updated history to ZenWeb format.
+
+*** 2.1.0 / 2003-01-07
+
++ 3 major enhancements
+	+ Output is runnable as-is thanks to zentestrunner.rb.
+	+ Wrapped up all running functionality into ZenTest.fix
+	+ Added simple statistic output... Thanks Dave & Andy!!!
++ 1 minor enhancement
 	+ Added zentestrunner.rb until Nathaniel accepts my changes!
-	- Removed at_exit override and avoided test/unit altogether.
-	- Added a clean rule to Makefile
-	- Extended README.txt to include some of the rules.
-	- Fixed several tests and added assertions for new stats
++ 3 bug fixes
+	+ Removed at_exit override and avoided test/unit altogether.
+	+ Added a clean rule to Makefile
+	+ Extended README.txt to include some of the rules.
+	+ Fixed several tests and added assertions for new stats
 
-###############################################################################
-2002-10-29 2.0.0				   02 major / 00 minor / 00 bug
+*** 2.0.0 / 2002-10-29
 
-	! Rewrite of ZenTest.rb into actual OO design.
-	! Added unit tests, finally...
++ 2 major enhancements
+	+ Rewrite of ZenTest.rb into actual OO design.
+	+ Added unit tests, finally...
 
-###############################################################################
-2002-09-28 1.0.1				   00 major / 01 minor / 03 bug
+*** 1.0.1 / 2002-09-28
 
-	! Only loads when a class is detected, allows some scripts to
-	  be skipped.
-	- Cleaned up output. Verbose when $DEBUG is true.
-	- Added an error count that is output at end.
-	- Better filtering or conversion on some method names.
++ 1 minor enhancements
+	+ Only loads when a class is detected, allows some scripts to be skipped.
++ 3 bug fixes
+	+ Cleaned up output. Verbose when $DEBUG is true.
+	+ Added an error count that is output at end.
+	+ Better filtering or conversion on some method names.
 
-###############################################################################
-2002-09-24 1.0.0				   01 major / 00 minor / 00 bug
- 
- 	! Birthday!
+*** 1.0.0 / 2002-09-24
+
++ 1 major enhancements
+	+ Birthday!

@@ -1,11 +1,10 @@
 #!/usr/local/bin/ruby -w
 
-require 'test/unit/testcase'
-require 'test/unit/ui/console/testrunner'
-require 'zentestrunner.rb'
+require 'test/unit'
 
 $TESTING = true
 
+# I do this so I can still run ZenTest against the tests and itself...
 if __FILE__ == $0 then
   puts "Requiring ZenTest"
   require 'ZenTest'
@@ -42,7 +41,7 @@ end
 
 class TestZenTest < Test::Unit::TestCase
 
-  def set_up
+  def setup
     @tester = ZenTest.new()
   end
 
@@ -193,6 +192,3 @@ class TestZenTest < Test::Unit::TestCase
 
 end
 
-if __FILE__ == $0 then
-  run_all_tests_with(ZenTestRunner) 
-end
