@@ -96,11 +96,14 @@ klasses.each_key do |klassname|
     klasses[klassname].each_key do | methodname |
       testmethodname = "test_#{methodname}".gsub(/\[\]=/, "index_equals").gsub(/\[\]/, "index")
       unless testmethods[testmethodname] then
-	puts "# ERROR method #{testklassname}\##{testmethodname} does not exist (1)" if $VERBOSE
-	missing_methods[testklassname] ||= []
-	missing_methods[testklassname].push(testmethodname)
+	unless testmethods.keys.find { |m| m =~ /#{testmethodname}(_\w+)+$/ } then
+	  puts "# ERROR method #{testklassname}\##{testmethodname} does not exist (1)" if $VERBOSE
+	  missing_methods[testklassname] ||= []
+	  missing_methods[testklassname].push(testmethodname)
+	end
       end
     end
+
     # check that each test method has a method
     testmethods.each_key do | testmethodname |
       if testmethodname =~ /^test_(.*)/ then
