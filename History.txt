@@ -1,3 +1,10 @@
+*** 2.1.2 / 2004-??-??
+
++ 2 bug fixes
+	+ Fixed code responsible for method name conversion.
+	+ I am a moron... didn't run tests after updating version.
+	+ Need to convert my diff-based tests to unit tests.
+
 *** 2.1.1 / 2004-03-06
 
 + 3 bug fixes

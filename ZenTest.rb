@@ -1,10 +1,10 @@
-#!/usr/local/bin/ruby -w -I.
+#!/usr/local/bin/ruby -wI .
 
 $TESTING = false unless defined? $TESTING
 
 class ZenTest
 
-  VERSION = '2.1.1'
+  VERSION = '2.1.2'
 
   if $TESTING then
     attr_reader :missing_methods
@@ -197,6 +197,14 @@ class ZenTest
     @missing_methods[klassname][methodname] = true
   end
 
+  def normal_to_test(name)
+    "test_#{name}".gsub(/\[\]=/, "index_equals").gsub(/\[\]/, "index")
+  end
+
+  def test_to_normal(name)
+    name.sub(/^test_/, '').gsub(/index_equals/, "[]=").gsub(/index/, "[]")
+  end
+
   def analyze
     # walk each known class and test that each method has a test method
     @klasses.each_key do |klassname|
@@ -207,7 +215,7 @@ class ZenTest
 
 	# check that each method has a test method
 	@klasses[klassname].each_key do | methodname |
-	  testmethodname = "test_#{methodname}".gsub(/\[\]=/, "index_equals").gsub(/\[\]/, "index")
+	  testmethodname = normal_to_test(methodname)
 	  unless testmethods[testmethodname] then
 	    unless testmethods.keys.find { |m| m =~ /#{testmethodname}(_\w+)+$/ } then
 	      self.add_missing_method(testklassname, testmethodname)
@@ -219,9 +227,9 @@ class ZenTest
 	@error_count += 1
 
 	@missing_methods[testklassname] ||= {}
-	@klasses[klassname].keys.each do |meth|
-	  # FIX: need to convert method name properly
-	  @missing_methods[testklassname]["test_#{meth}"] = true
+	@klasses[klassname].keys.each do | methodname |
+	  testmethodname = normal_to_test(methodname)
+	  @missing_methods[testklassname][testmethodname] = true
 	end
       end # @test_klasses[testklassname]
     end # @klasses.each_key
@@ -240,8 +248,8 @@ class ZenTest
 	# check that each test method has a method
 	testmethods.each_key do | testmethodname |
 	  # FIX: need to convert method name properly
-	  if testmethodname =~ /^test_(.*)/ then
-	    methodname = $1.gsub(/index_equals/, "[]=").gsub(/index/, "[]")
+	  if testmethodname =~ /^test_/ then
+	    methodname = test_to_normal(testmethodname)
 
 	    # TODO think about allowing test_misc_.*
 
@@ -275,9 +283,10 @@ class ZenTest
 	@error_count += 1
 
 	@missing_methods[klassname] ||= {}
-	@test_klasses[testklassname].keys.each do |meth|
+	@test_klasses[testklassname].keys.each do |testmethodname|
 	  # TODO: need to convert method name properly
-	  @missing_methods[klassname][meth.sub(/^test_/, '')] = true
+	  methodname = test_to_normal(testmethodname)
+	  @missing_methods[klassname][methodname] = true
 	end
       end # @klasses[klassname]
     end # @test_klasses.each_key
@@ -287,8 +296,7 @@ class ZenTest
 
     if @missing_methods.size > 0 then
       @result.push ""
-      @result.push "require 'test/unit/testcase'"
-      @result.push "require 'zentestrunner'"
+      @result.push "require 'test/unit'"
       @result.push ""
     end
 
@@ -328,13 +336,6 @@ class ZenTest
 	indent -= 1
 	@result.push indentunit*indent + "end"
       end
-      @result.push ""
-    end
-
-    if @missing_methods.size > 0 then
-      @result.push 'if __FILE__ == $0 then'
-      @result.push '  run_all_tests_with(ZenTestRunner)'
-      @result.push 'end'
       @result.push ''
     end
 

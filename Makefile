@@ -7,6 +7,7 @@ test: unittest
 	-$(RUBY) $(RUBYFLAGS) ./ZenTest.rb testcase2.rb > tmp.txt; diff testcase2.result tmp.txt
 	-$(RUBY) $(RUBYFLAGS) ./ZenTest.rb testcase3.rb > tmp.txt; diff testcase3.result tmp.txt
 	-$(RUBY) $(RUBYFLAGS) ./ZenTest.rb testcase4.rb > tmp.txt; diff testcase4.result tmp.txt
+	-$(RUBY) $(RUBYFLAGS) ./ZenTest.rb testcase5.rb > tmp.txt; diff testcase5.result tmp.txt
 	-rm -f tmp.txt
 
 unittest:

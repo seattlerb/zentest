@@ -130,7 +130,7 @@ class TestZenTest < Test::Unit::TestCase
     
     @tester.analyze
     str = @tester.generate_code.join("\n")
-    exp = "\nrequire 'test/unit/testcase'\nrequire 'zentestrunner'\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\nif __FILE__ == $0 then\n  run_all_tests_with(ZenTestRunner)\nend\n\n# Number of errors detected: 2\n"
+    exp = "\nrequire 'test/unit'\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\n# Number of errors detected: 2\n"
 
     assert_equal(exp, str)
   end
@@ -177,7 +177,7 @@ class TestZenTest < Test::Unit::TestCase
     @tester.analyze
     @tester.generate_code
     str = @tester.result
-    exp = "\nrequire 'test/unit/testcase'\nrequire 'zentestrunner'\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\nif __FILE__ == $0 then\n  run_all_tests_with(ZenTestRunner)\nend\n\n# Number of errors detected: 2\n"
+    exp = "\nrequire 'test/unit'\n\nclass Something\n  def method2\n    raise NotImplementedError, 'Need to write method2'\n  end\nend\n\nclass TestSomething < Test::Unit::TestCase\n  def test_method1\n    raise NotImplementedError, 'Need to write test_method1'\n  end\nend\n\n# Number of errors detected: 2\n"
 
     assert_equal(exp, str)
   end
