@@ -64,7 +64,8 @@ class ZenTest
   def get_methods_for(klass)
     klass = self.get_class(klass) if klass.kind_of? String
 
-    public_methods = klass.public_instance_methods - Kernel.methods
+    # WTF? public_instance_methods: default vs true vs false = 3 answers
+    public_methods = klass.public_instance_methods(false) - Kernel.methods
     klassmethods = {}
     public_methods.each do |meth|
       puts "# found method #{meth}" if $DEBUG

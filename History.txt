@@ -1,6 +1,7 @@
 *** 2.1.2 / 2004-??-??
 
-+ 2 bug fixes
++ 3 bug fixes
+	+ Fixed yet another 1.8ism, results will be the same in 1.8 and 1.6.
 	+ Fixed code responsible for method name conversion.
 	+ I am a moron... didn't run tests after updating version.
 	+ Need to convert my diff-based tests to unit tests.
