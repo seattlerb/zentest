@@ -1,5 +1,5 @@
 ZenTest
-    http://www.zenspider.com/
+    http://www.zenspider.com/ZSS/Products/ZenTest/
     support@zenspider.com
 
 ** DESCRIPTION:
