@@ -14,7 +14,7 @@ FEATURES/PROBLEMS:
 
 SYNOPSYS:
 
-  ZenTest.rb MyProject.rb TestMyProjec.rb > missing.rb
+  ZenTest.rb MyProject.rb TestMyProject.rb > missing.rb
   # edit missing.rb and merge appropriate parts into the above files.
 
 REQUIREMENTS:

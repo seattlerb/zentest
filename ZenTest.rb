@@ -1,5 +1,9 @@
 #!/usr/local/bin/ruby -w -I.
 
+VERSION = '1.0.0'
+
+puts "# Created with ZenTest v. #{VERSION}"
+
 $AUTOTESTER = true
 
 module Kernel
