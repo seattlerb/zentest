@@ -1,4 +1,4 @@
-*** 2.1.2 / 2004-??-??
+*** 2.1.2 / 2004-03-08
 
 + 3 bug fixes
 	+ Fixed yet another 1.8ism, results will be the same in 1.8 and 1.6.
