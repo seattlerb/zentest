@@ -1,4 +1,4 @@
-*** 2.2.0 / 2004-10-??
+*** 2.2.0 / 2004-10-18
 
 + 4 minor enhancement
 	+ Added LinuxJournalArticle.txt! WOOT!
