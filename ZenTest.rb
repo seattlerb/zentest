@@ -80,6 +80,7 @@ class ZenTest
     klass_methods = klass_methods.map { |m| "self." + m }
     public_methods += klass_methods
     public_methods -= Kernel.methods unless full
+    public_methods -= %w(test_00sanity)
     klassmethods = {}
     public_methods.each do |meth|
       puts "# found method #{meth}" if $DEBUG
@@ -386,7 +387,7 @@ class ZenTest
           end
           
         else # not a test_.* method
-          unless testmethodname =~ /^util_|test_\d+sanity/ then
+          unless testmethodname =~ /^util_/ then
             puts "# WARNING Skipping #{testklassname}\##{testmethodname}" if $DEBUG
           end
         end # testmethodname =~ ...
