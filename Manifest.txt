@@ -2,3 +2,15 @@ History.txt
 Manifest.txt
 README.txt
 ZenTest.rb
+Makefile
+TestZenTest.rb
+testcase0.rb
+testcase0.result
+testcase1.rb
+testcase1.result
+testcase2.rb
+testcase2.result
+testcase3.rb
+testcase3.result
+testcase4.rb
+testcase4.result
