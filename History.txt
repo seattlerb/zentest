@@ -1,3 +1,10 @@
+*** 2.3.1 / 2005-03-21
+
++ 3 bug fixes
+	+ bug:1151 Fixed stupid problem w/ unit_diff.
+	+ bug:1454 code generation correctly matches class/module for nested classes.
+	+ bug:1455 Updated method mapping to work on all operators listed in my quickref.
+
 *** 2.3.0 / 2004-11-18
 
 + 6 minor enhancements

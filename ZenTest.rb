@@ -8,7 +8,7 @@ require 'test/unit/testcase' # helps required modules
 
 class ZenTest
 
-  VERSION = '2.3.0'
+  VERSION = '2.3.1'
 
   if $TESTING then
     attr_reader :missing_methods
@@ -420,7 +420,9 @@ class ZenTest
       klassname = klasspath.pop
 
       klasspath.each do | modulename |
-	@result.push indentunit*indent + "module #{modulename}"
+        m = self.get_class(modulename)
+        type = m.nil? ? "module" : m.class.name.downcase
+	@result.push indentunit*indent + "#{type} #{modulename}"
 	indent += 1
       end
       @result.push indentunit*indent + "class #{klassname}" + (is_test_class ? " < Test::Unit::TestCase" : '')
