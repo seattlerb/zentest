@@ -1,0 +1,18 @@
+#                 classname: asrt / meth =  ratio%
+#         MyModule::MyClass:    0 /    2 =   0.00%
+
+require 'test/unit'
+
+module TestMyModule
+  class TestMyClass < Test::Unit::TestCase
+    def test_index
+      raise NotImplementedError, 'Need to write test_index'
+    end
+
+    def test_missingtest1
+      raise NotImplementedError, 'Need to write test_missingtest1'
+    end
+  end
+end
+
+# Number of errors detected: 2

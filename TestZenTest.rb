@@ -145,16 +145,30 @@ class TestZenTest < Test::Unit::TestCase
 
   def test_get_inherited_methods_for_subclass
     expect = { "inherited" => true, "overridden" => true }
-    result = @tester.get_inherited_methods_for("LowlyOne")
+    result = @tester.get_inherited_methods_for("LowlyOne", false)
 
     assert_equal(expect, result)
   end
 
+  def test_get_inherited_methods_for_subclass_full
+    expect = LowlyOne.superclass.instance_methods(true)
+    result = @tester.get_inherited_methods_for("LowlyOne", true)
+
+    assert_equal(expect.sort, result.keys.sort)
+  end
+
   def test_get_inherited_methods_for_superclass
     expect = { }
-    result = @tester.get_inherited_methods_for("SuperDuper")
+    result = @tester.get_inherited_methods_for("SuperDuper", false)
 
-    assert_equal(expect, result)
+    assert_equal(expect.keys.sort, result.keys.sort)
+  end
+
+  def test_get_inherited_methods_for_superclass_full
+    expect = SuperDuper.superclass.instance_methods(true)
+    result = @tester.get_inherited_methods_for("SuperDuper", true)
+
+    assert_equal(expect.sort, result.keys.sort)
   end
 
   def test_get_methods_for_subclass

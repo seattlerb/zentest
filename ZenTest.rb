@@ -4,7 +4,7 @@ $TESTING = false unless defined? $TESTING
 
 class ZenTest
 
-  VERSION = '2.1.2'
+  VERSION = '2.2.0'
 
   if $TESTING then
     attr_reader :missing_methods
@@ -62,11 +62,12 @@ class ZenTest
     return klass
   end
 
-  def get_methods_for(klass)
+  def get_methods_for(klass, full=false)
     klass = self.get_class(klass) if klass.kind_of? String
 
     # WTF? public_instance_methods: default vs true vs false = 3 answers
-    public_methods = klass.public_instance_methods(false) - Kernel.methods
+    public_methods = klass.public_instance_methods(false)
+    public_methods -= Kernel.methods unless full
     klassmethods = {}
     public_methods.each do |meth|
       puts "# found method #{meth}" if $DEBUG
@@ -75,7 +76,7 @@ class ZenTest
     return klassmethods
   end
 
-  def get_inherited_methods_for(klass)
+  def get_inherited_methods_for(klass, full)
     klass = self.get_class(klass) if klass.kind_of? String
 
     klassmethods = {}
@@ -85,8 +86,10 @@ class ZenTest
         the_methods = superklass.instance_methods(true)
         
         # generally we don't test Object's methods...
-        the_methods -= Object.instance_methods(true)
-        the_methods -= Kernel.methods # FIX (true) - check 1.6 vs 1.8
+        unless full then
+          the_methods -= Object.instance_methods(true)
+          the_methods -= Kernel.methods # FIX (true) - check 1.6 vs 1.8
+        end
       
         the_methods.each do |meth|
           klassmethods[meth] = true
@@ -144,11 +147,15 @@ class ZenTest
 	    next
 	  end
 
+          full = false
+	  if line =~ /\#\s*ZenTest FULL/ then
+	    full = true
+	  end
+
 	  unless is_loaded then
             unless path == "-" then
               self.load_file(path)
             else
-              # FIX: evals inside this module... don't want that scoping
               eval file, TOPLEVEL_BINDING
             end
             is_loaded = true
@@ -162,10 +169,11 @@ class ZenTest
 	  target = is_test_class ? @test_klasses : @klasses
 
 	  # record public instance methods JUST in this class
-	  target[klassname] = self.get_methods_for(klass)
+	  target[klassname] = self.get_methods_for(klass, full)
 	  
 	  # record ALL instance methods including superclasses (minus Object)
-	  @inherited_methods[klassname] = self.get_inherited_methods_for(klass)
+	  @inherited_methods[klassname] = 
+            self.get_inherited_methods_for(klass, full)
 	end # if /class/
       end # IO.foreach
     end # files
@@ -178,13 +186,13 @@ class ZenTest
       next if classname =~ /^Test/
       testclassname = "Test#{classname}"
       a_count = assert_count[testclassname]
-      d_count = method_count[classname]
-      ratio = a_count.to_f / d_count.to_f * 100.0
+      m_count = method_count[classname]
+      ratio = a_count.to_f / m_count.to_f * 100.0
 
       entry['n'] = classname
       entry['r'] = ratio
       entry['a'] = a_count
-      entry['d'] = d_count
+      entry['m'] = m_count
 
       result.push entry
     end
@@ -193,7 +201,7 @@ class ZenTest
 
     printf "# %25s: %4s / %4s = %6s%%\n", "classname", "asrt", "meth", "ratio"
     sorted_results.each do |e|
-      printf "# %25s: %4d / %4d = %6.2f%%\n", e['n'], e['a'], e['d'], e['r']
+      printf "# %25s: %4d / %4d = %6.2f%%\n", e['n'], e['a'], e['m'], e['r']
     end
 
     if $DEBUG then
@@ -211,9 +219,12 @@ class ZenTest
   end
 
   @@method_map = {
-    '[]' => 'index',
+    '[]'  => 'index',
     '[]=' => 'index_equals',
-    '<<' => 'append',
+    '<<'  => 'append',
+    '*'   => 'times',
+    '+'   => 'plus',
+    '=='  => 'equals',
   }
 
   @@method_map.merge!(@@method_map.invert)
@@ -328,6 +339,10 @@ class ZenTest
 
     @missing_methods.keys.sort.each do |fullklasspath|
 
+      methods = @missing_methods[fullklasspath] || {}
+
+      next if methods.empty?
+
       indent = 0
       is_test_class = self.is_test_class(fullklasspath)
       klasspath = fullklasspath.split(/::/)
@@ -340,7 +355,6 @@ class ZenTest
       @result.push indentunit*indent + "class #{klassname}" + (is_test_class ? " < Test::Unit::TestCase" : '')
       indent += 1
 
-      methods = @missing_methods[fullklasspath] || {}
       meths = []
       methods.keys.sort.each do |method|
 	meth = []
