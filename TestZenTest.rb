@@ -56,6 +56,7 @@ class TestZenTest < Test::Unit::TestCase
         "attrib=" => true,
         "equal?" => true,
         "self.method3" => true,
+        "self.[]" => true,
       },
     }
     @tester.test_klasses = {
@@ -65,6 +66,7 @@ class TestZenTest < Test::Unit::TestCase
         "test_method2" => true,
         "setup" => true,
         "teardown" => true,
+        "test_class_index" => true,
       },
     }
     @tester.inherited_methods = @tester.test_klasses.merge(@tester.klasses)
@@ -377,6 +379,7 @@ end
     assert_equal("test_times2",        @tester.normal_to_test("**"))
     assert_equal("test_unary_minus",   @tester.normal_to_test("@-"))
     assert_equal("test_unary_plus",    @tester.normal_to_test("@+"))
+    assert_equal("test_class_index",   @tester.normal_to_test("self.[]"))
   end
 
   def test_test_to_normal
@@ -393,6 +396,7 @@ end
     assert_equal("self.method1!", @tester.test_to_normal("test_class_method1_bang"))
     assert_equal("self.method1?", @tester.test_to_normal("test_class_method1_eh"))
     assert_equal("self.method1=", @tester.test_to_normal("test_class_method1_equals"))
+    assert_equal("self.[]", @tester.test_to_normal("test_class_index"))
   end
 
   def test_test_to_normal_extended
@@ -456,6 +460,7 @@ end
                      "self.method3"=>true,
                      "equal?"=>true,
                      "attrib="=>true,
+                     "self.[]"=>true,
                      "method1"=>true,
                      "method1="=>true,
                      "method1?"=>true,
