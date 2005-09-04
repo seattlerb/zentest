@@ -83,7 +83,7 @@ class ZenTest
     klass_methods = klass_methods.map { |m| "self." + m }
     public_methods += klass_methods
     public_methods -= Kernel.methods unless full
-    public_methods -= %w(test_00sanity)
+    public_methods -= %w(test_00sanity) # HACK for rubicon
     klassmethods = {}
     public_methods.each do |meth|
       puts "# found method #{meth}" if $DEBUG

@@ -66,16 +66,17 @@ class Tempfile
 end
 
 def temp_file(data)
-  temp = if $k then
-           File.new(Tempfile.make_temppath("diff"), "w")
-         else
-           Tempfile.new("diff")
-         end
+  temp = 
+    if $k then
+      File.new(Tempfile.make_temppath("diff"), "w")
+    else
+      Tempfile.new("diff")
+    end
   count = 0
   data = data.map { |l| '%3d) %s' % [count+=1, l] } if $l
   data = data.join('')
   # unescape newlines, strip <> from entire string
-  data = data.gsub(/\\n/, "\n").gsub(/\A</, '').gsub(/>\Z/, '')
+  data = data.gsub(/\\n/, "\n").gsub(/\A</m, '').gsub(/>\Z/m, '')
   temp.puts data
   temp.flush
   temp
@@ -83,7 +84,7 @@ end
 
 # Collect
 ARGF.each_line do |line|
-  if line =~ /^\s*\d+\) (Failure|Error):/
+  if line =~ /^\(?\s*\d+\) (Failure|Error):/ then # \(? is just for emacs bug
     type = $1
     current = []
     data << current
@@ -112,13 +113,19 @@ data.each do |result|
   end
 
   if found then
-    header = first.shift + first.shift # count, type + test_name, line
-    footer = second.pop # blank or summary
-    second.pop if second.last =~ /^\s*$/ # blank line
+    header = []
+    header << first.shift while first.first !~ /^</
+
+    footer = []
+    footer.unshift second.pop while second.last !~ /tests.*assertions.*failures/
+    footer.unshift second.pop
+
+    second.pop while second.last =~ /^\s*$/ # blank line
     second.last.sub!(/\.$/, '') unless second.empty?
     
     puts header
     puts `diff #{diff_flags} #{temp_file(first).path} #{temp_file(second).path}`
+    puts
     puts footer
   else
     puts first.join('')
