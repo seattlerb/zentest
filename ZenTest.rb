@@ -3,9 +3,7 @@
 $stdlib = {}
 ObjectSpace.each_object(Module) { |m| $stdlib[m.name] = true }
 
-# cheats for metaruby
-$stdlib["ZHash"] = true
-
+$:.unshift( *$I.split(/:/) ) if defined? $I and String === $I
 $r = false unless defined? $r # reverse mapping for testclass names
 
 $ZENTEST = true
