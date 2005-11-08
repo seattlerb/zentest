@@ -74,11 +74,11 @@ class TestZenTest < Test::Unit::TestCase
 require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
 class Something
-  def self.method4
+  def self.method4(*args)
     raise NotImplementedError, 'Need to write self.method4'
   end
 
-  def method2
+  def method2(*args)
     raise NotImplementedError, 'Need to write method2'
   end
 end

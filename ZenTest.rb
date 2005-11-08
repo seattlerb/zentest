@@ -10,6 +10,14 @@ $ZENTEST = true
 $TESTING = true
 require 'test/unit/testcase' # helps required modules
 
+class Module
+
+  def zentest
+    at_exit { ZenTest.autotest(self) }
+  end
+
+end
+
 class ZenTest
 
   VERSION = '2.4.0'
@@ -466,6 +474,7 @@ class ZenTest
       cls_methods.sort.each do |method|
 	meth = []
 	meth.push indentunit*indent + "def #{method}"
+        meth.last << "(*args)" unless method =~ /^test/
 	indent += 1
 	meth.push indentunit*indent + "raise NotImplementedError, 'Need to write #{method}'"
 	indent -= 1
@@ -476,6 +485,7 @@ class ZenTest
       methods.keys.sort.each do |method|
 	meth = []
 	meth.push indentunit*indent + "def #{method}"
+        meth.last << "(*args)" unless method =~ /^test/
 	indent += 1
 	meth.push indentunit*indent + "raise NotImplementedError, 'Need to write #{method}'"
 	indent -= 1
@@ -508,6 +518,27 @@ class ZenTest
     zentest.analyze
     zentest.generate_code
     return zentest.result
+  end
+
+  def ZenTest.autotest(*klasses)
+    zentest = ZenTest.new
+    klasses.each do |klass|
+      zentest.process_class(klass)
+    end
+
+    zentest.analyze
+
+    zentest.missing_methods.each do |klass,methods|
+      methods.each do |method,x|
+        warn "autotest generating #{klass}##{method}"
+      end
+    end
+
+    zentest.generate_code
+    code = zentest.result
+    puts code if $DEBUG
+
+    Object.class_eval code
   end
 
 end

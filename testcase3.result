@@ -3,7 +3,7 @@
 require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
 class Blah
-  def missingimpl
+  def missingimpl(*args)
     raise NotImplementedError, 'Need to write missingimpl'
   end
 end

@@ -76,15 +76,16 @@ def temp_file(data)
   data = data.map { |l| '%3d) %s' % [count+=1, l] } if $l
   data = data.join('')
   # unescape newlines, strip <> from entire string
-  data = data.gsub(/\\n/, "\n").gsub(/\A</m, '').gsub(/>\Z/m, '')
+  data = data.gsub(/\\n/, "\n").gsub(/\A</m, '').gsub(/>\Z/m, '').gsub(/0x[a-f0-9]+/m, '0xXXXXXX')
   temp.puts data
   temp.flush
+  temp.rewind
   temp
 end
 
 # Collect
 ARGF.each_line do |line|
-  if line =~ /^\(?\s*\d+\) (Failure|Error):/ then # \(? is just for emacs bug
+  if line =~ /^\(?\s*\d+\) (Failure|Error):/ then
     type = $1
     current = []
     data << current
@@ -117,14 +118,23 @@ data.each do |result|
     header << first.shift while first.first !~ /^</
 
     footer = []
-    footer.unshift second.pop while second.last !~ /tests.*assertions.*failures/
+    footer.unshift second.pop while second.last !~ /tests.*assertions.*failures/ and not second.last.nil?
     footer.unshift second.pop
 
     second.pop while second.last =~ /^\s*$/ # blank line
     second.last.sub!(/\.$/, '') unless second.empty?
     
     puts header
-    puts `diff #{diff_flags} #{temp_file(first).path} #{temp_file(second).path}`
+
+    a = temp_file(first)
+    b = temp_file(second)
+
+    result = `diff #{diff_flags} #{a.path} #{b.path}`
+    if result.empty? then
+      puts "[no difference--suspect ==]"
+    else
+      puts result
+    end
     puts
     puts footer
   else
