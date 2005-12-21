@@ -631,6 +631,8 @@ class UnitDiff
       end
     end
 
+    return header, expect, nil if butwas.empty?
+
     expect.last.chomp!
     expect.first.sub!(/^<\"/, '')
     expect.last.sub!(/\">$/, '')
@@ -667,26 +669,26 @@ class UnitDiff
 
       prefix, expect, butwas = parse_diff(result)
 
-      a = temp_file(expect)
-      b = temp_file(butwas)
-
-      diff_flags = $u ? "-u" : $c ? "-c" : ""
-      diff_flags += " -b" if $b
-
       output.push prefix.compact.map {|line| line.strip}.join("\n")
 
-      result = `diff #{diff_flags} #{a.path} #{b.path}`
-      if result.empty? then
-        output.push "[no difference--suspect ==]"
+      if butwas then
+        a = temp_file(expect)
+        b = temp_file(butwas)
+
+        diff_flags = $u ? "-u" : $c ? "-c" : ""
+        diff_flags += " -b" if $b
+
+        result = `diff #{diff_flags} #{a.path} #{b.path}`
+        if result.empty? then
+          output.push "[no difference--suspect ==]"
+        else
+          output.push result.map {|line| line.strip}
+        end
+
+        output.push ''
       else
-        output.push result.map {|line| line.strip}
+        output.push expect.join('')
       end
-
-      output.push ''
-
-#       else # ! found -- I think this is needed for the very last batch
-#         output.push first.join('')
-#       end
     end
 
     footer.shift if footer.first.strip.empty?

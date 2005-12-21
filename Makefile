@@ -1,12 +1,12 @@
 RUBY?=ruby
-RUBYFLAGS?=
+RUBYFLAGS?=-I.
 RUBY_BIN?=$(shell $(RUBY) -rrbconfig -e 'include Config; print CONFIG["bindir"]')
 RUBY_LIB?=$(shell $(RUBY) -rrbconfig -e 'include Config; print CONFIG["sitelibdir"]')
 
 test: unittest
 
 unittest:
-	$(RUBY) $(RUBYFLAGS) ./TestZenTest.rb
+	$(RUBY) $(RUBYFLAGS) ./TestZenTest.rb $(TEST)
 
 PREFIX=/usr/local
 install:
