@@ -1,7 +1,7 @@
 
 # nested class
-module MyModule
-  class MyClass
+module MyModule6
+  class MyClass6
     def []; end
     def missingtest1; end
   end

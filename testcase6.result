@@ -1,10 +1,10 @@
 #                 classname: asrt / meth =  ratio%
-#         MyModule::MyClass:    0 /    2 =   0.00%
+#       MyModule6::MyClass6:    0 /    2 =   0.00%
 
 require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
-module TestMyModule
-  class TestMyClass < Test::Unit::TestCase
+module TestMyModule6
+  class TestMyClass6 < Test::Unit::TestCase
     def test_index
       raise NotImplementedError, 'Need to write test_index'
     end

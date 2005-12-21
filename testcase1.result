@@ -1,15 +1,15 @@
 #                 classname: asrt / meth =  ratio%
-#                      Blah:    0 /    3 =   0.00%
+#                     Blah1:    0 /    3 =   0.00%
 
 require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
-class Blah
+class Blah1
   def missingimpl(*args)
     raise NotImplementedError, 'Need to write missingimpl'
   end
 end
 
-class TestBlah < Test::Unit::TestCase
+class TestBlah1 < Test::Unit::TestCase
   def test_missingtest
     raise NotImplementedError, 'Need to write test_missingtest'
   end

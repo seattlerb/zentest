@@ -1,9 +1,9 @@
 #                 classname: asrt / meth =  ratio%
-#                   MyClass:    0 /    2 =   0.00%
+#                  MyClass8:    0 /    2 =   0.00%
 
 require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
-class TestMyClass < Test::Unit::TestCase
+class TestMyClass8 < Test::Unit::TestCase
   def test_class_foobar
     raise NotImplementedError, 'Need to write test_class_foobar'
   end

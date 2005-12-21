@@ -2,7 +2,7 @@
 
 require 'test/unit/testcase'
 
-class Blah
+class Blah0
   def missingtest; end
   def notmissing1; end
   def notmissing2; end
@@ -11,7 +11,7 @@ class Blah
   def missingimpl; end
 end
 
-class TestBlah < Test::Unit::TestCase
+class TestBlah0 < Test::Unit::TestCase
   def setup; end
   def teardown; end
 
