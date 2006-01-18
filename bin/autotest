@@ -1,0 +1,12 @@
+#!/usr/local/bin/ruby -ws
+
+$rails ||= false
+
+if $rails then
+  require 'rails_autotest'
+  RailsAutotest.run
+else
+  require 'autotest'
+  Autotest.run
+end
+
