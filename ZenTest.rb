@@ -12,8 +12,6 @@ $TESTING = true
 require 'test/unit/testcase' # helps required modules
 require 'tempfile'
 
-Test::Unit::Assertions.use_pp = false # TODO nuke
-
 class Tempfile
   # blatently stolen. Design was poor in Tempfile.
   def self.make_tempname(basename, n=10)
