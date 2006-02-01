@@ -97,14 +97,13 @@ class ZenTest
       klass = Module.const_get(klassname.intern)
       puts "# found class #{klass.name}" if $DEBUG
     rescue NameError
-      # TODO use catch/throw to exit block as soon as it's found?
-      # TODO or do we want to look for potential dups?
-      ObjectSpace.each_object(Class) { |cls|
+      ObjectSpace.each_object(Class) do |cls|
 	if cls.name =~ /(^|::)#{klassname}$/ then
 	  klass = cls
 	  klassname = cls.name
+          break
 	end
-      }
+      end
       puts "# searched and found #{klass.name}" if klass and $DEBUG
     end
 
@@ -123,11 +122,10 @@ class ZenTest
     public_methods = klass.public_instance_methods(false)
     klass_methods = klass.public_methods(false)
     klass_methods -= Class.public_methods(true)
-    klass_methods -= %w(suite new) # boy are these HACKs
+    klass_methods -= %w(suite new)
     klass_methods = klass_methods.map { |m| "self." + m }
     public_methods += klass_methods
     public_methods -= Kernel.methods unless full
-    public_methods -= %w(test_00sanity) # HACK for rubicon
     klassmethods = {}
     public_methods.each do |meth|
       puts "# found method #{meth}" if $DEBUG
@@ -404,10 +402,7 @@ class ZenTest
 
       # check that each test method has a method
       testmethods.each_key do | testmethodname |
-        # FIX: need to convert method name properly
-        if testmethodname =~ /^test_/ then
-
-          # TODO think about allowing test_misc_.*
+        if testmethodname =~ /^test_(?!integration_)/ then
 
           # try the current name
           methodname = test_to_normal(testmethodname, klassname)

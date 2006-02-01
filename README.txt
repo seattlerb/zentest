@@ -4,9 +4,18 @@ ZenTest
 
 ** DESCRIPTION:
   
+ZenTest provides 3 different tools: zentest, unit_diff, and autotest.
+
 ZenTest scans your target and unit-test code and writes your missing
 code based on simple naming rules, enabling XP at a much quicker
 pace. ZenTest only works with Ruby and Test::Unit.
+
+unit_diff is a command-line filter to diff expected results from
+actual results and allow you to quickly see exactly what is wrong.
+
+autotest is a continous testing facility meant to be used during
+development. As soon as you save a file, autotest will run the
+corresponding dependent tests.
 
 There are two strategies intended for ZenTest: test conformance
 auditing and rapid XP.
@@ -69,6 +78,10 @@ extensions put on the name to distinguish edge cases:
   method	test_method
   method	test_method_simple
   method	test_method_no_network
+
+To allow for unmapped test methods (ie, non-unit tests), name them:
+
+  test_integration_.*
 
 ** REQUIREMENTS:
 

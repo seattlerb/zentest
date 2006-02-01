@@ -74,6 +74,9 @@ class TestBlah1
   def test_notmissing2_ext1; end
   def test_notmissing2_ext2; end
   def test_missingimpl; Blah1.new.missingimpl; end
+  def test_integration_blah1; end
+  def test_integration_blah2; end
+  def test_integration_blah3; end
 end
 
 module Something2
