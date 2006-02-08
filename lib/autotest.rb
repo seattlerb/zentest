@@ -39,11 +39,11 @@ class Autotest
 
       case filename
       when %r%^lib/(?:.*/)?(.*\.rb)$% then
-        tests << "test/test_#{$1}"
+        tests << "test/test_#{$1}" # lib/*/*rb -> test/test_*rb
       when %r%^test/test_% then
-        tests << filename
+        tests << filename # always run tests
       else
-        STDERR.puts "Dunno! #{filename}"
+        STDERR.puts "Dunno! #{filename}" # What are you trying to pull?
       end
     end
 
@@ -83,8 +83,10 @@ class Autotest
         puts "# Ok, you really want to quit, doing so"
         exit
       end
-      @interrupt = true
-      raise Interrupt
+      puts "# hit ^C again to quit"
+      sleep 1 # give them enough time to hit ^C again
+      @interrupt = true # if they hit ^C again, 
+      raise Interrupt # let the run loop catch it
     end
       
     begin
@@ -94,9 +96,9 @@ class Autotest
         sleep 5
       end
     rescue Interrupt
-      sleep 0.1
-      @interrupt = false
-      puts "# ^C caught, restarting from the top"
+      @interrupt = false # they didn't hit ^C in time
+      puts "# ok, restarting from the top"
+      @files.clear
       retry
     end
   end
@@ -122,7 +124,7 @@ class Autotest
       failed = results.scan(/^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/)
 
       if failed.empty? then
-        puts '# Test::Unit died, you did a really bad thing, retrying'
+        puts '# Test::Unit died, you did a really bad thing, retrying in 10'
         sleep 10
         redo
       end
@@ -154,9 +156,9 @@ class Autotest
 
     Find.find '.' do |f|
       next if File.directory? f
-      next if f =~ /(?:swp|~|rej|orig)$/
-      next if f =~ %r%/(?:.svn|CVS)/%
-      next if f =~ @exceptions unless @exceptions.nil?
+      next if f =~ /(?:swp|~|rej|orig)$/ # temporary/patch files
+      next if f =~ %r%/(?:.svn|CVS)/% # version control files
+      next if f =~ @exceptions unless @exceptions.nil? # custom exceptions
       updated << f if updated? f
     end
 
