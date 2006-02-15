@@ -29,16 +29,17 @@ end
 class TestAutotest < Test::Unit::TestCase
 
   def setup
-    @photo_test_file = 'test/data/plain/photo_test.rb'
-    @route_test_file = 'test/data/plain/route_test.rb'
-    @user_test_file = 'test/data/plain/user_test.rb'
+    @photo_test_file = 'test/data/plain/test_photo.rb'
+    @route_test_file = 'test/data/plain/test_route.rb'
+    @user_test_file = 'test/data/plain/test_user.rb'
+    @camelcase_test_file = 'test/data/plain/test_camelcase.rb'
 
     util_touch @photo_test_file, (Time.now - 60)
     @at = Autotest.new
   end
 
   def test_failed_test_files_not_updated
-    klass = 'PhotoTest'
+    klass = 'TestPhoto'
     tests = [@user_test_file, @photo_test_file]
 
     @at.updated? @photo_test_file
@@ -49,7 +50,7 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_failed_test_files_updated
-    klass = 'PhotoTest'
+    klass = 'TestPhoto'
     tests = [@user_test_file, @photo_test_file]
 
     @at.updated? @photo_test_file
@@ -60,13 +61,30 @@ class TestAutotest < Test::Unit::TestCase
     assert_equal [@photo_test_file], failed_files
   end
 
+  def test_failed_test_files_updated_camelcase
+    klass = 'TestCamelCase'
+    tests = [@camelcase_test_file]
+
+    @at.updated? @camelcase_test_file
+    util_touch @camelcase_test_file
+
+    failed_files = @at.failed_test_files klass, tests
+
+    assert_equal [@camelcase_test_file], failed_files
+  end
+
   def test_map_file_names
+    @at.files['test/test_autotest.rb'] = Time.at 1
+    @at.files['lib/autotest.rb'] = Time.at 1
+
     file_names = [
       './lib/autotest.rb',
+      './lib/auto_test.rb',
       './test/test_autotest.rb',
     ]
 
     expected = [
+      [['test/test_autotest.rb']],
       [['test/test_autotest.rb']],
       [['test/test_autotest.rb']],
     ]
@@ -77,7 +95,7 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_retest_failed_modified
-    failed = [['test_route', 'PhotoTest']]
+    failed = [['test_route', 'TestPhoto']]
     tests = [@photo_test_file]
 
     @at.system_responses = [true]
@@ -110,16 +128,17 @@ class TestAutotest < Test::Unit::TestCase
     end
 
     expected = {
-      './photo_test.rb' => File.stat(@photo_test_file).mtime,
-      './route_test.rb' => File.stat(@route_test_file).mtime,
-      './user_test.rb'  => File.stat(@user_test_file).mtime,
+      './test_photo.rb'     => File.stat(@photo_test_file).mtime,
+      './test_route.rb'     => File.stat(@route_test_file).mtime,
+      './test_user.rb'      => File.stat(@user_test_file).mtime,
+      './test_camelcase.rb' => File.stat(@camelcase_test_file).mtime,
     }
 
     assert_equal expected, @at.files
 
     util_touch @photo_test_file
 
-    assert_not_equal expected['./photo_test.rb'], @at.files
+    assert_not_equal expected['./test_photo.rb'], @at.files
   end
 
   def util_capture

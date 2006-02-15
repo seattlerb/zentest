@@ -2,6 +2,26 @@ $TESTING = defined? $TESTING
 
 require 'find'
 
+##
+# Autotest continuously runs your tests as you work on your project.
+#
+# Autotest periodically scans the files in your project for updates then
+# figures out the appropriate tests to run and runs them.  If a test fails
+# Autotest will run just that test until you get it to pass.
+#
+# If you want Autotest to start over from the top, hit ^C.  If you want
+# Autotest to quit, hit ^C twice.
+#
+# Autotest uses a simple naming scheme to figure out how to map implementation
+# files to test files following the Test::Unit naming scheme.
+#
+# * Test files must be stored in test/
+# * Test files names must start with test_
+# * Test classes must start with Test
+# * Implementation files must be stored in lib/
+# * Implementation files must match up with a test file named
+#   test_.*implementation.rb
+
 class Autotest
   
   def self.run
@@ -22,9 +42,9 @@ class Autotest
   # Maps failed class +klass+ to test files in +tests+ that have been updated.
 
   def failed_test_files(klass, tests)
-    klass_name = /#{klass.gsub(/(.)([A-Z])/, '\1_\2').downcase}/
+    klass_name = /#{klass.gsub(/(.)([A-Z])/, '\1_?\2').downcase}/
     failed_files = tests.select { |test| test =~ klass_name }
-    return failed_files.reject { |f| not updated? f }
+    return failed_files.select { |f| updated? f }
   end
 
   ##
@@ -39,7 +59,11 @@ class Autotest
 
       case filename
       when %r%^lib/(?:.*/)?(.*\.rb)$% then
-        tests << "test/test_#{$1}" # lib/*/*rb -> test/test_*rb
+        impl = $1
+        found = @files.keys.select do |k|
+          k =~ %r%^test/.*#{impl.gsub '_', '_?'}$%
+        end
+        tests.push(*found)
       when %r%^test/test_% then
         tests << filename # always run tests
       else
