@@ -12,6 +12,7 @@ example2.rb
 lib/ZenTest.rb
 lib/autotest.rb
 lib/rails_autotest.rb
+lib/unit_diff.rb
 test/data/normal/lib/photo.rb
 test/data/normal/test/test_camelcase.rb
 test/data/normal/test/test_photo.rb
@@ -22,4 +23,5 @@ test/data/rails/test/functional/route_controller_test.rb
 test/data/rails/test/unit/route_test.rb
 test/test_autotest.rb
 test/test_rails_autotest.rb
+test/test_unit_diff.rb
 test/test_zentest.rb

@@ -8,42 +8,6 @@ $ZENTEST = true
 $TESTING = true
 
 require 'test/unit/testcase' # helps required modules
-require 'tempfile'
-
-class Tempfile
-  # blatently stolen. Design was poor in Tempfile.
-  def self.make_tempname(basename, n=10)
-    sprintf('%s%d.%d', basename, $$, n)
-  end
-
-  def self.make_temppath(basename)
-    tempname = ""
-    n = 1
-    begin
-      tmpname = File.join('/tmp', make_tempname(basename, n))
-      n += 1
-    end while File.exist?(tmpname) and n < 100
-    tmpname
-  end
-end
-
-def temp_file(data)
-  temp = 
-    if $k then
-      File.new(Tempfile.make_temppath("diff"), "w")
-    else
-      Tempfile.new("diff")
-    end
-  count = 0
-  data = data.map { |l| '%3d) %s' % [count+=1, l] } if $l
-  data = data.join('')
-  # unescape newlines, strip <> from entire string
-  data = data.gsub(/\\n/, "\n").gsub(/\A</m, '').gsub(/>\Z/m, '').gsub(/0x[a-f0-9]+/m, '0xXXXXXX')
-  temp.print data
-  temp.flush
-  temp.rewind
-  temp
-end
 
 class Module
 

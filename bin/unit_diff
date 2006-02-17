@@ -14,7 +14,7 @@
 #    -u unified diff
 #    -v display version
 
-require 'ZenTest'
+require 'unit_diff'
 
 ############################################################
 
