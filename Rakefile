@@ -16,7 +16,7 @@ spec = Gem::Specification.new do |s|
 
   s.files = File.read('Manifest.txt').split($/)
   s.require_path = 'lib'
-  s.executables = %w[zentest unit_diff autotest]
+  s.executables = %w[ZenTest unit_diff autotest]
 end
 
 desc 'Run tests'
@@ -43,7 +43,9 @@ Rake::RDocTask.new :rdoc do |rd|
 end
 
 desc 'Build Gem'
-Rake::GemPackageTask.new spec do end # WTF? A block is required?
+Rake::GemPackageTask.new spec do |pkg|
+  pkg.need_tar = true
+end
 
 desc 'Clean up'
 task :clean => [ :clobber_rdoc, :clobber_package ]
