@@ -1,4 +1,42 @@
+##
+# UnitDiff makes reading Test::Unit output easy and fun.  Instead of a
+# confusing jumble of text with nearly unnoticable changes like this:
+#
+#   1) Failure:
+#   test_to_gpoints(RouteTest) [test/unit/route_test.rb:29]:
+#   <"new GPolyline([\n  new GPoint(  47.00000, -122.00000),\n  new GPoint(  46.5000
+#   0, -122.50000),\n  new GPoint(  46.75000, -122.75000),\n  new GPoint(  46.00000,
+#    -123.00000)])"> expected but was
+#   <"new Gpolyline([\n  new GPoint(  47.00000, -122.00000),\n  new GPoint(  46.5000
+#   0, -122.50000),\n  new GPoint(  46.75000, -122.75000),\n  new GPoint(  46.00000,
+#    -123.00000)])">.
+#
+#
+# You get an easy-to-read diff output like this:
+#
+#   1) Failure:
+#   test_to_gpoints(RouteTest) [test/unit/route_test.rb:29]:
+#   1c1
+#   < new GPolyline([
+#   ---
+#   > new Gpolyline([
+#
+# == Usage
+#
+#   test.rb | unit_diff [options]
+#     options:
+#     -b ignore whitespace differences
+#     -c contextual diff
+#     -h show usage
+#     -k keep temp diff files around
+#     -l prefix line numbers on the diffs
+#     -u unified diff
+#     -v display version
+
 class UnitDiff
+
+  ##
+  # Handy wrapper for UnitDiff#unit_diff.
 
   def self.unit_diff(input)
     ud = UnitDiff.new
@@ -62,8 +100,11 @@ class UnitDiff
     return header, expect, butwas
   end
 
-  def unit_diff(input)
+  ##
+  # Scans Test::Unit output +input+ looking for comparison failures and makes
+  # them easily readable by passing them through diff.
 
+  def unit_diff(input)
     $b = false unless defined? $b
     $c = false unless defined? $c
     $k = false unless defined? $k
