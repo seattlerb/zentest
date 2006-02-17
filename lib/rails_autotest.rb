@@ -1,5 +1,10 @@
 require 'autotest'
 
+##
+# RailsAutotest is an Autotest subclass designed for use with Rails projects.
+#
+# To use RailsAutotest pass the -rails flag to autotest.
+
 class RailsAutotest < Autotest
 
   def initialize # :nodoc:
