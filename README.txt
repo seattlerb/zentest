@@ -1,9 +1,10 @@
-ZenTest
-    http://www.zenspider.com/ZSS/Products/ZenTest/
-    support@zenspider.com
+= ZenTest
 
-** DESCRIPTION:
-  
+* http://www.zenspider.com/ZSS/Products/ZenTest/
+* support@zenspider.com
+
+== DESCRIPTION
+
 ZenTest provides 3 different tools: zentest, unit_diff, and autotest.
 
 ZenTest scans your target and unit-test code and writes your missing
@@ -29,37 +30,37 @@ ZenTest can also be used to evaluate generated code and execute your
 tests, allowing for very rapid development of both tests and
 implementation.
 
-** FEATURES/PROBLEMS:
-  
-+ Scans your ruby code and tests and generates missing methods for you.
-+ Includes a very helpful filter for Test::Unit output called unit_diff.rb
-+ Includes a LinuxJournal article on testing with ZenTest written by Pat Eyler.
+== FEATURES/PROBLEMS
 
-** SYNOPSYS:
+* Scans your ruby code and tests and generates missing methods for you.
+* Includes a very helpful filter for Test::Unit output called unit_diff.rb
+* Includes a LinuxJournal article on testing with ZenTest written by Pat Eyler.
 
-  ZenTest.rb MyProject.rb TestMyProject.rb > missing.rb
+== SYNOPSYS
+
+  ZenTest MyProject.rb TestMyProject.rb > missing.rb
   # edit missing.rb and merge appropriate parts into the above files.
-  ./TestMyProject.rb | unit_diff.rb
+  ./TestMyProject.rb | unit_diff
   # Use unit_diff.rb to show you the actual differences in your failures.
 
-** RULES:
+== RULES
 
 ZenTest uses the following rules to figure out what code should be
 generated:
 
-+ Definition:
-	+ CUT = Class Under Test
-	+ TC = Test Class (for CUT)
-+ TC's name is the same as CUT w/ "Test" prepended at every scope level.
-	+ Example: TestA::TestB vs A::B.
-+ CUT method names are used in CT, with "test_" prependend and optional "_ext" extensions for differentiating test case edge boundaries.
-	+ Example:
-		+ A::B#blah
-		+ TestA::TestB#test_blah_normal
-		+ TestA::TestB#test_blah_missing_file
-+ All naming conventions are bidirectional with the exception of test extensions.
+* Definition:
+  * CUT = Class Under Test
+  * TC = Test Class (for CUT)
+* TC's name is the same as CUT w/ "Test" prepended at every scope level.
+  * Example: TestA::TestB vs A::B.
+* CUT method names are used in CT, with "test_" prependend and optional "_ext" extensions for differentiating test case edge boundaries.
+  * Example:
+    * A::B#blah
+    * TestA::TestB#test_blah_normal
+    * TestA::TestB#test_blah_missing_file
+* All naming conventions are bidirectional with the exception of test extensions.
 
-** METHOD MAPPING:
+== METHOD MAPPING
 
 Method names are mapped bidirectionally in the following way:
 
@@ -83,21 +84,21 @@ To allow for unmapped test methods (ie, non-unit tests), name them:
 
   test_integration_.*
 
-** REQUIREMENTS:
+== REQUIREMENTS
 
-+ Ruby 1.6+
-+ Test::Unit
+* Ruby 1.6+
+* Test::Unit
 
-** INSTALL:
+== INSTALL
 
-+ make test
-+ sudo make install
+* make test
+* sudo make install
 
-** LICENSE:
+== LICENSE
 
 (The MIT License)
 
-Copyright (c) 2001-2004 Ryan Davis, Zen Spider Software
+Copyright (c) 2001-2006 Ryan Davis, Eric Hodel, Zen Spider Software
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -117,3 +118,4 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
