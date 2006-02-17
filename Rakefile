@@ -23,17 +23,9 @@ desc 'Run tests'
 task :default => :test
 
 desc 'Run tests'
-task :test => [ :test_new, :test_old ]
-
-desc 'The new tests' # TODO make me just test
-Rake::TestTask.new :test_new do |t|
+Rake::TestTask.new :test do |t|
   t.libs << 'test'
   t.verbose = true
-end
-
-desc 'The old tests' # TODO remove me
-task :test_old do
-  sh "ruby -I. ./TestZenTest.rb #{ENV['TEST']}"
 end
 
 desc 'Update Manifest.txt'
