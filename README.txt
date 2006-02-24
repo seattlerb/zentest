@@ -88,6 +88,7 @@ To allow for unmapped test methods (ie, non-unit tests), name them:
 
 * Ruby 1.6+
 * Test::Unit
+* Rake or rubygems for install/uninstall
 
 == INSTALL
 
