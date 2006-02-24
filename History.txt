@@ -1,3 +1,16 @@
+*** 3.0.0 / 2006-02-24
+
++ 2 major enhancements
+	+ Added autotest and rails_autotest. YAY for continous testing!
+	+ Repackaged and gemified. YAY for gemification!
++ 3 minor enhancements
+	+ Added non-mappable tests starting with test_integration_.
+	+ Lots of code and test refactoring and cleanup.
+	+ Massive improvement on unit tests.
++ 2 bug fixes
+	+ Finally fixed the unit_diff parse bug!
+	+ Fixed improper counting of errors if a class was missing, should be 1 + missing methods.
+
 *** 2.4.0 / 2005-03-21
 
 + 3 minor enhancements

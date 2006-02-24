@@ -4,6 +4,12 @@ ObjectSpace.each_object(Module) { |m| $stdlib[m.name] = true }
 $:.unshift( *$I.split(/:/) ) if defined? $I and String === $I
 $r = false unless defined? $r # reverse mapping for testclass names
 
+if $r then
+  $-w = false # rails is retarded
+  $: << 'config'
+  require 'environment'
+end
+
 $ZENTEST = true
 $TESTING = true
 
@@ -19,7 +25,7 @@ end
 
 class ZenTest
 
-  VERSION = '2.4.0'
+  VERSION = '3.0.0'
 
   if $TESTING then
     attr_reader :missing_methods

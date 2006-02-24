@@ -18,7 +18,7 @@ class Autotest
 
   attr_accessor :backtick_responses
 
-  def `(cmd)
+  def `(cmd)                            # ` appeases emacs
     @backtick_responses ||= []
     raise 'Out of backtick responses' if @backtick_responses.empty?
     return @backtick_responses.shift
@@ -172,11 +172,8 @@ class TestAutotest < Test::Unit::TestCase
     $stderr = old_stderr
   end
 
-  def util_touch(file, time = nil)
-    timestamp = time ? " -t #{time.strftime '%Y%m%d%H%M.%S'}" : nil
-    cmd = "touch #{timestamp} #{file}"
-    system cmd
+  def util_touch(file, t = Time.now)
+    File.utime(t, t, file)
   end
-
 end
 

@@ -1,8 +1,12 @@
+# -*- ruby -*-
+
 require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
 require 'rake/gempackagetask'
+require 'rbconfig'
 
+$: << 'lib'
 require 'ZenTest'
 
 $VERBOSE = nil
@@ -29,8 +33,8 @@ Rake::TestTask.new :test do |t|
 end
 
 desc 'Update Manifest.txt'
-task :update_manifest do
-  sh "p4 open Manifest.txt; find . -type f | sed -e 's%./%%' | egrep -v 'swp|~' | egrep -v '^(doc|pkg)/' | sort > Manifest.txt"
+task :update_manifest => :clean do
+  sh "p4 open Manifest.txt; find . -type f | sed -e 's%./%%' | sort > Manifest.txt"
 end
 
 desc 'Generate RDoc'
@@ -47,6 +51,33 @@ Rake::GemPackageTask.new spec do |pkg|
   pkg.need_tar = true
 end
 
-desc 'Clean up'
-task :clean => [ :clobber_rdoc, :clobber_package ]
+$prefix = ENV['PREFIX'] || Config::CONFIG['prefix']
+$bin  = File.join($prefix, 'bin')
+$lib  = Config::CONFIG['sitelibdir']
+$bins = %w(ZenTest autotest unit_diff)
+$libs = %w(ZenTest.rb autotest.rb rails_autotest.rb unit_diff.rb)
 
+task :install do
+  $bins.each do |f|
+    install File.join("bin", f), $bin, :mode => 0555
+  end
+
+  $libs.each do |f|
+    install File.join("lib", f), $lib, :mode => 0444
+  end
+end
+
+task :uninstall do
+  $bins.each do |f|
+    rm_f File.join($bin, f)
+  end
+
+  $libs.each do |f|
+    rm_f File.join($lib, f)
+  end
+end
+
+desc 'Clean up'
+task :clean => [ :clobber_rdoc, :clobber_package ] do
+  rm_rf %w(*~ doc)
+end
