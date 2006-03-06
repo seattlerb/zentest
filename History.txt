@@ -1,4 +1,4 @@
-*** 3.0.0 / 2006-02-24
+*** 3.0.0 / 2006-03-06
 
 + 2 major enhancements
 	+ Added autotest and rails_autotest. YAY for continous testing!
@@ -7,7 +7,8 @@
 	+ Added non-mappable tests starting with test_integration_.
 	+ Lots of code and test refactoring and cleanup.
 	+ Massive improvement on unit tests.
-+ 2 bug fixes
++ 3 bug fixes
+	+ Cleaned up class method inheritence. Esp relevant for rails testing.
 	+ Finally fixed the unit_diff parse bug!
 	+ Fixed improper counting of errors if a class was missing, should be 1 + missing methods.
 
