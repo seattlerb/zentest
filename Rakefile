@@ -14,13 +14,26 @@ $VERBOSE = nil
 spec = Gem::Specification.new do |s|
   s.name = 'ZenTest'
   s.version = ZenTest::VERSION
-  s.summary = ''
   s.authors = ['Ryan Davis', 'Eric Hodel']
   s.email = 'ryand-ruby@zenspider.com'
 
   s.files = File.read('Manifest.txt').split($/)
   s.require_path = 'lib'
   s.executables = %w[ZenTest unit_diff autotest]
+
+  paragraphs = File.read("README.txt").split(/\n\n+/)
+  s.instance_variable_set "@description", paragraphs[3..9].join("\n\n")
+  s.instance_variable_set "@summary", paragraphs[11]
+
+  puts "ZenTest #{s.version}"
+  puts
+  puts s.summary
+  puts
+  puts s.description
+
+  s.files = IO.readlines("Manifest.txt").map {|f| f.chomp }
+  s.homepage = "http://www.zenspider.com/ZSS/Products/ZenTest/"
+  s.rubyforge_project = "zentest"
 end
 
 desc 'Run tests'

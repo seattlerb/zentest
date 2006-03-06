@@ -33,7 +33,8 @@ implementation.
 == FEATURES/PROBLEMS
 
 * Scans your ruby code and tests and generates missing methods for you.
-* Includes a very helpful filter for Test::Unit output called unit_diff.rb
+* Includes a very helpful filter for Test::Unit output called unit_diff.
+* Continually and intelligently test only those files you change with autotest.
 * Includes a LinuxJournal article on testing with ZenTest written by Pat Eyler.
 
 == SYNOPSYS
