@@ -26,11 +26,13 @@ class TestCls1				# ZenTest SKIP
 end
 
 class SuperDuper			# ZenTest SKIP
+  def self.cls_inherited; end
   def inherited; end
   def overridden; end
 end
 
 class LowlyOne < SuperDuper		# ZenTest SKIP
+  def self.cls_extended; end
   def overridden; end
   def extended; end
 end
@@ -367,7 +369,7 @@ end
   end
 
   def test_get_inherited_methods_for_subclass_full
-    expect = LowlyOne.superclass.instance_methods(true)
+    expect = Object.instance_methods + %w( inherited overridden )
     result = @tester.get_inherited_methods_for("LowlyOne", true)
 
     assert_equal(expect.sort, result.keys.sort)
@@ -381,21 +383,40 @@ end
   end
 
   def test_get_inherited_methods_for_superclass_full
-    expect = SuperDuper.superclass.instance_methods(true)
+    expect = Object.instance_methods
     result = @tester.get_inherited_methods_for("SuperDuper", true)
 
     assert_equal(expect.sort, result.keys.sort)
   end
 
   def test_get_methods_for_subclass
-    expect = { "overridden" => true, "extended" => true }
+    expect = {
+      "self.cls_extended" => true,
+      "overridden" => true,
+      "extended" => true
+    }
     result = @tester.get_methods_for("LowlyOne")
 
     assert_equal(expect, result)
   end
 
+  def test_get_methods_for_subclass_full
+    expect = {
+      "self.cls_inherited" => true, 
+      "self.cls_extended" => true,
+      "overridden" => true,
+      "extended" => true 
+   }
+    result = @tester.get_methods_for("LowlyOne", true)
+
+    assert_equal(expect, result)
+  end
+
   def test_get_methods_for_superclass
-    expect = { "overridden" => true, "inherited" => true }
+    expect = {
+      "self.cls_inherited" => true,
+      "overridden" => true,
+      "inherited" => true }
     result = @tester.get_methods_for("SuperDuper")
 
     assert_equal(expect, result)
@@ -425,7 +446,10 @@ end
     assert_equal({}, @tester.test_klasses)
     assert_equal({}, @tester.inherited_methods["SuperDuper"])
     @tester.process_class("SuperDuper")
-    assert_equal({"SuperDuper"=>{"inherited"=>true, "overridden"=>true}},
+    assert_equal({"SuperDuper"=> {
+                     "self.cls_inherited"=>true,
+                     "inherited"=>true,
+                     "overridden"=>true}},
                  @tester.klasses)
     assert_equal({}, @tester.test_klasses)
     assert_equal({}, @tester.inherited_methods["SuperDuper"])
@@ -613,7 +637,7 @@ assert_equal expected, util_testcase("Something2::Blah2", "TestSomething2::TestB
   end
 
   def test_testcase5
-    expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass TestMyHash5 < Test::Unit::TestCase\n  def test_class_index\n    raise NotImplementedError, 'Need to write test_class_index'\n  end\n\n  def test_index\n    raise NotImplementedError, 'Need to write test_index'\n  end\n\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\nend\n\n# Number of errors detected: 4"
+    expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass TestMyHash5 < Test::Unit::TestCase\n  def test_index\n    raise NotImplementedError, 'Need to write test_index'\n  end\n\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\nend\n\n# Number of errors detected: 3"
 
     assert_equal expected, util_testcase("MyHash5")
   end

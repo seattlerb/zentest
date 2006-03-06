@@ -30,6 +30,7 @@ def temp_file(data)
   # unescape newlines, strip <> from entire string
   data = data.gsub(/\\n/, "\n").gsub(/\A</m, '').gsub(/>\Z/m, '').gsub(/0x[a-f0-9]+/m, '0xXXXXXX')
   temp.print data
+  temp.puts unless data =~ /\n\Z/m
   temp.flush
   temp.rewind
   temp

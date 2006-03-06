@@ -88,7 +88,7 @@ class ZenTest
 
     # WTF? public_instance_methods: default vs true vs false = 3 answers
     public_methods = klass.public_instance_methods(false)
-    klass_methods = klass.public_methods(false)
+    klass_methods = klass.singleton_methods(full)
     klass_methods -= Class.public_methods(true)
     klass_methods -= %w(suite new)
     klass_methods = klass_methods.map { |m| "self." + m }
