@@ -25,11 +25,13 @@ spec = Gem::Specification.new do |s|
   s.instance_variable_set "@description", paragraphs[3..9].join("\n\n")
   s.instance_variable_set "@summary", paragraphs[11]
 
-  puts "ZenTest #{s.version}"
-  puts
-  puts s.summary
-  puts
-  puts s.description
+  if $DEBUG then
+    puts "ZenTest #{s.version}"
+    puts
+    puts s.summary
+    puts
+    puts s.description
+  end
 
   s.files = IO.readlines("Manifest.txt").map {|f| f.chomp }
   s.homepage = "http://www.zenspider.com/ZSS/Products/ZenTest/"
