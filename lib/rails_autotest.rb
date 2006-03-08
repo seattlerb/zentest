@@ -42,6 +42,8 @@ class RailsAutotest < Autotest
       when %r%^app/views/layouts/% then
       when %r%^app/views/(.*)/% then
         functional_tests << "test/functional/#{$1}_controller_test.rb"
+      when %r%^config/routes.rb$% then
+        functional_tests.push(*Dir['test/functional/*_test.rb'].sort)
       else
         puts "dunno! #{filename}"
       end

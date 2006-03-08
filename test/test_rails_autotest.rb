@@ -19,11 +19,13 @@ class TestRailsAutotest < TestAutotest
       './app/views/layouts/default.rhtml',
       './app/views/route/index.rhtml',
       './app/helpers/route_helper.rb',
+      './config/routes.rb',
     ]
 
     expected = [
       # ApplicationHelper
-      [[], ['test/functional/route_controller_test.rb']],
+      [[], ['test/functional/dummy_controller_test.rb',
+            'test/functional/route_controller_test.rb']],
       # fixture
       [['test/unit/route_test.rb'],
        ['test/functional/route_controller_test.rb']],
@@ -41,6 +43,9 @@ class TestRailsAutotest < TestAutotest
       [[], ['test/functional/route_controller_test.rb']],
       # helper
       [[], ['test/functional/route_controller_test.rb']],
+      # config/routes.rb
+      [[], ['test/functional/dummy_controller_test.rb',
+            'test/functional/route_controller_test.rb']],
     ]
 
     Dir.chdir 'test/data/rails' do

@@ -18,7 +18,9 @@ test/data/normal/test/test_camelcase.rb
 test/data/normal/test/test_photo.rb
 test/data/normal/test/test_route.rb
 test/data/normal/test/test_user.rb
+test/data/rails/test/config/routes.rb
 test/data/rails/test/fixtures/routes.yml
+test/data/rails/test/functional/dummy_controller_test.rb
 test/data/rails/test/functional/route_controller_test.rb
 test/data/rails/test/unit/route_test.rb
 test/test_autotest.rb
