@@ -5,6 +5,7 @@ README.txt
 Rakefile
 bin/ZenTest
 bin/autotest
+bin/multiruby
 bin/unit_diff
 example.txt
 example1.rb

@@ -1,0 +1,66 @@
+#!/usr/local/bin/ruby -w
+
+require 'fileutils'
+
+BASEDIR = Dir.pwd
+
+%w(versions inst build).each do |dir|
+  unless test ?d, dir then
+    puts "creating #{dir}"
+    Dir.mkdir dir 
+    if dir == "versions" then
+      file = "ruby-#{RUBY_VERSION}.tar.gz"
+      puts "  downloading #{file} via HTTP... this might take a while"
+      puts "  put other ruby tarballs in versions to use them"
+      
+      Dir.chdir dir do
+        require 'open-uri'
+        open("http://ftp.ruby-lang.org/pub/ruby/#{file}") do |f|
+          File.open file, 'w' do |out|
+            out.write f.read
+          end
+        end
+      end
+    end
+  end
+end
+
+def run(cmd)
+  puts "Running command: #{cmd}"
+  raise "ERROR: Command failed with exit code #{$?}" unless system cmd
+end
+
+Dir.chdir "build" do
+  Dir["../versions/ruby*.tar.gz"].each do |tarball|
+    dir = File.basename tarball, ".tar.gz"
+    version = dir[5..-1]
+    # ruby = "#{BASEDIR}/inst/#{version}/bin/ruby"
+    unless test ?d, dir then
+      inst_dir = "#{BASEDIR}/inst/#{version}"
+      unless test ?d, inst_dir then
+        puts "creating #{inst_dir}"
+        Dir.mkdir inst_dir
+        puts "unpacking #{tarball}"
+        system "tar zxf #{tarball}"
+        Dir.chdir dir do
+          run "autoconf" unless test ?f, "configure"
+          FileUtils.rm_r "ext/readline"
+          run "./configure --prefix #{inst_dir} &> log.configure"
+          run "make &> log.build"
+          run "make install &> log.install"
+        end
+      end
+    end
+  end
+end
+
+Dir["inst/*"].each do |inst|
+  Dir.chdir inst do
+    puts
+    puts "VERSION = #{File.basename inst}"
+    puts
+    system "./bin/ruby", *ARGV
+    puts
+    puts "RESULT = #{$?}"
+  end
+end
