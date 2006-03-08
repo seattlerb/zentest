@@ -5,6 +5,8 @@ require 'test/unit'
 
 require 'autotest'
 
+Dir.chdir File.join(File.dirname(__FILE__), "..")
+
 class Autotest
 
   attr_accessor :system_responses
