@@ -35,6 +35,8 @@ class LowlyOne < SuperDuper		# ZenTest SKIP
   def self.cls_extended; end
   def overridden; end
   def extended; end
+  def pretty_print; end
+  def pretty_print_cycle; end
 end
 
 # This is the good case where there are no missing methods on either side.
