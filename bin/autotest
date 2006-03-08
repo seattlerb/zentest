@@ -2,7 +2,7 @@
 
 $rails ||= false
 
-if $rails then
+if $rails or File.exist? 'config/environment.rb' then
   require 'rails_autotest'
   RailsAutotest.run
 else
