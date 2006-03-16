@@ -38,30 +38,30 @@ Dir.chdir root_dir do
 
   Dir.chdir "build" do
     Dir["../versions/ruby*.tar.gz"].each do |tarball|
-      dir = File.basename tarball, ".tar.gz"
-      version = dir[5..-1]
+      build_dir = File.basename tarball, ".tar.gz"
+      version = build_dir.sub(/^ruby-?/, '')
       versions << version
-      unless test ?d, dir then
-        inst_dir = "#{root_dir}/install/#{version}"
-        unless test ?d, inst_dir then
+      inst_dir = "#{root_dir}/install/#{version}"
+      unless test ?d, inst_dir then
+        unless test ?d, build_dir then
           puts "creating #{inst_dir}"
           Dir.mkdir inst_dir
           puts "unpacking #{tarball}"
           system "tar zxf #{tarball}"
-          Dir.chdir dir do
-            run "autoconf" unless test ?f, "configure"
-            FileUtils.rm_r "ext/readline"
-            run "./configure --prefix #{inst_dir} &> log.configure"
-            run "make &> log.build"
-            run "make install &> log.install"
-          end
+        end
+        Dir.chdir build_dir do
+          run "autoconf" unless test ?f, "configure"
+          FileUtils.rm_r "ext/readline" if test ?d, "ext/readline"
+          run "./configure --prefix #{inst_dir} &> log.configure"
+          run "make -j4 &> log.build"
+          run "make install &> log.install"
         end
       end
     end
   end
 end
 
-versions.each do |version|
+results = versions.map do |version|
   ruby = "#{root_dir}/install/#{version}/bin/ruby"
   puts
   puts "VERSION = #{version}"
@@ -69,4 +69,8 @@ versions.each do |version|
   system ruby, *ARGV
   puts
   puts "RESULT = #{$?}"
+  $?
 end
+
+exit results.select { |n| n != 0 }.size
+

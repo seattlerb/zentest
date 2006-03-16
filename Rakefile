@@ -69,7 +69,7 @@ end
 $prefix = ENV['PREFIX'] || Config::CONFIG['prefix']
 $bin  = File.join($prefix, 'bin')
 $lib  = Config::CONFIG['sitelibdir']
-$bins = %w(ZenTest autotest unit_diff)
+$bins = %w(ZenTest autotest unit_diff multiruby)
 $libs = %w(ZenTest.rb autotest.rb rails_autotest.rb unit_diff.rb)
 
 task :install do
