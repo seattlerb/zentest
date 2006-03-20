@@ -72,5 +72,11 @@ results = versions.map do |version|
   $?
 end
 
-exit results.select { |n| n != 0 }.size
+result = results.select { |n| n != 0 }.size
+
+puts
+puts "TOTAL RESULT = #{result} failures"
+
+exit result
+
 
