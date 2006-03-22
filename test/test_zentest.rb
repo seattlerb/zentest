@@ -504,8 +504,8 @@ end
     assert_equal("test_spaceship",     @tester.normal_to_test("<=>"))
     assert_equal("test_times",         @tester.normal_to_test("*"))
     assert_equal("test_times2",        @tester.normal_to_test("**"))
-    assert_equal("test_unary_minus",   @tester.normal_to_test("@-"))
-    assert_equal("test_unary_plus",    @tester.normal_to_test("@+"))
+    assert_equal("test_unary_minus",   @tester.normal_to_test("-@"))
+    assert_equal("test_unary_plus",    @tester.normal_to_test("+@"))
     assert_equal("test_class_index",   @tester.normal_to_test("self.[]"))
   end
 
@@ -577,8 +577,8 @@ end
     assert_equal("<=>", @tester.test_to_normal("test_spaceship"))
     assert_equal("*",   @tester.test_to_normal("test_times"))
     assert_equal("**",  @tester.test_to_normal("test_times2"))
-    assert_equal("@-",  @tester.test_to_normal("test_unary_minus"))
-    assert_equal("@+",  @tester.test_to_normal("test_unary_plus"))
+    assert_equal("-@",  @tester.test_to_normal("test_unary_minus"))
+    assert_equal("+@",  @tester.test_to_normal("test_unary_plus"))
   end
 
   def test_klasses_equals
