@@ -130,7 +130,23 @@ class Autotest
     end
       
     begin
+      last_update = Time.at 0
+
       loop do
+        if $vcs and Time.now > last_update + $vcstime then
+          last_update = Time.now
+          case $vcs
+          when 'cvs' then
+            system 'cvs up'
+          when 'p4' then
+            system 'p4 sync'
+          when 'svn' then
+            system 'svn up'
+          else
+            puts "# Sorry, I don't know what version control system \"#{$vcs}\" is"
+          end
+        end
+
         files = updated_files
         test files unless files.empty?
         sleep 5

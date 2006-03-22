@@ -1,6 +1,9 @@
 #!/usr/local/bin/ruby -ws
 
-$rails ||= false
+$rails   ||= false
+$vcs     ||= nil
+$vcstime ||= 300
+$vcstime = $vcstime.to_i
 
 if $rails or File.exist? 'config/environment.rb' then
   require 'rails_autotest'
