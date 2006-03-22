@@ -186,7 +186,9 @@ class Autotest
       failed = results.scan(/^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/)
 
       if failed.empty? then
-        puts '# Test::Unit died, you did a really bad thing, retrying in 10'
+        puts '# Test::Unit exited without a parseable failure or error message.'
+        puts '# You probably have a syntax error in your code.'
+        puts '# I\'ll retry in 10 seconds'
         sleep 10
         redo
       end
