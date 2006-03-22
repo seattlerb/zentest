@@ -1,6 +1,6 @@
 #!/usr/local/bin/ruby -swI .
 
-require 'ZenTest'
+require 'zentest'
 
 $TESTING = true # for ZenWeb and any other testing infrastructure code
 
