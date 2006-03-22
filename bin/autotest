@@ -1,5 +1,32 @@
 #!/usr/local/bin/ruby -ws
 
+$h    ||= false
+$help ||= false
+
+if $h or $help then
+  help = []
+  help << "autotest [options]"
+  help << nil
+  help << "options:"
+  help << "\t-h"
+  help << "\t-help\t\tYou're looking at it."
+  help << nil
+  help << "\t-rails\t\tForce rails mode."
+  help << "\t\t\tRails will be automatically detected by the presence of"
+  help << "\t\t\tconfig/environment.rb"
+  help << nil
+  help << "\t-vcs=NAME\tVersion control system to update."
+  help << "\t\t\tAutotest will automatically update every vcstime"
+  help << "\t\t\tseconds."
+  help << "\t\t\tAutotest understands Perforce (p4), CVS (cvs) and"
+  help <<  "\t\t\tSubversion (svn)."
+  help << nil
+  help << "\t-vcstime=N\tUpdate source control every N seconds."
+  help << "\t\t\tDefaults to every five minutes (300 seconds)."
+  STDERR.puts help.join("\n")
+  exit 1
+end
+
 $rails   ||= false
 $vcs     ||= nil
 $vcstime ||= 300
