@@ -83,6 +83,14 @@ class Autotest
   end
 
   ##
+  # Resets all file timestamps in the list
+
+  def reset_times
+    ago = Time.at 0
+    @files.each_key { |file| @files[file] = ago }
+  end
+
+  ##
   # Retests failed tests.
 
   def retest_failed(failed, tests)
@@ -138,8 +146,12 @@ class Autotest
   ##
   # Runs tests for files in +updated+.  Implementation files are looked up
   # with map_file_names.
+  #
+  # Returns true if any of the tests ever failed.
 
   def test(updated)
+    ever_failed = false
+
     map_file_names(updated).each do |tests|
       next if tests.empty?
       puts '# Testing updated files'
@@ -153,6 +165,8 @@ class Autotest
         next
       end
 
+      ever_failed = true
+
       failed = results.scan(/^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/)
 
       if failed.empty? then
@@ -164,7 +178,11 @@ class Autotest
       retest_failed failed, tests
     end
 
+    reset_times if ever_failed
+
     puts '# All passed'
+
+    return ever_failed
   end
 
   ##

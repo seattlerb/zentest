@@ -132,6 +132,15 @@ class TestAutotest < Test::Unit::TestCase
     assert_equal true, @at.system_responses.empty?
   end
 
+  def test_reset_times
+    @at.updated?(@photo_test_file)
+    assert_equal false, @at.updated?(@photo_test_file), 'In @files'
+    time = @at.files[@photo_test_file]
+    @at.reset_times
+    assert_not_equal time, @at.files[@photo_test_file]
+    assert_equal true, @at.updated?(@photo_test_file), 'Time reset to 0'
+  end
+
   def test_updated_eh
     assert_equal true,  @at.updated?(@photo_test_file), 'Not in @files'
     assert_equal false, @at.updated?(@photo_test_file), 'In @files'
@@ -177,5 +186,6 @@ class TestAutotest < Test::Unit::TestCase
   def util_touch(file, t = Time.now)
     File.utime(t, t, file)
   end
+
 end
 
