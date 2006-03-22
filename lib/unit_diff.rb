@@ -73,6 +73,9 @@ end
 
 class UnitDiff
 
+  WINDOZE  = /win32/ =~ RUBY_PLATFORM
+  DIFF = (WINDOZE ? 'diff.exe' : 'diff')
+
   ##
   # Handy wrapper for UnitDiff#unit_diff.
 
@@ -177,7 +180,7 @@ class UnitDiff
         diff_flags = $u ? "-u" : $c ? "-c" : ""
         diff_flags += " -b" if $b
 
-        result = `diff #{diff_flags} #{a.path} #{b.path}`
+        result = `#{DIFF} #{diff_flags} #{a.path} #{b.path}`
         if result.empty? then
           output.push "[no difference--suspect ==]"
         else
