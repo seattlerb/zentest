@@ -105,7 +105,7 @@ class Autotest
         break [method, klass] if failed_files.empty?
         puts "# Rerunning failures: #{failed_files.join ' '}"
         filter = "-n #{method} " unless method == 'default_test'
-        cmd = "ruby -Ilib:test -S testrb #{filter}#{failed_files.join ' '}"
+        cmd = "ruby -Ilib:test -S testrb #{filter}#{failed_files.join ' '} | unit_diff -u"
         puts "+ #{cmd}"
         system(cmd) ? nil : [method, klass] # clever
       end
@@ -155,7 +155,7 @@ class Autotest
     map_file_names(updated).each do |tests|
       next if tests.empty?
       puts '# Testing updated files'
-      cmd = "ruby -Ilib:test -e '#{tests.inspect}.each { |f| load f }'"
+      cmd = "ruby -Ilib:test -e '#{tests.inspect}.each { |f| load f }' | unit_diff -u"
       puts "+ #{cmd}"
       results = `#{cmd}`
       puts results

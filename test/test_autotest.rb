@@ -127,7 +127,7 @@ class TestAutotest < Test::Unit::TestCase
     out = out.split $/
 
     assert_equal "# Rerunning failures: #{@photo_test_file}", out.shift
-    assert_equal "+ ruby -Ilib:test -S testrb -n test_route #{@photo_test_file}", out.shift
+    assert_equal "+ ruby -Ilib:test -S testrb -n test_route #{@photo_test_file} | unit_diff -u", out.shift
 
     assert_equal true, @at.system_responses.empty?
   end
