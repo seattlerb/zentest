@@ -11,41 +11,72 @@ class TestRailsAutotest < TestAutotest
   def test_map_file_names
     file_names = [
       './app/helpers/application_helper.rb',
+
       './test/fixtures/routes.yml',
-      './test/unit/photo_test.rb',
+
       './app/models/photo.rb',
+      './test/unit/photo_test.rb',
+
       './app/controllers/application.rb',
+
       './app/controllers/route_controller.rb',
+      './test/functional/route_controller_test.rb',
+
       './app/views/layouts/default.rhtml',
+
       './app/views/route/index.rhtml',
+
       './app/helpers/route_helper.rb',
+
       './config/routes.rb',
+
+      './app/controllers/admin/themes_controller.rb',
+      './test/functional/admin/themes_controller_test.rb',
     ]
 
     expected = [
       # ApplicationHelper
       [[], ['test/functional/dummy_controller_test.rb',
             'test/functional/route_controller_test.rb']],
-      # fixture
+
+      # Fixture
       [['test/unit/route_test.rb'],
        ['test/functional/route_controller_test.rb']],
-      # test
+
+      # Model
       [['test/unit/photo_test.rb'], []],
-      # model
+
+      # Model test
       [['test/unit/photo_test.rb'], []],
+
       # ApplicationController
       [[], ['test/functional/dummy_controller_test.rb']],
-      # controller
+
+      # Controller
       [[], ['test/functional/route_controller_test.rb']],
-      # layout
+
+      # Controller test
+      [[], ['test/functional/route_controller_test.rb']],
+
+      # Layout
       [[], []],
-      # view
+
+      # View
       [[], ['test/functional/route_controller_test.rb']],
-      # helper
+
+      # Helper
       [[], ['test/functional/route_controller_test.rb']],
+
       # config/routes.rb
-      [[], ['test/functional/dummy_controller_test.rb',
+      [[], ['test/functional/admin/themes_controller_test.rb',
+            'test/functional/dummy_controller_test.rb',
             'test/functional/route_controller_test.rb']],
+
+      # Nested controller
+      [[], ['test/functional/admin/themes_controller_test.rb']],
+
+      # Nested controller test
+      [[], ['test/functional/admin/themes_controller_test.rb']],
     ]
 
     Dir.chdir 'test/data/rails' do
