@@ -5,7 +5,63 @@ class TestRailsAutotest < TestAutotest
 
   def setup
     super
+
     @at = RailsAutotest.new
+
+    @rails_tests_dir = 'test/data/rails'
+
+    @rails_route_file             = 'app/models/route.rb'
+    @rails_route_test_file        = 'test/unit/route_test.rb'
+    @rails_flickr_photo_file      = 'app/models/flickr_photo.rb'
+    @rails_flickr_photo_test_file = 'test/unit/flickr_photo_test.rb'
+
+    @rails_route_controller_file      = 'app/controllers/route_controller.rb'
+    @rails_route_controller_test_file = 'test/functional/route_controller_test.rb'
+  end
+
+  def test_failed_test_files_updated
+    failed_files = nil
+    klass = 'RouteTest'
+    tests = [@rails_route_test_file]
+
+    Dir.chdir @rails_tests_dir do
+      @at.updated? @rails_route_test_file
+      util_touch @rails_route_test_file
+
+      failed_files = @at.failed_test_files klass, tests
+    end
+
+    assert_equal [@rails_route_test_file], failed_files
+  end
+
+  def test_failed_test_files_updated_camelcase
+    failed_files = nil
+    klass = 'FlickrPhotoTest'
+    tests = [@rails_flickr_photo_test_file]
+
+    Dir.chdir @rails_tests_dir do
+      @at.updated? @rails_flickr_photo_test_file
+      util_touch @rails_flickr_photo_test_file
+
+      failed_files = @at.failed_test_files klass, tests
+    end
+
+    assert_equal [@rails_flickr_photo_test_file], failed_files
+  end
+
+  def test_failed_test_files_updated_implementation
+    failed_files = nil
+    klass = 'RouteTest'
+    tests = [@rails_route_test_file]
+
+    Dir.chdir @rails_tests_dir do
+      @at.updated? @rails_route_file
+      util_touch @rails_route_file
+
+      failed_files = @at.failed_test_files klass, tests
+    end
+
+    assert_equal [@rails_route_test_file], failed_files
   end
 
   def test_map_file_names
@@ -79,7 +135,7 @@ class TestRailsAutotest < TestAutotest
       [[], ['test/functional/admin/themes_controller_test.rb']],
     ]
 
-    Dir.chdir 'test/data/rails' do
+    Dir.chdir @rails_tests_dir do
       file_names.each_with_index do |name, i|
         assert_equal expected[i], @at.map_file_names([name]),
                      "test #{i}, #{name}"

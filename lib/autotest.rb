@@ -47,7 +47,7 @@ class Autotest
     failed_files = tests.select { |test| test =~ /#{failed_klass}/ }
     # updated implementations that match this failure
     changed_impls = @files.keys.select do |file|
-      file =~ %r%^lib.*#{failed_klass}.rb$% and updated? file
+      file =~ /#{failed_klass}/ and updated? file
     end
     tests_to_run = map_file_names(changed_impls).flatten
     # add updated tests
