@@ -94,5 +94,5 @@ end
 
 desc 'Clean up'
 task :clean => [ :clobber_rdoc, :clobber_package ] do
-  rm_rf %w(*~ doc)
+  rm_f Dir["**/*~"]
 end

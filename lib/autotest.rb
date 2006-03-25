@@ -22,6 +22,15 @@ require 'find'
 # * Implementation files must match up with a test file named
 #   test_.*implementation.rb
 
+# New (proposed) strategy:
+#
+# 1) find all files and associate them from impl <-> test
+# 2) run all tests
+# 3) scan for failures
+# 4) detect changes in ANY (ruby?) file, rerun all failures + changed files
+# 5) until 0 defects, goto 3
+# 6) when 0 defects, goto 2
+
 class Autotest
   
   def self.run
