@@ -33,11 +33,14 @@ class TestAutotest < Test::Unit::TestCase
   def setup
     @normal_tests_dir = 'test/data/normal'
 
+    @blah_file           = 'lib/blah.rb'
     @photo_file          = 'lib/photo.rb'
     @photo_test_file     = 'test/test_photo.rb'
     @route_test_file     = 'test/test_route.rb'
     @user_test_file      = 'test/test_user.rb'
     @camelcase_test_file = 'test/test_camelcase.rb'
+
+    @all_files = [ @blah_file, @photo_file, @photo_test_file, @route_test_file, @user_test_file, @camelcase_test_file ]
 
     Dir.chdir @normal_tests_dir do
       util_touch @photo_file, (Time.now - 60)
@@ -48,71 +51,85 @@ class TestAutotest < Test::Unit::TestCase
     @at = Autotest.new
   end
 
-  def test_failed_test_files_not_updated
-    failed_files = nil
-    klass = 'TestPhoto'
-    tests = [@user_test_file, @photo_test_file]
+  def util_failed_test_files(klass, *tests)
+    tests.flatten!
 
     Dir.chdir @normal_tests_dir do
-      @at.updated? @photo_test_file
+      tests.each do |f| @at.updated? f; end
 
-      failed_files = @at.failed_test_files klass, tests
+      yield if block_given?
+
+      return @at.failed_test_files klass, tests
     end
+  end
+
+  # 0 files update, 0 run
+  def test_failed_test_files_not_updated
+    tests = [@user_test_file, @photo_test_file]
+
+    failed_files = util_failed_test_files 'TestPhoto', tests
 
     assert_equal [], failed_files
   end
 
+  # 1 test changes, 1 test runs
   def test_failed_test_files_updated
-    failed_files = nil
-    klass = 'TestPhoto'
     tests = [@user_test_file, @photo_test_file]
 
-    Dir.chdir @normal_tests_dir do
-      @at.updated? @photo_test_file
+    failed_files = util_failed_test_files 'TestPhoto', tests do
       util_touch @photo_test_file
-
-      failed_files = @at.failed_test_files klass, tests
     end
 
     assert_equal [@photo_test_file], failed_files
   end
 
+  # same as updated, 
   def test_failed_test_files_updated_camelcase
-    failed_files = nil
-    klass = 'TestCamelCase'
     tests = [@camelcase_test_file]
 
-    Dir.chdir @normal_tests_dir do
-      @at.updated? @camelcase_test_file
+    failed_files = util_failed_test_files 'TestCamelCase', tests do
       util_touch @camelcase_test_file
-
-      failed_files = @at.failed_test_files klass, tests
     end
 
     assert_equal [@camelcase_test_file], failed_files
   end
 
+  # 1 impl changes, 1 test runs
   def test_failed_test_files_updated_implementation
-    failed_files = nil
     klass = 'TestPhoto'
     tests = [@user_test_file, @photo_test_file]
 
-    Dir.chdir @normal_tests_dir do
-      @at.updated? @photo_test_file # mark
-
-      failed_files = @at.failed_test_files klass, tests
-    end
+    failed_files = util_failed_test_files klass, tests
 
     assert_equal [], failed_files # flush
 
-    Dir.chdir @normal_tests_dir do
-      @at.updated? @photo_file
+    failed_files = util_failed_test_files klass, tests do
       util_touch @photo_file
-
-      failed_files = @at.failed_test_files klass, tests
     end
 
     assert_equal [@photo_test_file], failed_files
+  end
+
+  # "general" file changes, run all failures + mapped file
+  def test_failed_test_files_updated_external
+    tests = [@user_test_file, @photo_test_file]
+
+    failed_files = util_failed_test_files 'TestPhoto', tests do
+      util_touch @blah_file
+    end
+
+    assert_equal tests, failed_files
+  end
+
+  # passing file changes, run all failures + mapped file
+  def test_failed_test_files_updated_passed
+    tests = [@user_test_file]
+
+    failed_files = util_failed_test_files 'TestPhoto', tests do
+      util_touch @photo_file
+    end
+
+    assert_equal tests + [@photo_test_file], failed_files
   end
 
   def test_map_file_names
@@ -160,10 +177,14 @@ class TestAutotest < Test::Unit::TestCase
 
   def test_reset_times
     Dir.chdir @normal_tests_dir do
+
       @at.updated?(@photo_test_file)
+
       assert_equal false, @at.updated?(@photo_test_file), 'In @files'
       time = @at.files[@photo_test_file]
+
       @at.reset_times
+
       assert_not_equal time, @at.files[@photo_test_file]
       assert_equal true, @at.updated?(@photo_test_file), 'Time reset to 0'
     end
@@ -183,19 +204,13 @@ class TestAutotest < Test::Unit::TestCase
     Dir.chdir @normal_tests_dir do
       @at.updated_files
 
-      expected = {
-        'lib/photo.rb'           => File.stat(@photo_file).mtime,
-        'test/test_photo.rb'     => File.stat(@photo_test_file).mtime,
-        'test/test_route.rb'     => File.stat(@route_test_file).mtime,
-        'test/test_user.rb'      => File.stat(@user_test_file).mtime,
-        'test/test_camelcase.rb' => File.stat(@camelcase_test_file).mtime,
-      }
+      expected = Hash[*@all_files.map { |f| [f, File.stat(f).mtime] }.flatten]
 
       assert_equal expected, @at.files
 
       util_touch @photo_test_file
 
-      assert_not_equal expected['test_photo.rb'], @at.files
+      assert_not_equal expected['test/test_photo.rb'], @at.files
     end
   end
 

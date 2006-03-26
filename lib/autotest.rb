@@ -233,11 +233,13 @@ class Autotest
 
     Find.find '.' do |f|
       next if File.directory? f
-      next if f =~ /(?:swp|~|rej|orig)$/ # temporary/patch files
-      next if f =~ %r%/\.#% # Emacs autosaved/cvs merge files
-      next if f =~ %r%/(?:.svn|CVS)/% # version control files
-      next if f =~ @exceptions unless @exceptions.nil? # custom exceptions
-      f = f.sub(/^\.\//, '') # trim the ./ that Find gives us
+      next if f =~ /(?:swp|~|rej|orig)$/        # temporary/patch files
+      next if f =~ %r%/\.\#%                    # Emacs autosave/cvs merge files
+      next if f =~ %r%/(?:.svn|CVS)/%           # version control files
+      next if f =~ @exceptions if @exceptions   # custom exceptions
+
+      f = f.sub(/^\.\//, '')
+
       updated << f if updated? f
     end
 
