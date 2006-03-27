@@ -17,6 +17,19 @@ class TestRailsAutotest < TestAutotest
 
     @rails_route_controller_file      = 'app/controllers/route_controller.rb'
     @rails_route_controller_test_file = 'test/functional/route_controller_test.rb'
+
+    @rails_unit_tests = [
+      @rails_flickr_photo_test_file,
+      @rails_route_test_file,
+    ]
+
+    @rails_functional_tests = [
+      'test/functional/admin/themes_controller_test.rb',
+      'test/functional/dummy_controller_test.rb',
+      @rails_route_controller_test_file,
+    ]
+
+    @rails_all_tests = [@rails_unit_tests, @rails_functional_tests]
   end
 
   (instance_methods.sort - Object.instance_methods).each do |meth|
@@ -24,29 +37,38 @@ class TestRailsAutotest < TestAutotest
   end
 
   def test_map_file_names
-    file_names = [
-      './app/helpers/application_helper.rb',
+    file_names = %w[
+      ./app/helpers/application_helper.rb
 
-      './test/fixtures/routes.yml',
+      ./test/fixtures/routes.yml
 
-      './app/models/photo.rb',
-      './test/unit/photo_test.rb',
+      ./app/models/photo.rb
+      ./test/unit/photo_test.rb
 
-      './app/controllers/application.rb',
+      ./app/controllers/application.rb
 
-      './app/controllers/route_controller.rb',
-      './test/functional/route_controller_test.rb',
+      ./app/controllers/route_controller.rb
+      ./test/functional/route_controller_test.rb
 
-      './app/views/layouts/default.rhtml',
+      ./app/views/layouts/default.rhtml
 
-      './app/views/route/index.rhtml',
+      ./app/views/route/index.rhtml
 
-      './app/helpers/route_helper.rb',
+      ./app/helpers/route_helper.rb
 
-      './config/routes.rb',
+      ./config/routes.rb
 
-      './app/controllers/admin/themes_controller.rb',
-      './test/functional/admin/themes_controller_test.rb',
+      ./app/controllers/admin/themes_controller.rb
+      ./test/functional/admin/themes_controller_test.rb
+
+      ./test/test_helper.rb
+      ./config/boot.rb
+      ./config/database.yml
+      ./config/environment.rb
+      ./config/environments/test.rb
+
+      ./vendor/plugins/cartographer/lib/keys.rb
+      Rakefile
     ]
 
     expected = [
@@ -83,15 +105,25 @@ class TestRailsAutotest < TestAutotest
       [[], ['test/functional/route_controller_test.rb']],
 
       # config/routes.rb
-      [[], ['test/functional/admin/themes_controller_test.rb',
-            'test/functional/dummy_controller_test.rb',
-            'test/functional/route_controller_test.rb']],
+      [[], @rails_functional_tests],
 
       # Nested controller
       [[], ['test/functional/admin/themes_controller_test.rb']],
 
       # Nested controller test
       [[], ['test/functional/admin/themes_controller_test.rb']],
+
+      # test/test_helper.rb, boot.rb, database.yml, environment.rb,
+      # environments/test.rb
+      @rails_all_tests,
+      @rails_all_tests,
+      @rails_all_tests,
+      @rails_all_tests,
+      @rails_all_tests,
+
+      # vendor/, Rakefile
+      [[], []],
+      [[], []],
     ]
 
     Dir.chdir @rails_tests_dir do

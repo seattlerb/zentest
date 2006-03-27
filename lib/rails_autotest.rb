@@ -44,6 +44,15 @@ class RailsAutotest < Autotest
         functional_tests << "test/functional/#{$1}_controller_test.rb"
       when %r%^config/routes.rb$% then
         functional_tests.push(*Dir['test/functional/**/*_test.rb'].sort)
+      when %r%^test/test_helper.rb$%,
+           %r%^config/boot.rb%,
+           %r%^config/database.yml%,
+           %r%^config/environment.rb%,
+           %r%^config/environments/test.rb% then
+        model_tests.push(*Dir['test/unit/**/*_test.rb'].sort)
+        functional_tests.push(*Dir['test/functional/**/*_test.rb'].sort)
+      when %r%^vendor/%, /^Rakefile$/ then
+        # ignore standard rails files
       else
         puts "dunno! #{filename}"
       end
