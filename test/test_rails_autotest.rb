@@ -19,49 +19,8 @@ class TestRailsAutotest < TestAutotest
     @rails_route_controller_test_file = 'test/functional/route_controller_test.rb'
   end
 
-  def test_failed_test_files_updated
-    failed_files = nil
-    klass = 'RouteTest'
-    tests = [@rails_route_test_file]
-
-    Dir.chdir @rails_tests_dir do
-      @at.updated? @rails_route_test_file
-      util_touch @rails_route_test_file
-
-      failed_files = @at.failed_test_files klass, tests
-    end
-
-    assert_equal [@rails_route_test_file], failed_files
-  end
-
-  def test_failed_test_files_updated_camelcase
-    failed_files = nil
-    klass = 'FlickrPhotoTest'
-    tests = [@rails_flickr_photo_test_file]
-
-    Dir.chdir @rails_tests_dir do
-      @at.updated? @rails_flickr_photo_test_file
-      util_touch @rails_flickr_photo_test_file
-
-      failed_files = @at.failed_test_files klass, tests
-    end
-
-    assert_equal [@rails_flickr_photo_test_file], failed_files
-  end
-
-  def test_failed_test_files_updated_implementation
-    failed_files = nil
-    klass = 'RouteTest'
-    tests = [@rails_route_test_file]
-
-    Dir.chdir @rails_tests_dir do
-      @at.updated? @rails_route_file
-      util_touch @rails_route_file
-
-      failed_files = @at.failed_test_files klass, tests
-    end
-
-    assert_equal [@rails_route_test_file], failed_files
+  (instance_methods.sort - Object.instance_methods).each do |meth|
+    undef_method meth if meth =~ /^test_failed_test_files/
   end
 
   def test_map_file_names

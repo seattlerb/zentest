@@ -51,85 +51,69 @@ class TestAutotest < Test::Unit::TestCase
     @at = Autotest.new
   end
 
-  def util_failed_test_files(klass, *tests)
-    tests.flatten!
-
-    Dir.chdir @normal_tests_dir do
-      tests.each do |f| @at.updated? f; end
-
-      yield if block_given?
-
-      return @at.failed_test_files klass, tests
-    end
-  end
-
   # 0 files update, 0 run
-  def test_failed_test_files_not_updated
+  def test_failed_test_files_no_updates
     tests = [@user_test_file, @photo_test_file]
+    updated_files = []
 
-    failed_files = util_failed_test_files 'TestPhoto', tests
+    failed_files = @at.failed_test_files(/photo/, tests, updated_files)
 
     assert_equal [], failed_files
   end
 
   # 1 test changes, 1 test runs
-  def test_failed_test_files_updated
+  def test_failed_test_files_test_updated
     tests = [@user_test_file, @photo_test_file]
+    updated_files = [@photo_test_file]
 
-    failed_files = util_failed_test_files 'TestPhoto', tests do
-      util_touch @photo_test_file
-    end
+    failed_files = @at.failed_test_files(/photo/, tests, updated_files)
 
     assert_equal [@photo_test_file], failed_files
   end
 
-  # same as updated, 
-  def test_failed_test_files_updated_camelcase
-    tests = [@camelcase_test_file]
+  # non-matching test class changed, 0 test runs
+  def test_failed_test_files_unrelated_test_updated
+    tests = [@user_test_file, @photo_test_file]
+    updated_files = [@user_test_file]
 
-    failed_files = util_failed_test_files 'TestCamelCase', tests do
-      util_touch @camelcase_test_file
-    end
+    failed_files = @at.failed_test_files(/photo/, tests, updated_files)
+
+    assert_equal [], failed_files
+  end
+
+  # tests handling of camelcase test matching
+  def test_failed_test_files_camelcase_updated
+    tests = [@camelcase_test_file]
+    updated_files = [@camelcase_test_file]
+
+    failed_files = @at.failed_test_files(/camel_?case/, tests, updated_files)
 
     assert_equal [@camelcase_test_file], failed_files
   end
 
-  # 1 impl changes, 1 test runs
-  def test_failed_test_files_updated_implementation
-    klass = 'TestPhoto'
-    tests = [@user_test_file, @photo_test_file]
+  # running back to back with different classes should give updates for each
+  # class.
+  def test_failed_test_files_implementation_updated_both
+    tests = [@photo_test_file, @user_test_file]
+    updated_files = [@blah_file]
 
-    failed_files = util_failed_test_files klass, tests
-
-    assert_equal [], failed_files # flush
-
-    failed_files = util_failed_test_files klass, tests do
-      util_touch @photo_file
-    end
+    failed_files = @at.failed_test_files(/photo/, tests, updated_files)
 
     assert_equal [@photo_test_file], failed_files
+
+    failed_files = @at.failed_test_files(/user/, tests, updated_files)
+
+    assert_equal [@user_test_file], failed_files
   end
 
   # "general" file changes, run all failures + mapped file
-  def test_failed_test_files_updated_external
+  def test_failed_test_files_implementation_updated
     tests = [@user_test_file, @photo_test_file]
+    updated_files = [@blah_file]
 
-    failed_files = util_failed_test_files 'TestPhoto', tests do
-      util_touch @blah_file
-    end
+    failed_files = @at.failed_test_files(/photo/, tests, updated_files)
 
-    assert_equal tests, failed_files
-  end
-
-  # passing file changes, run all failures + mapped file
-  def test_failed_test_files_updated_passed
-    tests = [@user_test_file]
-
-    failed_files = util_failed_test_files 'TestPhoto', tests do
-      util_touch @photo_file
-    end
-
-    assert_equal tests + [@photo_test_file], failed_files
+    assert_equal [@photo_test_file], failed_files
   end
 
   def test_map_file_names
@@ -155,7 +139,9 @@ class TestAutotest < Test::Unit::TestCase
 
   def test_retest_failed_modified
     Dir.chdir @normal_tests_dir do
-      failed = [['test_route', 'TestPhoto']]
+      @all_files.each do |f| @at.updated? f; end
+
+      failed = [['test_route', /photo/]]
       tests = [@photo_test_file]
 
       @at.system_responses = [true]

@@ -28,6 +28,8 @@ require 'find'
 # 2) run all tests
 # 3) scan for failures
 # 4) detect changes in ANY (ruby?) file, rerun all failures + changed files
+#    NOTE: this runs in a loop, loop handling should be improved slightly to
+#          have less crap (ruby command, failure count).
 # 5) until 0 defects, goto 3
 # 6) when 0 defects, goto 2
 
@@ -48,20 +50,28 @@ class Autotest
   end
 
   ##
-  # Maps failed class +klass+ to test files in +tests+ that have been updated.
+  # Selects test files to run that match failures in +failed_file+ based on
+  # +updated_files+ and +tests+.
+  #
+  # Only test files matching +failed_file+ will be returned so the test
+  # runner's -n flag will correctly match the failed tests.
+  #--
+  # failed_test_files must never check for updated files, retest_failed reuses
+  # +updated_files+.
 
-  def failed_test_files(klass, tests)
-    failed_klass = klass.sub('Test', '').gsub(/(.)([A-Z])/, '\1_?\2').downcase
-    # tests that match this failure
-    failed_files = tests.select { |test| test =~ /#{failed_klass}/ }
-    # updated implementations that match this failure
-    changed_impls = @files.keys.select do |file|
-      file =~ /#{failed_klass}/ and updated? file
-    end
-    tests_to_run = map_file_names(changed_impls).flatten
-    # add updated tests
-    failed_files.each { |f| tests_to_run << f if updated? f }
-    return tests_to_run.uniq
+  def failed_test_files(failed_file, tests, updated_files)
+    return [] if updated_files.empty?
+
+    updated_tests = updated_files.select { |f| f =~ /^test/ }
+
+    tests_to_filter = if updated_files == updated_tests then
+                        updated_tests
+                      else
+                        files = (updated_files + tests).uniq
+                        tests_to_filter = map_file_names(files).flatten.uniq
+                      end
+
+    return tests_to_filter.select { |test| test =~ failed_file }
   end
 
   ##
@@ -101,6 +111,12 @@ class Autotest
 
   ##
   # Retests failed tests.
+  #--
+  # Runs through each failure and runs tests matching the failure.  If an
+  # implementation file was updated all failed tests should be run.
+  #
+  # TODO collapse multiple failures in the same file (in test) and use | in
+  # the filter.
 
   def retest_failed(failed, tests)
     # -t and -n includes all tests that match either filter, not tests that
@@ -109,14 +125,19 @@ class Autotest
     until failed.empty? do
       sleep 5 unless $TESTING
 
-      failed.map! do |method, klass|
-        failed_files = failed_test_files klass, tests
-        break [method, klass] if failed_files.empty?
+      updated_files = @files.keys.select { |f| updated? f }
+
+      failed.map! do |method, failed_test|
+        failed_files = failed_test_files failed_test, tests, updated_files
+        break [method, failed_test] if failed_files.empty?
+
         puts "# Rerunning failures: #{failed_files.join ' '}"
+
         filter = "-n #{method} " unless method == 'default_test'
         cmd = "ruby -Ilib:test -S testrb #{filter}#{failed_files.join ' '} | unit_diff -u"
+
         puts "+ #{cmd}"
-        system(cmd) ? nil : [method, klass] # clever
+        system(cmd) ? nil : [method, failed_test] # clever
       end
 
       failed.compact!
@@ -200,6 +221,11 @@ class Autotest
         puts '# I\'ll retry in 10 seconds'
         sleep 10
         redo
+      end
+
+      failed = failed.map do |method, klass|
+        failed_file = klass.sub('Test', '').gsub(/(.)([A-Z])/, '\1_?\2')
+        [method, /#{failed_file.downcase}/]
       end
 
       retest_failed failed, tests
