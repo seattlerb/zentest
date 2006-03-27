@@ -51,6 +51,23 @@ class TestAutotest < Test::Unit::TestCase
     @at = Autotest.new
   end
 
+  def test_consolidate_failures
+    failed = [
+      %w[test_a TestOne],
+      %w[test_b TestOne],
+      %w[test_c TestOne],
+      %w[test_d TestTwo],
+    ]
+
+    expected = [
+      ["'/^(test_a|test_b|test_c)/'", /one/],
+      ["'/^(test_d)/'", /two/],
+    ]
+
+    assert_equal expected,
+                 @at.consolidate_failures(failed).sort_by { |f,k| k.source }
+  end
+
   # 0 files update, 0 run
   def test_failed_test_files_no_updates
     tests = [@user_test_file, @photo_test_file]
@@ -144,7 +161,7 @@ class TestAutotest < Test::Unit::TestCase
       failed = [['test_route', /photo/]]
       tests = [@photo_test_file]
 
-      @at.system_responses = [true]
+      @at.backtick_responses = ['1 tests, 1 assertions, 0 failures, 0 errors']
 
       util_touch @photo_test_file
 
@@ -155,9 +172,9 @@ class TestAutotest < Test::Unit::TestCase
       out = out.split $/
 
       assert_equal "# Rerunning failures: #{@photo_test_file}", out.shift
-      assert_equal "+ ruby -Ilib:test -S testrb -n test_route #{@photo_test_file} | unit_diff -u", out.shift
+      assert_equal "+ ruby -Ilib:test #{@photo_test_file} -n test_route | unit_diff -u", out.shift
 
-      assert_equal true, @at.system_responses.empty?
+      assert_equal true, @at.backtick_responses.empty?
     end
   end
 

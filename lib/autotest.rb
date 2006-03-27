@@ -50,6 +50,24 @@ class Autotest
   end
 
   ##
+  # Consolidates failed tests +failed+ for the same test class into a single
+  # test runner filter.  Also maps failed class to its file regexp.
+
+  def consolidate_failures(failed)
+    filters = Hash.new { |h,k| h[k] = [] }
+
+    failed.each do |method, klass|
+      failed_file = klass.sub('Test', '').gsub(/(.)([A-Z])/, '\1_?\2')
+      filters[failed_file.downcase] << method
+    end
+
+    return filters.map do |klass, methods|
+      ["'/^(#{methods.join('|')})/'", /#{klass}/]
+    end
+  end
+
+
+  ##
   # Selects test files to run that match failures in +failed_file+ based on
   # +updated_files+ and +tests+.
   #
@@ -125,22 +143,28 @@ class Autotest
     until failed.empty? do
       sleep 5 unless $TESTING
 
-      updated_files = @files.keys.select { |f| updated? f }
+      updated = updated_files
 
-      failed.map! do |method, failed_test|
-        failed_files = failed_test_files failed_test, tests, updated_files
-        break [method, failed_test] if failed_files.empty?
+      failed.map! do |filter, failed_test|
+        failed_files = failed_test_files failed_test, tests, updated
+        break [filter, failed_test] if failed_files.empty?
 
         puts "# Rerunning failures: #{failed_files.join ' '}"
 
-        filter = "-n #{method} " unless method == 'default_test'
-        cmd = "ruby -Ilib:test -S testrb #{filter}#{failed_files.join ' '} | unit_diff -u"
+        test_filter = " -n #{filter}" unless filter == "'/^(default_test)/'"
+        cmd = "ruby -Ilib:test #{failed_files.join ' '}#{test_filter} | unit_diff -u"
 
         puts "+ #{cmd}"
-        system(cmd) ? nil : [method, failed_test] # clever
+        result = `#{cmd}`
+        puts result
+        status = result.split($/).last
+        status =~ /0 failures, 0 errors/ ? nil : [filter, failed_test] # clever
       end
 
-      failed.compact!
+      if failed.compact! and not failed.empty? then # also clever
+        puts "# failures remain in #{failed.length} files:"
+        puts "# #{failed.map { |f,t| "test_#{t.source}.rb" }.join ', '}" # "
+      end
     end
   end
 
@@ -153,6 +177,7 @@ class Autotest
         puts "# Ok, you really want to quit, doing so"
         exit
       end
+      #STDERR.puts "\t#{caller.join "\n\t"}"
       puts "# hit ^C again to quit"
       sleep 1.5 # give them enough time to hit ^C again
       @interrupt = true # if they hit ^C again, 
@@ -223,10 +248,7 @@ class Autotest
         redo
       end
 
-      failed = failed.map do |method, klass|
-        failed_file = klass.sub('Test', '').gsub(/(.)([A-Z])/, '\1_?\2')
-        [method, /#{failed_file.downcase}/]
-      end
+      failed = consolidate_failures(failed)
 
       retest_failed failed, tests
     end
