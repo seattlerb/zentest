@@ -11,6 +11,10 @@ if $h or $help then
   help << "\t-h"
   help << "\t-help\t\tYou're looking at it."
   help << nil
+  help << "\t-v\t\tBe verbose."
+  help << "\t\t\tPrints files that autotest doesn't know how to map to"
+  help << "\t\t\ttests."
+  help << nil
   help << "\t-rails\t\tForce rails mode."
   help << "\t\t\tRails will be automatically detected by the presence of"
   help << "\t\t\tconfig/environment.rb"
@@ -27,6 +31,7 @@ if $h or $help then
   exit 1
 end
 
+$v       ||= false
 $rails   ||= false
 $vcs     ||= nil
 $vcstime ||= 300

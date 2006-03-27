@@ -112,7 +112,7 @@ class Autotest
       when %r%^(doc|pkg)/% then
         # ignore
       else
-        STDERR.puts "Dunno! #{filename}" # What are you trying to pull?
+        STDERR.puts "Dunno! #{filename}" if $v or $TESTING
       end
     end
 

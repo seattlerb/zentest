@@ -54,7 +54,7 @@ class RailsAutotest < Autotest
       when %r%^vendor/%, /^Rakefile$/ then
         # ignore standard rails files
       else
-        puts "dunno! #{filename}"
+        STDERR.puts "Dunno! #{filename}" if $v or $TESTING
       end
     end
 
