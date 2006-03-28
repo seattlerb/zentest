@@ -137,6 +137,8 @@ class Autotest
   # the filter.
 
   def retest_failed(failed, tests)
+    puts "# Waiting for changes"
+
     # -t and -n includes all tests that match either filter, not tests that
     # match both filters, so figure out which TestCase to run from the filename,
     # and use -n on that.
@@ -145,6 +147,7 @@ class Autotest
 
       updated = updated_files
 
+      # REFACTOR
       failed.map! do |filter, failed_test|
         failed_files = failed_test_files failed_test, tests, updated
         break [filter, failed_test] if failed_files.empty?
@@ -158,12 +161,16 @@ class Autotest
         result = `#{cmd}`
         puts result
         status = result.split($/).last
-        status =~ /0 failures, 0 errors/ ? nil : [filter, failed_test] # clever
+        rerun = status =~ / 0 failures, 0 errors/ ? nil : [filter, failed_test]
+        puts "# Waiting for changes" if rerun
+        rerun # needed for map!
       end
 
-      if failed.compact! and not failed.empty? then # also clever
-        puts "# failures remain in #{failed.length} files:"
-        puts "# #{failed.map { |f,t| "test_#{t.source}.rb" }.join ', '}" # "
+      if not failed.empty? then
+        if failed.compact! then
+          puts "# failures remain in #{failed.length} files:"
+          puts "# #{failed.map { |f,t| "test_#{t.source}.rb" }.join ', '}" # "
+        end
       end
     end
   end
@@ -177,7 +184,7 @@ class Autotest
         puts "# Ok, you really want to quit, doing so"
         exit
       end
-      #STDERR.puts "\t#{caller.join "\n\t"}"
+      # STDERR.puts "\t#{caller.join "\n\t"}"
       puts "# hit ^C again to quit"
       sleep 1.5 # give them enough time to hit ^C again
       @interrupt = true # if they hit ^C again, 
@@ -250,6 +257,7 @@ class Autotest
 
       failed = consolidate_failures(failed)
 
+      # REFACTOR: I don't think the two routines merit real differences
       retest_failed failed, tests
     end
 
@@ -280,11 +288,19 @@ class Autotest
     updated = []
 
     Find.find '.' do |f|
+
+      if @exceptions then
+        if f =~ @exceptions then
+          Find.prune if Kernel.test ?d, f
+          next
+        end
+      end
+
+      Find.prune if f =~ /(?:\.svn|CVS)$/       # version control files
+
       next if File.directory? f
       next if f =~ /(?:swp|~|rej|orig)$/        # temporary/patch files
-      next if f =~ %r%/\.\#%                    # Emacs autosave/cvs merge files
-      next if f =~ %r%/(?:.svn|CVS)/%           # version control files
-      next if f =~ @exceptions if @exceptions   # custom exceptions
+      next if f =~ /\/\.#/                      # Emacs autosave/cvs merge files
 
       f = f.sub(/^\.\//, '')
 

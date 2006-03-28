@@ -9,7 +9,7 @@ class RailsAutotest < Autotest
 
   def initialize # :nodoc:
     super
-    @exceptions = %r%(?:^\./(?:db|doc|log|public|script))|(?:.rhtml$)%
+    @exceptions = %r%(?:^\./(?:db|doc|log|public|script|vendor/rails))|(?:.rhtml$)%
   end
 
   def map_file_names(updated) # :nodoc:
