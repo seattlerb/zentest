@@ -138,16 +138,18 @@ class TestAutotest < Test::Unit::TestCase
     @at.files['lib/autotest.rb'] = Time.at 1
 
     file_names = [
-      'lib/autotest.rb',
-      'lib/auto_test.rb',
-      'test/test_autotest.rb',
-    ]
+                  'lib/untested.rb',
+                  'lib/autotest.rb',
+                  'lib/auto_test.rb',
+                  'test/test_autotest.rb',
+                 ]
 
     expected = [
-      [['test/test_autotest.rb']],
-      [['test/test_autotest.rb']],
-      [['test/test_autotest.rb']],
-    ]
+                [[]],
+                [['test/test_autotest.rb']],
+                [['test/test_autotest.rb']],
+                [['test/test_autotest.rb']],
+               ]
 
     file_names.each_with_index do |name, i|
       assert_equal expected[i], @at.map_file_names([name]), "test #{i}, #{name}"

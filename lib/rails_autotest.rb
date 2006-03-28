@@ -41,7 +41,8 @@ class RailsAutotest < Autotest
         functional_tests << "test/functional/#{$1}#{$2}_test.rb"
       when %r%^app/views/layouts/% then
       when %r%^app/views/(.*)/% then
-        functional_tests << "test/functional/#{$1}_controller_test.rb"
+        test_file = "test/functional/#{$1}_controller_test.rb"
+        functional_tests << test_file if @files.has_key? test_file
       when %r%^config/routes.rb$% then
         functional_tests.push(*Dir['test/functional/**/*_test.rb'].sort)
       when %r%^test/test_helper.rb$%,

@@ -36,100 +36,75 @@ class TestRailsAutotest < TestAutotest
     undef_method meth if meth =~ /^test_failed_test_files/
   end
 
+  def util_add_map(file, unit_tests = [], functional_tests = [])
+    @file_map[file] = [ unit_tests, functional_tests ]
+  end
+
   def test_map_file_names
-    file_names = %w[
-      ./app/helpers/application_helper.rb
+    @file_map = {}
 
-      ./test/fixtures/routes.yml
+    @rails_all_tests.flatten.each do |t|
+      @at.files[t] = Time.at(0)
+    end
 
-      ./app/models/photo.rb
-      ./test/unit/photo_test.rb
+    # controllers
+    util_add_map("./app/controllers/admin/themes_controller.rb",
+                 [], ["test/functional/admin/themes_controller_test.rb"])
+    util_add_map("./app/controllers/application.rb",
+                 [], ["test/functional/dummy_controller_test.rb"])
+    util_add_map("./app/controllers/route_controller.rb",
+                 [], ["test/functional/route_controller_test.rb"])
 
-      ./app/controllers/application.rb
+    # helpers
+    util_add_map("./app/helpers/application_helper.rb",
+                 [], ["test/functional/dummy_controller_test.rb",
+                      "test/functional/route_controller_test.rb"])
+    util_add_map("./app/helpers/route_helper.rb",
+                 [], ["test/functional/route_controller_test.rb"])
 
-      ./app/controllers/route_controller.rb
-      ./test/functional/route_controller_test.rb
+    # model
+    util_add_map("./app/models/photo.rb",
+                 ["test/unit/photo_test.rb"], [])
 
-      ./app/views/layouts/default.rhtml
+    # views
+    util_add_map("./app/views/layouts/default.rhtml")
+    util_add_map("./app/views/route/index.rhtml",
+                 [], ["test/functional/route_controller_test.rb"])
+    util_add_map("./app/views/shared/crap.rhtml")
 
-      ./app/views/route/index.rhtml
+    # tests
+    util_add_map("./test/fixtures/routes.yml",
+                 ["test/unit/route_test.rb"],
+                 ["test/functional/route_controller_test.rb"])
+    util_add_map("./test/functional/admin/themes_controller_test.rb",
+                 [], ["test/functional/admin/themes_controller_test.rb"])
+    util_add_map("./test/functional/route_controller_test.rb",
+                 [], ["test/functional/route_controller_test.rb"])
+    util_add_map("./test/unit/photo_test.rb",
+                 ["test/unit/photo_test.rb"], [])
 
-      ./app/helpers/route_helper.rb
+    util_add_map("./test/test_helper.rb",
+                 @rails_unit_tests, @rails_functional_tests )
 
-      ./config/routes.rb
+    # global conf thingies
+    util_add_map("./config/boot.rb",
+                 @rails_unit_tests, @rails_functional_tests )
+    util_add_map("./config/database.yml",
+                 @rails_unit_tests, @rails_functional_tests )
+    util_add_map("./config/environment.rb",
+                 @rails_unit_tests, @rails_functional_tests )
+    util_add_map("./config/environments/test.rb",
+                 @rails_unit_tests, @rails_functional_tests )
+    util_add_map("./config/routes.rb",
+                 [], @rails_functional_tests)
 
-      ./app/controllers/admin/themes_controller.rb
-      ./test/functional/admin/themes_controller_test.rb
-
-      ./test/test_helper.rb
-      ./config/boot.rb
-      ./config/database.yml
-      ./config/environment.rb
-      ./config/environments/test.rb
-
-      ./vendor/plugins/cartographer/lib/keys.rb
-      Rakefile
-    ]
-
-    expected = [
-      # ApplicationHelper
-      [[], ['test/functional/dummy_controller_test.rb',
-            'test/functional/route_controller_test.rb']],
-
-      # Fixture
-      [['test/unit/route_test.rb'],
-       ['test/functional/route_controller_test.rb']],
-
-      # Model
-      [['test/unit/photo_test.rb'], []],
-
-      # Model test
-      [['test/unit/photo_test.rb'], []],
-
-      # ApplicationController
-      [[], ['test/functional/dummy_controller_test.rb']],
-
-      # Controller
-      [[], ['test/functional/route_controller_test.rb']],
-
-      # Controller test
-      [[], ['test/functional/route_controller_test.rb']],
-
-      # Layout
-      [[], []],
-
-      # View
-      [[], ['test/functional/route_controller_test.rb']],
-
-      # Helper
-      [[], ['test/functional/route_controller_test.rb']],
-
-      # config/routes.rb
-      [[], @rails_functional_tests],
-
-      # Nested controller
-      [[], ['test/functional/admin/themes_controller_test.rb']],
-
-      # Nested controller test
-      [[], ['test/functional/admin/themes_controller_test.rb']],
-
-      # test/test_helper.rb, boot.rb, database.yml, environment.rb,
-      # environments/test.rb
-      @rails_all_tests,
-      @rails_all_tests,
-      @rails_all_tests,
-      @rails_all_tests,
-      @rails_all_tests,
-
-      # vendor/, Rakefile
-      [[], []],
-      [[], []],
-    ]
+    # ignored crap
+    util_add_map("./vendor/plugins/cartographer/lib/keys.rb")
+    util_add_map("./Rakefile")
 
     Dir.chdir @rails_tests_dir do
-      file_names.each_with_index do |name, i|
-        assert_equal expected[i], @at.map_file_names([name]),
-                     "test #{i}, #{name}"
+      @file_map.each do |name, expected|
+        assert_equal expected, @at.map_file_names([name.dup]), "test #{name}"
       end
     end
   end
