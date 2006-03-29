@@ -1,3 +1,25 @@
+*** 3.1.0 / 2006-03-29
+
++ 2 major enhancements
+	+ Added multiruby! YAY!
+	+ Massive improvements to autotest: speed, reliability, reporting, etc.
++ 10 minor enhancements
+	+ multiruby builds in a centralized location. YAY!
+	+ multiruby now allows reinstalls quickly and easily (can even skip config).
+	+ multiruby exits with total sum of exit codes.
+	+ autotest file search is muuuuch faster.
+	+ autotest automatically detects rails mode.
+	+ autotest deals with rails dependencies much better.
+	+ autotest reruns a full suite after you go green to ensure full coverage.
+	+ autotest always runs with unit_diff -u.
+	+ autotest can now run cvs/svn/p4 up periodically to be a mini-tinderbox.
+	+ autotest now has real help.
++ 4 bug fixes
+	- ZenTest is now zentest. Yay for consistency! (do a rake uninstall to clean)
+	- ZenTest excludes pretty_print methods.
+	- Fixed unary operator issues (they were backwards... oops!) for ZenTest.
+	- unit_diff now runs diff.exe on Windoze. dunno if that will work.
+
 *** 3.0.0 / 2006-03-06
 
 + 2 major enhancements

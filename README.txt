@@ -18,6 +18,9 @@ autotest is a continous testing facility meant to be used during
 development. As soon as you save a file, autotest will run the
 corresponding dependent tests.
 
+multiruby runs anything you want on multiple versions of ruby. Great
+for compatibility checking!
+
 There are two strategies intended for ZenTest: test conformance
 auditing and rapid XP.
 
@@ -35,14 +38,18 @@ implementation.
 * Scans your ruby code and tests and generates missing methods for you.
 * Includes a very helpful filter for Test::Unit output called unit_diff.
 * Continually and intelligently test only those files you change with autotest.
+* Test against multiple versions with multiruby.
 * Includes a LinuxJournal article on testing with ZenTest written by Pat Eyler.
 
 == SYNOPSYS
 
   ZenTest MyProject.rb TestMyProject.rb > missing.rb
-  # edit missing.rb and merge appropriate parts into the above files.
+
   ./TestMyProject.rb | unit_diff
-  # Use unit_diff.rb to show you the actual differences in your failures.
+
+  autotest
+
+  multiruby ./TestMyProject.rb
 
 == RULES
 

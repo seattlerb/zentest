@@ -25,7 +25,7 @@ end
 
 class ZenTest
 
-  VERSION = '3.0.0'
+  VERSION = '3.1.0'
 
   if $TESTING then
     attr_reader :missing_methods

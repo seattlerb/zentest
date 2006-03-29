@@ -6,8 +6,7 @@ require 'rake/rdoctask'
 require 'rake/gempackagetask'
 require 'rbconfig'
 
-$: << 'lib'
-require 'ZenTest'
+require './lib/zentest.rb'
 
 $VERBOSE = nil
 
@@ -55,8 +54,7 @@ end
 desc 'Generate RDoc'
 Rake::RDocTask.new :rdoc do |rd|
   rd.rdoc_dir = 'doc'
-  rd.rdoc_files.add 'lib', 'README.txt', 'History.txt',
-                    'LinuxJournalArticle.txt'
+  rd.rdoc_files.add 'lib', 'README.txt', 'History.txt', 'LinuxJournalArticle.txt'
   rd.main = 'README.txt'
   rd.options << '-d' if `which dot` =~ /\/dot/ unless RUBY_PLATFORM =~ /win32/
   rd.options << '-t "ZenTest RDoc"'
@@ -70,8 +68,8 @@ end
 $prefix = ENV['PREFIX'] || Config::CONFIG['prefix']
 $bin  = File.join($prefix, 'bin')
 $lib  = Config::CONFIG['sitelibdir']
-$bins = %w(ZenTest autotest unit_diff multiruby)
-$libs = %w(ZenTest.rb autotest.rb rails_autotest.rb unit_diff.rb)
+$bins = %w(zentest autotest unit_diff multiruby)
+$libs = %w(zentest.rb autotest.rb rails_autotest.rb unit_diff.rb)
 
 task :install do
   $bins.each do |f|
@@ -84,6 +82,10 @@ task :install do
 end
 
 task :uninstall do
+  # add old versions
+  $bins << "ZenTest"
+  $libs << "ZenTest.rb"  
+
   $bins.each do |f|
     rm_f File.join($bin, f)
   end
