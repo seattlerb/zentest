@@ -39,7 +39,9 @@ implementation.
 * Includes a very helpful filter for Test::Unit output called unit_diff.
 * Continually and intelligently test only those files you change with autotest.
 * Test against multiple versions with multiruby.
+- Not the best doco in the world (my fault)
 * Includes a LinuxJournal article on testing with ZenTest written by Pat Eyler.
+* See also: http://blog.zenspider.com/archives/zentest/
 
 == SYNOPSYS
 
