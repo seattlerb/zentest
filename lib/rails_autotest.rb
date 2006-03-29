@@ -33,12 +33,14 @@ class RailsAutotest < Autotest
       when %r%^app/helpers/application_helper.rb% then
         functional_tests.push(*Dir['test/functional/*_test.rb'])
       when %r%^app/helpers/(.*)_helper.rb% then
-        functional_tests << "test/functional/#{$1}_controller_test.rb"
+        test_file = "test/functional/#{$1}_controller_test.rb"
+        functional_tests << test_file if @files.has_key? test_file
       when %r%^app/controllers/application.rb$% then
-        functional_tests << "test/functional/dummy_controller_test.rb"
+        test_file = "test/functional/dummy_controller_test.rb"
+        functional_tests << test_file if @files.has_key? test_file
       when %r%^app/controllers/(.*/)?(.*)\.rb$% then
         test_file = "test/functional/#{$1}#{$2}_test.rb"
-        functional_tests << test_file
+        functional_tests << test_file if @files.has_key? test_file
       when %r%^app/views/layouts/% then
       when %r%^app/views/(.*)/% then
         test_file = "test/functional/#{$1}_controller_test.rb"
