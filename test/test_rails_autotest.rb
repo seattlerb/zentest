@@ -37,10 +37,6 @@ class TestRailsAutotest < TestAutotest
   end
 
   def test_map_file_names
-    @rails_all_tests.flatten.each do |t|
-      @at.files[t] = Time.at(0)
-    end
-
     # controllers
     util_add_map("./app/controllers/admin/themes_controller.rb",
                  [], ["test/functional/admin/themes_controller_test.rb"])
@@ -57,9 +53,9 @@ class TestRailsAutotest < TestAutotest
                  [], ["test/functional/route_controller_test.rb"])
 
     # model
-    util_add_map("./app/models/photo.rb",
-                 ["test/unit/photo_test.rb"], [])
-    util_add_map("./app/models/notest.rb")
+    util_add_map("./app/models/route.rb",
+                 ["test/unit/route_test.rb"], [])
+    util_add_map("./app/models/notest.rb", [], [])
 
     # views
     util_add_map("./app/views/layouts/default.rhtml", [], [])
@@ -98,6 +94,10 @@ class TestRailsAutotest < TestAutotest
     # ignored crap
     util_add_map("./vendor/plugins/cartographer/lib/keys.rb", [], [])
     util_add_map("./Rakefile", [], [])
+
+    @rails_all_tests.flatten.each do |t|
+      @at.files[t] = Time.at(0)
+    end
 
     util_test_map_file_names @rails_tests_dir
   end

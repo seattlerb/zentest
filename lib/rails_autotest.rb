@@ -28,7 +28,8 @@ class RailsAutotest < Autotest
       when %r%^test/unit/.*rb$% then
         model_tests << filename
       when %r%^app/models/(.*)\.rb$% then
-        model_tests << "test/unit/#{$1}_test.rb"
+        test_file = "test/unit/#{$1}_test.rb"
+        model_tests << test_file if @files.has_key? test_file
       when %r%^test/functional/.*\.rb$% then
         functional_tests << filename
       when %r%^app/helpers/application_helper.rb% then
