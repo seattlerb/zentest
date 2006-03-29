@@ -5,7 +5,8 @@
 
 == DESCRIPTION
 
-ZenTest provides 3 different tools: zentest, unit_diff, and autotest.
+ZenTest provides 4 different tools: zentest, unit_diff, autotest, and
+multiruby.
 
 ZenTest scans your target and unit-test code and writes your missing
 code based on simple naming rules, enabling XP at a much quicker

@@ -21,14 +21,16 @@ spec = Gem::Specification.new do |s|
   s.executables = %w[ZenTest unit_diff autotest multiruby]
 
   paragraphs = File.read("README.txt").split(/\n\n+/)
-  s.instance_variable_set "@description", paragraphs[3..9].join("\n\n")
-  s.instance_variable_set "@summary", paragraphs[11]
+  s.instance_variable_set "@description", paragraphs[3..10].join("\n\n")
+  s.instance_variable_set "@summary", paragraphs[12]
 
   if $DEBUG then
     puts "ZenTest #{s.version}"
     puts
+    puts "** summary:"
     puts s.summary
     puts
+    puts "** description:"
     puts s.description
   end
 
