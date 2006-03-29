@@ -173,6 +173,7 @@ class TestAutotest < Test::Unit::TestCase
 
       out = out.split $/
 
+      assert_equal "# Waiting for changes", out.shift
       assert_equal "# Rerunning failures: #{@photo_test_file}", out.shift
       assert_equal "+ ruby -Ilib:test #{@photo_test_file} -n test_route | unit_diff -u", out.shift
 
