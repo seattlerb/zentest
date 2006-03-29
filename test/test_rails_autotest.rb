@@ -65,6 +65,7 @@ class TestRailsAutotest < TestAutotest
     # model
     util_add_map("./app/models/photo.rb",
                  ["test/unit/photo_test.rb"], [])
+    util_add_map("./app/models/notest.rb")
 
     # views
     util_add_map("./app/views/layouts/default.rhtml")
