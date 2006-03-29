@@ -10,11 +10,9 @@ class TestRailsAutotest < TestAutotest
 
     @rails_tests_dir = 'test/data/rails'
 
-    @rails_photo_file             = 'app/models/photo.rb'
-    @rails_photo_test_file        = 'test/unit/photo_test.rb'
+    @rails_photo_file = 'app/models/photo.rb'
     @rails_unit_tests = [
                          'test/unit/flickr_photo_test.rb',
-      @rails_photo_test_file,
                          'test/unit/photo_test.rb',
                          'test/unit/route_test.rb',
                         ]
