@@ -279,6 +279,7 @@ class Autotest
     reset_times if ever_failed
 
     puts '# All passed'
+    puts "# Waiting for changes"
 
     return ever_failed
   end

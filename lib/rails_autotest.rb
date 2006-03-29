@@ -21,15 +21,13 @@ class RailsAutotest < Autotest
 
       case filename
       when %r%^test/fixtures/(.*)s.yml% then
-        model_test = "test/unit/#{$1}_test.rb"
-        functional_test = "test/functional/#{$1}_controller_test.rb"
-        model_tests << model_test if File.exists? model_test
-        functional_tests << functional_test if File.exists? functional_test
+        model_tests << "test/unit/#{$1}_test.rb"
+        functional_tests << "test/functional/#{$1}_controller_test.rb"
       when %r%^test/unit/.*rb$% then
         model_tests << filename
       when %r%^app/models/(.*)\.rb$% then
         test_file = "test/unit/#{$1}_test.rb"
-        model_tests << test_file if @files.has_key? test_file
+        model_tests << test_file
       when %r%^test/functional/.*\.rb$% then
         functional_tests << filename
       when %r%^app/helpers/application_helper.rb% then
@@ -39,11 +37,12 @@ class RailsAutotest < Autotest
       when %r%^app/controllers/application.rb$% then
         functional_tests << "test/functional/dummy_controller_test.rb"
       when %r%^app/controllers/(.*/)?(.*)\.rb$% then
-        functional_tests << "test/functional/#{$1}#{$2}_test.rb"
+        test_file = "test/functional/#{$1}#{$2}_test.rb"
+        functional_tests << test_file
       when %r%^app/views/layouts/% then
       when %r%^app/views/(.*)/% then
         test_file = "test/functional/#{$1}_controller_test.rb"
-        functional_tests << test_file if @files.has_key? test_file
+        functional_tests << test_file
       when %r%^config/routes.rb$% then
         functional_tests.push(*Dir['test/functional/**/*_test.rb'].sort)
       when %r%^test/test_helper.rb$%,
@@ -60,8 +59,8 @@ class RailsAutotest < Autotest
       end
     end
 
-    model_tests.uniq!
-    functional_tests.uniq!
+    model_tests = model_tests.uniq.select { |f| @files.has_key? f }
+    functional_tests = functional_tests.uniq.select { |f| @files.has_key? f }
 
     return model_tests, functional_tests
   end
