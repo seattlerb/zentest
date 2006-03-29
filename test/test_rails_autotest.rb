@@ -36,13 +36,7 @@ class TestRailsAutotest < TestAutotest
     undef_method meth if meth =~ /^test_failed_test_files/
   end
 
-  def util_add_map(file, unit_tests = [], functional_tests = [])
-    @file_map[file] = [ unit_tests, functional_tests ]
-  end
-
   def test_map_file_names
-    @file_map = {}
-
     @rails_all_tests.flatten.each do |t|
       @at.files[t] = Time.at(0)
     end
@@ -68,12 +62,12 @@ class TestRailsAutotest < TestAutotest
     util_add_map("./app/models/notest.rb")
 
     # views
-    util_add_map("./app/views/layouts/default.rhtml")
+    util_add_map("./app/views/layouts/default.rhtml", [], [])
     util_add_map("./app/views/route/index.rhtml",
                  [], ["test/functional/route_controller_test.rb"])
     util_add_map("./app/views/route/xml.rxml",
                  [], ["test/functional/route_controller_test.rb"])
-    util_add_map("./app/views/shared/crap.rhtml")
+    util_add_map("./app/views/shared/crap.rhtml", [], [])
 
     # tests
     util_add_map("./test/fixtures/routes.yml",
@@ -102,14 +96,10 @@ class TestRailsAutotest < TestAutotest
                  [], @rails_functional_tests)
 
     # ignored crap
-    util_add_map("./vendor/plugins/cartographer/lib/keys.rb")
-    util_add_map("./Rakefile")
+    util_add_map("./vendor/plugins/cartographer/lib/keys.rb", [], [])
+    util_add_map("./Rakefile", [], [])
 
-    Dir.chdir @rails_tests_dir do
-      @file_map.each do |name, expected|
-        assert_equal expected, @at.map_file_names([name.dup]), "test #{name}"
-      end
-    end
+    util_test_map_file_names @rails_tests_dir
   end
 
 end

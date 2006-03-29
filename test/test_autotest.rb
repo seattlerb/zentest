@@ -40,6 +40,8 @@ class TestAutotest < Test::Unit::TestCase
     @user_test_file      = 'test/test_user.rb'
     @camelcase_test_file = 'test/test_camelcase.rb'
 
+    @file_map = {}
+
     @all_files = [ @blah_file, @photo_file, @photo_test_file, @route_test_file, @user_test_file, @camelcase_test_file ]
 
     Dir.chdir @normal_tests_dir do
@@ -154,26 +156,14 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_map_file_names
-    @at.files['test/test_autotest.rb'] = Time.at 1
-    @at.files['lib/autotest.rb'] = Time.at 1
+    util_add_map('lib/untested.rb', [])
+    util_add_map('lib/autotest.rb', ['test/test_autotest.rb'])
+    util_add_map('lib/auto_test.rb', ['test/test_autotest.rb'])
+    util_add_map('test/test_autotest.rb', ['test/test_autotest.rb'])
 
-    file_names = [
-                  'lib/untested.rb',
-                  'lib/autotest.rb',
-                  'lib/auto_test.rb',
-                  'test/test_autotest.rb',
-                 ]
+    @file_map.keys.each { |file| @at.files[file] = Time.at 0 }
 
-    expected = [
-                [[]],
-                [['test/test_autotest.rb']],
-                [['test/test_autotest.rb']],
-                [['test/test_autotest.rb']],
-               ]
-
-    file_names.each_with_index do |name, i|
-      assert_equal expected[i], @at.map_file_names([name]), "test #{i}, #{name}"
-    end
+    util_test_map_file_names @normal_tests_dir
   end
 
   def test_retest_failed_modified
@@ -236,6 +226,18 @@ class TestAutotest < Test::Unit::TestCase
       util_touch @photo_test_file
 
       assert_not_equal expected['test/test_photo.rb'], @at.files
+    end
+  end
+
+  def util_add_map(file, *tests)
+    @file_map[file] = tests
+  end
+
+  def util_test_map_file_names(dir)
+    Dir.chdir dir do
+      @file_map.each do |name, expected|
+        assert_equal expected, @at.map_file_names([name.dup]), "test #{name}"
+      end
     end
   end
 
