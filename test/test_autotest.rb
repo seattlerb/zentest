@@ -133,6 +133,26 @@ class TestAutotest < Test::Unit::TestCase
     assert_equal [@photo_test_file], failed_files
   end
 
+  def test_failure_report
+    @at.files['test/test_one.rb'] = Time.at 0
+    @at.files['test/test_two.rb'] = Time.at 0
+
+    failures = [
+      ["'/^(test_a|test_b|test_c)/'", /one/],
+      ["'/^(test_d)/'", /two/],
+    ]
+
+    expected = "# failures remain in 2 files:
+#  test/test_one.rb:
+#    test_a
+#    test_b
+#    test_c
+#  test/test_two.rb:
+#    test_d"
+
+    assert_equal expected, @at.failure_report(failures)
+  end
+
   def test_map_file_names
     @at.files['test/test_autotest.rb'] = Time.at 1
     @at.files['lib/autotest.rb'] = Time.at 1
@@ -183,7 +203,6 @@ class TestAutotest < Test::Unit::TestCase
 
   def test_reset_times
     Dir.chdir @normal_tests_dir do
-
       @at.updated?(@photo_test_file)
 
       assert_equal false, @at.updated?(@photo_test_file), 'In @files'

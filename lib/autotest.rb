@@ -93,6 +93,26 @@ class Autotest
   end
 
   ##
+  # Returns a report of remaining failures in +failures+.
+
+  def failure_report(failed)
+    out = []
+    out << "# failures remain in #{failed.length} files:"
+    failed.each do |filter, failed_test|
+      tests = @files.keys.select { |file| file =~ /^test.*#{failed_test}/ }
+      test = tests.sort_by { |f| f.length }.first
+
+      filter =~ /\((.*)\)/
+      filter = $1.split('|')
+
+      out << "#  #{test}:"
+      out << "#    #{filter.join "\n#    "}"
+    end
+
+    return out.join("\n")
+  end
+
+  ##
   # Maps implementation files to test files.  Returns an Array of one or more
   # Arrays of test filenames.
 
@@ -166,12 +186,7 @@ class Autotest
         rerun # needed for map!
       end
 
-      if not failed.empty? then
-        if failed.compact! then
-          puts "# failures remain in #{failed.length} files:"
-          puts "# #{failed.map { |f,t| "test_#{t.source}.rb" }.join ', '}" # "
-        end
-      end
+      puts failure_report(failed) if failed.compact! and not failed.empty?
     end
   end
 
