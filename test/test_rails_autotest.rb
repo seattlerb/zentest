@@ -70,6 +70,8 @@ class TestRailsAutotest < TestAutotest
     util_add_map("./app/views/layouts/default.rhtml")
     util_add_map("./app/views/route/index.rhtml",
                  [], ["test/functional/route_controller_test.rb"])
+    util_add_map("./app/views/route/xml.rxml",
+                 [], ["test/functional/route_controller_test.rb"])
     util_add_map("./app/views/shared/crap.rhtml")
 
     # tests
