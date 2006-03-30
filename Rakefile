@@ -60,7 +60,7 @@ Rake::RDocTask.new :rdoc do |rd|
   rd.rdoc_files.add 'lib', 'README.txt', 'History.txt', 'LinuxJournalArticle.txt'
   rd.main = 'README.txt'
   rd.options << '-d' if `which dot` =~ /\/dot/ unless RUBY_PLATFORM =~ /win32/
-  rd.options << '-t "ZenTest RDoc"'
+  rd.options << '-t ZenTest RDoc'
 end
 
 desc 'Build Gem'
