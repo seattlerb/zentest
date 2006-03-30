@@ -18,7 +18,7 @@ spec = Gem::Specification.new do |s|
 
   s.files = File.read('Manifest.txt').split($/)
   s.require_path = 'lib'
-  s.executables = %w[ZenTest unit_diff autotest multiruby]
+  s.executables = %w[zentest unit_diff autotest multiruby rails_test_audit]
 
   paragraphs = File.read("README.txt").split(/\n\n+/)
   s.instance_variable_set "@description", paragraphs[3..10].join("\n\n")
@@ -101,3 +101,6 @@ desc 'Clean up'
 task :clean => [ :clobber_rdoc, :clobber_package ] do
   rm_f Dir["**/*~"]
 end
+
+# vim:syntax=ruby
+
