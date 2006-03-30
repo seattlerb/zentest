@@ -21,7 +21,7 @@ require 'find'
 # * Implementation files must be stored in lib/
 # * Implementation files must match up with a test file named
 #   test_.*implementation.rb
-
+#--
 # New (proposed) strategy:
 #
 # 1) find all files and associate them from impl <-> test

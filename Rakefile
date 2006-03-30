@@ -37,6 +37,7 @@ spec = Gem::Specification.new do |s|
   s.files = IO.readlines("Manifest.txt").map {|f| f.chomp }
   s.homepage = "http://www.zenspider.com/ZSS/Products/ZenTest/"
   s.rubyforge_project = "zentest"
+  s.has_rdoc = true
 end
 
 desc 'Run tests'

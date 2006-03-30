@@ -33,8 +33,10 @@ $TESTING = true
 
 module Test::Rails; end
 
-def Object.path2class(klassname) # :nodoc:
-  klassname.split('::').inject(Object) { |k,n| k.const_get n }
+class Object # :nodoc:
+  def self.path2class(klassname)
+    klassname.split('::').inject(Object) { |k,n| k.const_get n }
+  end
 end
 
 require 'test/rails/controller_test_case'
