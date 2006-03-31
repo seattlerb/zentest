@@ -316,7 +316,7 @@ class Autotest
 
       next if File.directory? f
       next if f =~ /(?:swp|~|rej|orig)$/        # temporary/patch files
-      next if f =~ /\/\.#/                      # Emacs autosave/cvs merge files
+      next if f =~ /\/\.?#/                     # Emacs autosave/cvs merge files
 
       f = f.sub(/^\.\//, '')
 
