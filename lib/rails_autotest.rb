@@ -9,7 +9,7 @@ class RailsAutotest < Autotest
 
   def initialize # :nodoc:
     super
-    @exceptions = %r%(?:^\./(?:db|doc|log|public|script|vendor/rails))|(?:.rhtml$)%
+    @exceptions = %r%^\./(?:db|doc|log|public|script|vendor/rails)%
   end
 
   def map_file_names(updated) # :nodoc:
@@ -31,7 +31,10 @@ class RailsAutotest < Autotest
       when %r%^test/functional/.*\.rb$% then
         functional_tests << filename
       when %r%^app/helpers/application_helper.rb% then
-        functional_tests.push(*Dir['test/functional/*_test.rb'])
+        functional_test_files = @files.keys.select do |f|
+          f =~ %r%^test/functional/.*_test\.rb$%
+        end
+        functional_tests.push(*functional_test_files.sort)
       when %r%^app/helpers/(.*)_helper.rb% then
         test_file = "test/functional/#{$1}_controller_test.rb"
         functional_tests << test_file
@@ -46,14 +49,23 @@ class RailsAutotest < Autotest
         test_file = "test/functional/#{$1}_controller_test.rb"
         functional_tests << test_file
       when %r%^config/routes.rb$% then
-        functional_tests.push(*Dir['test/functional/**/*_test.rb'].sort)
+        functional_test_files = @files.keys.select do |f|
+          f =~ %r%^test/functional/.*_test\.rb$%
+        end
+        functional_tests.push(*functional_test_files.sort)
       when %r%^test/test_helper.rb$%,
            %r%^config/boot.rb%,
            %r%^config/database.yml%,
            %r%^config/environment.rb%,
            %r%^config/environments/test.rb% then
-        model_tests.push(*Dir['test/unit/**/*_test.rb'].sort)
-        functional_tests.push(*Dir['test/functional/**/*_test.rb'].sort)
+        model_test_files = @files.keys.select do |f|
+          f =~ %r%^test/unit/.*_test\.rb$%
+        end
+        functional_test_files = @files.keys.select do |f|
+          f =~ %r%^test/functional/.*_test\.rb$%
+        end
+        model_tests.push(*model_test_files.sort)
+        functional_tests.push(*functional_test_files.sort)
       when %r%^vendor/%, /^Rakefile$/ then
         # ignore standard rails files
       else

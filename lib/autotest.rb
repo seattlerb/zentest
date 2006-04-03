@@ -304,7 +304,6 @@ class Autotest
     updated = []
 
     Find.find '.' do |f|
-
       if @exceptions then
         if f =~ @exceptions then
           Find.prune if Kernel.test ?d, f
