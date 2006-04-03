@@ -285,19 +285,29 @@ class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
 
   ##
   # Asserts that a form with +form_action+ has a select element with a name of
-  # "+model+[+column+]" and has +child_count+ children.
+  # "+model+[+column+]" and options with specified names and values.
   #
   # view:
   #   <%= start_form_tag :action => 'save' %>
   #   <%= collection_select :game, :location_id, @locations, :id, :name %>
   #
   # test:
-  #   assert_select '/games/save', :game, :location_id, 3
+  #   assert_select '/games/save', :game, :location_id,
+  #                 'Ballet' => 1, 'Guaymas' => 2
 
-  def assert_select(form_action, model, column, child_count)
-    assert_tag_in_form form_action, :tag => 'select', :attributes => {
-                                      :name => "#{model}[#{column}]" },
-                                    :children => { :count => child_count }
+  def assert_select(form_action, model, column, options)
+    assert_kind_of Hash, options, "options needs to be a Hash"
+    deny options.empty?, "options must not be empty"
+    options.each do |option_name, option_id|
+      assert_tag_in_form(form_action,
+                         :tag => 'select',
+                         :attributes => { :name => "#{model}[#{column}]" },
+                         :child => {
+                           :tag => 'option',
+                           :attributes => { :value => option_id },
+                           :content => option_name
+                         })
+    end
   end
 
   ##
