@@ -1,4 +1,7 @@
 require 'test/unit'
+require 'test_help' # hopefully temporary, required for Test::Rails to work
+                    # until we get rid of test_help so Test::Unit::TestCase
+                    # is kept virgin.
 
 $TESTING = true
 
@@ -23,11 +26,34 @@ $TESTING = true
 #
 #   require 'test/rails'
 #
-# Add this line to your Rakefile:
+# Right before you require 'test_help', so your test/test_helper.rb looks like
+# this:
+#
+#   ENV["RAILS_ENV"] = "test"
+#   require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
+#   require 'test/rails'
+#   require 'test_help'
+#   ...
+#
+#--
+# This lets us undo whatever horrors test_help performs upon
+# Test::Unit::TestCase.
+#
+# TODO Have people switch from Test::Unit::TestCase to Test::Rails::TestCase
+# or similar so we can keep Test::Unit::TestCase virgin.
+#++
+#
+# Add this line to your Rakefile after you require 'test/rails/rake_tasks':
 #
 #   require 'test/rails/rake_tasks'
 #
-# = Switching to Test::Rails
+# So your Rakefile looks like this:
+#
+#   ...
+#   require 'tasks/rails'
+#   require 'test/rails/rake_tasks'
+#
+# = Switching your tests to Test::Rails
 #
 # Test::Rails splits functional tests into view tests and controller tests.
 #
@@ -35,6 +61,9 @@ $TESTING = true
 # assertions away from your controller assertions.
 #
 # == Creating view tests
+#
+# TODO Describe where view tests live (test/views)
+# TODO Describe how view tests are named (test/views/route_view_test.rb)
 #
 # A typical view test looks like this:
 #
@@ -108,7 +137,11 @@ $TESTING = true
 #
 # == Creating controller tests
 #
-# A typical view test looks like this:
+# TODO Describe where controller tests live (test/controllers)
+# TODO Describe how controller tests are named
+# (test/controllers/route_controller_test.rb)
+#
+# A typical controller test looks like this:
 #
 #   require 'test/test_helper'
 #   
@@ -221,6 +254,8 @@ $TESTING = true
 # +@route+ to +test_flickr_refresh+, which I indeed forgot.
 #
 # = Changes to rake tasks
+#
+# TODO Describe how new tests are run rake test:views, rake test:controllers.
 #
 # When you add require 'test/rails/rake_tasks' to your Rakefile the following
 # changes get made to the rake tasks:
