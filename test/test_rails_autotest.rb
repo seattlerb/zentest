@@ -28,11 +28,12 @@ class TestRailsAutotest < TestAutotest
 
   # Remove test_failed_test_files tests from RailsAutoTest because these
   # tests are regular-mode dependent.
-  (instance_methods.sort - Object.instance_methods).each do |meth|
+  superclass.instance_methods.each do |meth|
     undef_method meth if meth =~ /^test_failed_test_files/
   end
 
   def test_map_file_names
+    # controllers
     # controllers
     util_add_map("app/controllers/admin/themes_controller.rb",
                  [], ["test/functional/admin/themes_controller_test.rb"])
