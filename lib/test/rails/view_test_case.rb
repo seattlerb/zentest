@@ -31,8 +31,8 @@
 #     fixtures :users, :routes, :points, :photos
 #   
 #     def test_delete
-#       controller[:loggedin_user] = users(:herbert)
-#       controller[:route] = routes(:work)
+#       assigns[:loggedin_user] = users(:herbert)
+#       assigns[:route] = routes(:work)
 #   
 #       render
 #   
@@ -65,7 +65,7 @@ class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
     @controller.send :assign_shortcuts, @request, @response
     @controller.send :reset_session
 
-    controller[:session] = @controller.session
+    assigns[:session] = @controller.session
     @controller.class.send :public, :flash # make flash accessible to the test
   end
 
@@ -74,9 +74,9 @@ class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
   #
   # test:
   #   def test_show
-  #     controller[:route] = routes(:work)
+  #     assigns[:route] = routes(:work)
 
-  def controller
+  def assigns
     @ivar_proxy
   end
 
@@ -119,7 +119,7 @@ class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
 
   def render(options = {}, deprecated_status = nil)
     @action_name = action_name caller[0] if options.empty?
-    controller[:action_name] = @action_name
+    assigns[:action_name] = @action_name
 
     @request.path_parameters = {
       :controller => @controller.controller_name,
@@ -356,6 +356,10 @@ class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
     assert_tag :tag => 'form', :attributes => { :action => form_action },
                  :descendant => options
   end
+
+  ##
+  # Creates a new Paginator that uses the current controller.  +item_count+,
+  # +items_per_page+ and +page_number+ are passed straight through.
 
   def util_make_paginator(item_count, items_per_page, page_number)
     ActionController::Pagination::Paginator.new(@controller, item_count,

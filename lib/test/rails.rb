@@ -77,8 +77,8 @@ $TESTING = true
 #     # testing the view for the delete action of RouteController
 #     def test_delete
 #       # Instance variables necessary for this view
-#       controller[:loggedin_user] = users(:herbert)
-#       controller[:route] = routes(:work)
+#       assigns[:loggedin_user] = users(:herbert)
+#       assigns[:route] = routes(:work)
 #       
 #       # render this view
 #       render
@@ -111,7 +111,7 @@ $TESTING = true
 # actions will save you headaches and typing.
 #
 # +controller+ is a proxy for the RouteController instance this test case uses.
-# The call +controller[:route] = routes(:work)+ sets the +@route+ instance
+# The call +assigns[:route] = routes(:work)+ sets the +@route+ instance
 # variable to +routes(:work)+ just like you would in RouteController#delete.
 #
 # The call to render is the equivalent to a functional tests' process/get/post
@@ -216,8 +216,8 @@ $TESTING = true
 #
 #   class RouteViewTest < Test::Rails::ViewTestCase
 #     def test_flickr_refresh
-#       controller[:route] = routes(:work)
-#       controller[:tz_name] = 'Pacific Time (US & Canada)'
+#       assigns[:route] = routes(:work)
+#       assigns[:tz_name] = 'Pacific Time (US & Canada)'
 #       
 #       render
 #       
