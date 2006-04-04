@@ -85,8 +85,11 @@ class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
   # you have multiple tests for the same view render will try to Do The Right
   # Thing and remove parts of the name looking for the template file.
   #
-  # The action can be forced by using the :action option:
+  # The action can be forced by using the options:
+  #
   #   render :action => 'new'
+  #
+  #   render :template => 'profile/index'
   #
   # For this test:
   #   class RouteViewTest < RailsViewTestCase
@@ -115,7 +118,7 @@ class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
   # If a view cannot be found the test will flunk.
 
   def render(options = {}, deprecated_status = nil)
-    @action_name = options[:action] || action_name(caller[0])
+    @action_name = action_name caller[0] if options.empty?
     controller[:action_name] = @action_name
 
     @request.path_parameters = {
@@ -126,10 +129,19 @@ class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
     defaults = { :layout => false }
     options = defaults.merge options
     @controller.send :initialize_current_url
-    #@controller.send :assign_names
-    @controller.send :forget_variables_added_to_assigns
+
+    # Rails 1.0
+    @controller.send :assign_names rescue nil
+    @controller.send :fire_flash rescue nil
+
+    # Rails 1.1
+    @controller.send :forget_variables_added_to_assigns rescue nil
+
+    # Do the render
     @controller.render options, deprecated_status
-    @controller.send :process_cleanup
+
+    # Rails 1.1
+    @controller.send :process_cleanup rescue nil
   end
 
   ##
@@ -343,6 +355,11 @@ class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
   def assert_tag_in_form(form_action, options)
     assert_tag :tag => 'form', :attributes => { :action => form_action },
                  :descendant => options
+  end
+
+  def util_make_paginator(item_count, items_per_page, page_number)
+    ActionController::Pagination::Paginator.new(@controller, item_count,
+                                                items_per_page, page_number)
   end
 
   protected
