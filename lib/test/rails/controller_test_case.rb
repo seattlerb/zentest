@@ -3,7 +3,7 @@ class Test::Rails::ControllerTestCase < Test::Unit::TestCase
   NOTHING = Object.new # :nodoc:
 
   def setup
-    return if self.class == Test::Rails::ControllerTestCase
+    return if self.class.name =~ /TestCase$/
     klass_name = self.class.name.sub(/View/, 'Controller')
     klass_name =~ /\A(.*)Test\Z/
     raise "Can't find controller name in #{self.class}" unless $1
@@ -92,13 +92,6 @@ class Test::Rails::ControllerTestCase < Test::Unit::TestCase
       assert_includes assigns, ivar, "#{ivar.inspect} missing from assigns"
       deny_equal value, assigns[ivar]
     end
-  end
-
-  ##
-  # Sets up the session so that +player+ is logged-in.
-
-  def util_set_user(player)
-    @request.session[:username] = player.username
   end
 
 end
