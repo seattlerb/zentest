@@ -1,11 +1,11 @@
 ##
-# RailsViewTestCase allows views to be tested independent of their
-# controllers.  Testcase implementors must set up the instance variables the
-# view needs to render itself.
+# ViewTestCase allows views to be tested independent of their controllers.
+# Testcase implementors must set up the instance variables the view needs to
+# render itself.
 #
 # == Naming
 #
-# The test class must be named +ControllerViewTest+, so if you're testing
+# The test class must be named +ControllerNameViewTest+, so if you're testing
 # views for the +RouteController+ you would name your test case
 # +RouteViewTest+.  The test case will expect to find your view files in
 # +app/views/route/+.
@@ -31,15 +31,21 @@
 #     fixtures :users, :routes, :points, :photos
 #   
 #     def test_delete
+#       # Set up instance variables for template
 #       assigns[:loggedin_user] = users(:herbert)
 #       assigns[:route] = routes(:work)
 #   
+#       # render template for the delete action in RouteController
 #       render
 #   
+#       # assert that there's a form with an action of "/route/destroy"
 #       form_url = '/route/destroy'
 #       assert_post_form form_url
+#       # with a hidden id field
 #       assert_input form_url, :hidden, :id
+#       # And a submit button that says 'Delete!'
 #       assert_submit form_url, 'Delete!'
+#       # And a link back to the route so you don't delete it
 #       assert_links_to "/route/show/#{routes(:work).id}", 'No, I do not!'
 #     end
 #   
@@ -47,8 +53,36 @@
 #
 # === Testing Layouts
 #
-# TODO: render :layout => 'home', :text => '' to get around 'no such file'
-#       error
+# Layouts can be tested independent of your application's controllers.  Here's
+# an example layout view test:
+#
+#   require 'test/test_helper'
+#   
+#   # Create a dummy controller for layout views.  This lets the setup use the
+#   # right path with minimum fuss.
+#   class LayoutsController < ApplicationController; end
+#   
+#   class LayoutsViewTest < Test::Rails::ViewTestCase
+#   
+#     fixtures :users, :routes, :points, :photos
+#     
+#     def test_default
+#       # Template set-up
+#       @request.request_uri = '/foo'
+#       assigns[:action_title] = 'Hello & Goodbye'
+#   
+#       # Render an empty string with the 'default' layout.
+#       render :text => '', :layout => 'default'
+#   
+#       # Assert content just like a regular view test.
+#       assert_links_to '/', 'Home'
+#       assert_links_to '/user', 'Login'
+#       deny_links_to   '/user/logout', 'Logout'
+#       assert_tag :tag => 'title', :content => 'Hello &amp; Goodbye'
+#       assert_tag :tag => 'h1', :content => 'Hello &amp; Goodbye'
+#     end
+#     
+#   end
 
 class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
 
@@ -92,7 +126,7 @@ class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
   #   render :template => 'profile/index'
   #
   # For this test:
-  #   class RouteViewTest < RailsViewTestCase
+  #   class RouteViewTest < Test::Rails::ViewTestCase
   #     def test_show_photos
   #       render
   #     end

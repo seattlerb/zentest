@@ -62,8 +62,9 @@ $TESTING = true
 #
 # == Creating view tests
 #
-# TODO Describe where view tests live (test/views)
-# TODO Describe how view tests are named (test/views/route_view_test.rb)
+# View tests live in test/views.  They are named after the controller that is
+# being tested.  For exampe, RouteViewTest will live in the file
+# test/views/route_view_test.rb.
 #
 # A typical view test looks like this:
 #
@@ -137,9 +138,9 @@ $TESTING = true
 #
 # == Creating controller tests
 #
-# TODO Describe where controller tests live (test/controllers)
-# TODO Describe how controller tests are named
-# (test/controllers/route_controller_test.rb)
+# Controller tests live in test/controllers.  They are named after the
+# controller they are testing.  For exampe, RouteControllerTest will live in
+# the file test/controllers/route_controller_test.rb.
 #
 # A typical controller test looks like this:
 #
@@ -191,6 +192,45 @@ $TESTING = true
 # +@route+ on the RouteController is set to routes(:work).  assert_assigned is
 # used by the auditing script to match up a controller's set instance
 # variables with which instance variables a view test needs to work.
+#
+# == Creating abstract test cases
+#
+# If you have common setup code for your controller or view tests you can
+# create your own subclass of ControllerTestCase or ViewTestCase.  If the name
+# of your abstract test case ends in TestCase then it will be treated as
+# abstract and no setup will be performed when running tests in the abstract
+# TestCase.  (Something Test::Unit will do automatically.)
+#
+#--
+# TODO: I don't like this verbage much.
+#++
+#
+# === Example abstract test case
+#
+#   class RobotControllerTestCase < Test::Rails::ControllerTestCase
+#     
+#     fixtures :markets, :people
+#     
+#     def setup
+#       super
+#       
+#       # We're running tests in this class so we don't need to do any more
+#       # setup
+#       return if self.class == RobotControllerTestCase
+#       
+#       # Set our current host
+#       @host = 'www.test.robotcoop.com'
+#       util_set_host @host
+#     end
+#     
+#     ##
+#     # Sets the hostname to +host+ for this request.
+#     
+#     def util_set_host(hoston)
+#       @request.host = host
+#     end
+#     
+#   end
 #
 # = Auditing your tests
 #
@@ -255,9 +295,7 @@ $TESTING = true
 #
 # = Changes to rake tasks
 #
-# TODO Describe how new tests are run rake test:views, rake test:controllers.
-#
-# When you add require 'test/rails/rake_tasks' to your Rakefile the following
+# When you add "require 'test/rails/rake_tasks'" to your Rakefile the following
 # changes get made to the rake tasks:
 #
 # test:views and test:controllers targets get added so you can run just the
@@ -268,7 +306,8 @@ $TESTING = true
 #
 # The test target no longer runs all tests, it stops on the first failure.
 # This way a failure in a unit test doesn't fill your screen with crap because
-# the brokenness also affected your controllers and views.
+# the brokenness also affected your controllers and views.  (Which it should
+# have unless you're adding new features.)
 #
 # The stats target is updated to account for controller and view tests.
 

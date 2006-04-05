@@ -1,3 +1,48 @@
+##
+# ControllerTestCase allows controllers to be tested independent of their
+# views.
+#
+# == Naming
+#
+# The test class must be named +ControllerNameControllerTest+, so if you're
+# testing actions for the +RouteController+ you would name your test case
+# +RouteControllerTest+.
+#
+# The test names should be +test_actionname_extra+ wher the actionname
+# corresponds to the name of the controller action.  If you are testing an
+# action named 'show' your test should be named +test_show+.  If your action
+# behaves differently depending upon its arguments you can make the test name
+# descriptive with extra arguments like +test_show_photos+ and
+# +test_show_no_photos+.
+#
+# == Examples
+#
+#   class RouteControllerTest < Test::Rails::ControllerTestCase
+#     
+#     fixtures :users, :routes, :points, :photos
+#     
+#     def test_delete
+#       # Set up our environment
+#       @request.session[:username] = users(:herbert).username
+#       
+#       # perform the delet action
+#       get :delete, :id => routes(:work).id
+#       
+#       # Assert we got a 200
+#       assert_success
+#       # Ensure that @action_title is set properly
+#       assert_assigned :action_title, "Deleting \"#{routes(:work).name}\""
+#       # Ensure that @route is set properly
+#       assert_assigned :route, routes(:work)
+#     end
+#     
+#   end
+#
+#--
+# TODO: Make session transparent
+# TODO: Get rid of assert_success and friends, deprecated in Rails
+# TODO: Ensure that assert_tag doesn't work (maybe)
+
 class Test::Rails::ControllerTestCase < Test::Unit::TestCase
 
   NOTHING = Object.new # :nodoc:
