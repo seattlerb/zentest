@@ -16,9 +16,10 @@ spec = Gem::Specification.new do |s|
   s.authors = ['Ryan Davis', 'Eric Hodel']
   s.email = 'ryand-ruby@zenspider.com'
 
-  s.files = File.read('Manifest.txt').split($/)
+  s.files = IO.readlines("Manifest.txt").map {|f| f.chomp }
   s.require_path = 'lib'
-  s.executables = %w[zentest unit_diff autotest multiruby rails_test_audit]
+
+  s.executables = s.files.grep(/^bin\//).map { |f| File.basename f }
 
   paragraphs = File.read("README.txt").split(/\n\n+/)
   s.instance_variable_set "@description", paragraphs[3..10].join("\n\n")
@@ -27,6 +28,8 @@ spec = Gem::Specification.new do |s|
   if $DEBUG then
     puts "ZenTest #{s.version}"
     puts
+    puts s.executables.sort.inspect
+    puts
     puts "** summary:"
     puts s.summary
     puts
@@ -34,10 +37,14 @@ spec = Gem::Specification.new do |s|
     puts s.description
   end
 
-  s.files = IO.readlines("Manifest.txt").map {|f| f.chomp }
   s.homepage = "http://www.zenspider.com/ZSS/Products/ZenTest/"
   s.rubyforge_project = "zentest"
   s.has_rdoc = true
+end
+
+desc 'Build Gem'
+Rake::GemPackageTask.new spec do |pkg|
+  pkg.need_tar = true
 end
 
 desc 'Run tests'
@@ -63,16 +70,16 @@ Rake::RDocTask.new :rdoc do |rd|
   rd.options << '-t ZenTest RDoc'
 end
 
-desc 'Build Gem'
-Rake::GemPackageTask.new spec do |pkg|
-  pkg.need_tar = true
-end
-
 $prefix = ENV['PREFIX'] || Config::CONFIG['prefix']
 $bin  = File.join($prefix, 'bin')
 $lib  = Config::CONFIG['sitelibdir']
-$bins = %w(zentest autotest unit_diff multiruby)
-$libs = %w(zentest.rb autotest.rb rails_autotest.rb unit_diff.rb)
+$bins = spec.executables
+$libs = spec.files.grep(/^lib\//).map { |f| f.sub(/^lib\//, '') }.sort
+
+task :blah do
+    p $bins
+    p $libs
+end
 
 task :install do
   $bins.each do |f|
@@ -80,7 +87,9 @@ task :install do
   end
 
   $libs.each do |f|
-    install File.join("lib", f), $lib, :mode => 0444
+    dir = File.join($lib, File.dirname(f))
+    mkdir_p dir unless test ?d, dir
+    install File.join("lib", f), dir, :mode => 0444
   end
 end
 
@@ -96,6 +105,8 @@ task :uninstall do
   $libs.each do |f|
     rm_f File.join($lib, f)
   end
+
+  rm_rf File.join($lib, "test")
 end
 
 desc 'Clean up'
