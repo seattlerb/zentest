@@ -15,6 +15,7 @@ lib/autotest.rb
 lib/rails_autotest.rb
 lib/test/rails.rb
 lib/test/rails/controller_test_case.rb
+lib/test/rails/functional_test_case.rb
 lib/test/rails/ivar_proxy.rb
 lib/test/rails/rake_tasks.rb
 lib/test/rails/view_test_case.rb
@@ -23,6 +24,7 @@ lib/zentest.rb
 test/data/normal/lib/.#photo.rb
 test/data/normal/lib/blah.rb
 test/data/normal/lib/photo.rb
+test/data/normal/test/#test_photo.rb#
 test/data/normal/test/test_camelcase.rb
 test/data/normal/test/test_photo.rb
 test/data/normal/test/test_route.rb
@@ -31,6 +33,7 @@ test/data/rails/app/controllers/admin/theme_controller.rb
 test/data/rails/app/controllers/route_controller.rb
 test/data/rails/app/models/flickr_photo.rb
 test/data/rails/app/models/route.rb
+test/data/rails/app/views/route/index.rhtml
 test/data/rails/config/environment.rb
 test/data/rails/config/routes.rb
 test/data/rails/test/fixtures/routes.yml

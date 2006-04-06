@@ -319,6 +319,7 @@ class Object # :nodoc:
   end
 end
 
+require 'test/rails/functional_test_case'
 require 'test/rails/controller_test_case'
 require 'test/rails/ivar_proxy'
 require 'test/rails/view_test_case'

@@ -84,14 +84,19 @@
 #     
 #   end
 
-class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
+class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
 
   ##
   # Sets up the test case.
 
   def setup
     return if self.class == Test::Rails::ViewTestCase
+
+    klass_name = self.class.name.sub(/View/, 'Controller')
+    @controller_class_name ||= klass_name.sub 'Test', ''
+
     super
+
     @ivar_proxy = Test::Rails::IvarProxy.new @controller
 
     # these go here so that flash and session work as they should.
@@ -162,6 +167,8 @@ class Test::Rails::ViewTestCase < Test::Rails::ControllerTestCase
 
     defaults = { :layout => false }
     options = defaults.merge options
+
+    @controller.instance_variable_set :@params, @request.parameters
     @controller.send :initialize_current_url
 
     # Rails 1.0

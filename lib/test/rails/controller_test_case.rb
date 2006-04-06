@@ -2,7 +2,11 @@
 # ControllerTestCase allows controllers to be tested independent of their
 # views.
 #
-# == Naming
+# = Features
+#
+# * ActionMailer is already set up for you.
+#
+# = Naming
 #
 # The test class must be named +ControllerNameControllerTest+, so if you're
 # testing actions for the +RouteController+ you would name your test case
@@ -15,7 +19,9 @@
 # descriptive with extra arguments like +test_show_photos+ and
 # +test_show_no_photos+.
 #
-# == Examples
+# = Examples
+#
+# == Typical Controller Test
 #
 #   class RouteControllerTest < Test::Rails::ControllerTestCase
 #     
@@ -29,7 +35,7 @@
 #       get :delete, :id => routes(:work).id
 #       
 #       # Assert we got a 200
-#       assert_success
+#       assert_response :success
 #       # Ensure that @action_title is set properly
 #       assert_assigned :action_title, "Deleting \"#{routes(:work).name}\""
 #       # Ensure that @route is set properly
@@ -38,25 +44,76 @@
 #     
 #   end
 #
+# == ActionMailer Test
+#
+#   class ApplicationController < ActionController::Base
+#     
+#     ##
+#     # Send an email when we get an unhandled exception.
+#     
+#     def log_error(exception)
+#       case exception
+#       when ::ActionController::RoutingError,
+#            ::ActionController::UnknownAction,
+#            ::ActiveRecord::RecordNotFound then
+#         # ignore
+#       else
+#         unless RAILS_ENV == 'development' then
+#           Email.deliver_error exception, params, session, @request.env
+#         end
+#       end
+#     end
+#     
+#   end
+#   
+#   ##
+#   # Dummy Controller just for testing.
+#   
+#   class DummyController < ApplicationController
+#     
+#     def error
+#       # Simulate a bug in our application
+#       raise RuntimeError
+#     end
+#     
+#   end
+#   
+#   class DummyControllerTest < Test::Rails::ControllerTestCase
+#     
+#     def test_error_email
+#       # The rescue_action added by ControllerTestCase needs to be removed so
+#       # that exceptions fall through to the real error handler
+#       @controller.class.send :remove_method, :rescue_action
+#       
+#       # Fire off a request
+#       get :error
+#       
+#       # We should get a 500
+#       assert_response 500
+#       
+#       # And one delivered email
+#       assert_equal 1, @deliveries.length, 'error email sent'
+#     end
+#     
+#   end
+#
 #--
 # TODO: Make session transparent
-# TODO: Get rid of assert_success and friends, deprecated in Rails
-# TODO: Ensure that assert_tag doesn't work (maybe)
+# TODO: Ensure that assert_tag doesn't work
+# TODO: Audit assigns assertions and spit out warnings if tests are missing
 
-class Test::Rails::ControllerTestCase < Test::Unit::TestCase
+class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
 
   NOTHING = Object.new # :nodoc:
 
   def setup
-    return if self.class.name =~ /TestCase$/
-    klass_name = self.class.name.sub(/View/, 'Controller')
-    klass_name =~ /\A(.*)Test\Z/
-    raise "Can't find controller name in #{self.class}" unless $1
-    controller_klass = Object.path2class $1
-    controller_klass.send(:define_method, :rescue_action) { |e| raise e }
-    @controller = controller_klass.new
-    @request = ActionController::TestRequest.new
-    @response = ActionController::TestResponse.new
+    return if self.class == Test::Rails::ControllerTestCase
+
+    @controller_class_name ||= self.class.name.sub 'Test', ''
+
+    super
+
+    @controller_class.send(:define_method, :rescue_action) { |e| raise e }
 
     @deliveries = []
     ActionMailer::Base.deliveries = @deliveries
@@ -83,13 +140,6 @@ class Test::Rails::ControllerTestCase < Test::Unit::TestCase
   end
 
   ##
-  # Asserts that a page gave a 500 Server Error response.
-
-  def assert_error
-    assert_response 500
-  end
-
-  ##
   # Asserts that +key+ of flash has +content+.  If +content+ is a Regexp, then
   # the assertion will fail if the Regexp does not match.
   #
@@ -112,31 +162,10 @@ class Test::Rails::ControllerTestCase < Test::Unit::TestCase
   end
 
   ##
-  # Asserts that a page gave a 403 Forbidden response.
+  # Asserts that the assigns variable +ivar+ is not set.
 
-  def assert_forbidden
-    assert_response 403
-  end
-
-  ##
-  # Asserts that a page gave a 404 Not Found response.
-
-  def assert_not_found
-    assert_response 404
-  end
-
-  ##
-  # Asserts that the assigns variable +ivar+ is not assigned to +value+.  If
-  # +value+ is not present, asserts that the assigns variable is not present.
-
-  def deny_assigned(ivar, value = NOTHING)
-    ivar = ivar.to_s
-    if value.equal? NOTHING then
-      deny_includes assigns, ivar
-    else
-      assert_includes assigns, ivar, "#{ivar.inspect} missing from assigns"
-      deny_equal value, assigns[ivar]
-    end
+  def deny_assigned(ivar)
+    deny_includes assigns, ivar
   end
 
 end
