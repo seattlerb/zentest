@@ -230,8 +230,6 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def util_add_map(file, *tests)
-    tests = [[],[]] if tests.empty?
-    
     @file_map[file] = tests
   end
 
