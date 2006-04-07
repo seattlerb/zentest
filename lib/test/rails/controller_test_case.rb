@@ -6,6 +6,8 @@
 #
 # * ActionMailer is already set up for you.
 # * The session and flash accessors work on both sides of get/post/etc.
+# * Optional automatic auditing for missing assert_assigns.  See
+#   util_audit_assert_assigned
 #
 # = Naming
 #
@@ -99,14 +101,20 @@
 #   end
 #
 #--
-# TODO: Make session transparent
 # TODO: Ensure that assert_tag doesn't work
-# TODO: Audit assigns assertions and spit out warnings if tests are missing
 # TODO: Cookie input.
 
 class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
 
   NOTHING = Object.new # :nodoc:
+
+  DEFAULT_ASSIGNS = %w[
+    action_name before_filter_chain_aborted cookies flash headers
+    ignore_missing_templates loggedin_user logger params request
+    request_origin response session template template_class template_root url
+    user variables_added
+  ]
+
 
   def setup
     return if self.class == Test::Rails::ControllerTestCase
@@ -119,6 +127,10 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
 
     @deliveries = []
     ActionMailer::Base.deliveries = @deliveries
+
+    # used by util_audit_assert_assigns
+    @assigns_asserted = []
+    @assigns_ignored ||= [] # untested assigns to ignore
   end
 
   ##
@@ -210,6 +222,7 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
 
   def assert_assigned(ivar, value = NOTHING)
     ivar = ivar.to_s
+    @assigns_asserted << ivar
     assert_includes assigns, ivar, "#{ivar.inspect} missing from assigns"
     assert_equal value, assigns[ivar] unless value.equal? NOTHING
   end
@@ -248,6 +261,82 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
 
   def deny_assigned(ivar)
     deny_includes assigns, ivar
+  end
+
+  ##
+  # Checks your assert_assigned tests against the instance variables in
+  # assigns.  Fails if the two don't match.
+  #
+  # Add util_audit_assert_assigned to your teardown.  If you have instance
+  # variables that you don't need to set (for example, were set in a
+  # before_filter in ApplicationController) then add them to the
+  # @assigns_ignored instance variable in your setup.
+  #
+  # = Example
+  #
+  # == Test setup:
+  #
+  #   class UserControllerTest < Test::Rails::ControllerTestCase
+  #     
+  #     def teardown
+  #       super
+  #       util_audit_assert_assigned
+  #     end
+  #     
+  #     def test_new
+  #       get :new
+  #       
+  #       assert_response :success
+  #       # no assert_assigns for this test
+  #     end
+  #     
+  #   end
+  #
+  # == Controller method
+  #
+  #   class UserController < ApplicationController
+  #     def new
+  #       redirect_to :action => 'index' and return unless user.nil?
+  #       flash[:redirect] = params[:redirect] if params.include? :redirect
+  #       # @login_form is set but no assert_assigned exists for it
+  #       @login_form = false
+  #     end
+  #   end
+  #
+  # == Output
+  #     1) Failure:
+  #   test_new(UserControllerTest)
+  #       [[...]/controller_test_case.rb:331:in `util_audit_assert_assigned'
+  #        [...]/user_controller_test.rb:14:in `teardown_without_fixtures'
+  #        [...]fixtures.rb:555:in `teardown']:
+  #   You are missing these assert_assigned assertions:
+  #       assert_assigned :login_form #, some_value
+  #   .
+
+  def util_audit_assert_assigned
+    return unless @controller.send :performed?
+    all_assigns = assigns.keys.sort
+
+    assigns_ignored = DEFAULT_ASSIGNS | @assigns_ignored
+
+    assigns_created = all_assigns - assigns_ignored
+    assigns_asserted = @assigns_asserted - assigns_ignored
+
+    assigns_created = assigns_created
+    assigns_asserted = assigns_asserted
+
+    assigns_missing = assigns_created - assigns_asserted
+
+    return if assigns_missing.empty?
+
+    message = []
+    message << "You are missing these assert_assigned assertions:"
+    assigns_missing.sort.each do |ivar|
+      message << "    assert_assigned #{ivar.intern.inspect} #, some_value"
+    end
+    message << nil # stupid '.'
+
+    flunk message.join("\n")
   end
 
   def test_stupid # :nodoc:
