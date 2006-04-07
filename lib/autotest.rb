@@ -62,7 +62,7 @@ class Autotest
     end
 
     return filters.map do |klass, methods|
-      ["'/^(#{methods.join('|')})/'", /#{klass}/]
+      ["'/^(#{methods.join('|')})$/'", /#{klass}/]
     end
   end
 
@@ -274,12 +274,16 @@ class Autotest
 
       # REFACTOR: I don't think the two routines merit real differences
       retest_failed failed, tests
+
+      break
     end
 
-    reset_times if ever_failed
-
-    puts '# All passed'
-    puts "# Waiting for changes"
+    if ever_failed
+      reset_times
+    else # We'll immediately test everything, so don't print this out.
+      puts '# All passed'
+      puts "# Waiting for changes"
+    end
 
     return ever_failed
   end
