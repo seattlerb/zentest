@@ -5,6 +5,7 @@
 # = Features
 #
 # * ActionMailer is already set up for you.
+# * The session and flash accessors work on both sides of get/post/etc.
 #
 # = Naming
 #
@@ -29,7 +30,7 @@
 #     
 #     def test_delete
 #       # Set up our environment
-#       @request.session[:username] = users(:herbert).username
+#       session[:username] = users(:herbert).username
 #       
 #       # perform the delet action
 #       get :delete, :id => routes(:work).id
@@ -101,6 +102,7 @@
 # TODO: Make session transparent
 # TODO: Ensure that assert_tag doesn't work
 # TODO: Audit assigns assertions and spit out warnings if tests are missing
+# TODO: Cookie input.
 
 class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
 
@@ -119,8 +121,88 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
     ActionMailer::Base.deliveries = @deliveries
   end
 
-  def test_stupid # :nodoc:
+  ##
+  # Excutes the request +action+ with +params+.
+  #
+  # See also: get, post, put, delete, head, xml_http_request
+
+  def process(action, parameters = nil)
+    parameters ||= {}
+
+    @request.recycle!
+    @request.env['REQUEST_METHOD'] ||= 'GET'
+    @request.action = action.to_s
+
+    @request.assign_parameters @controller_class.controller_path, action.to_s,
+                               parameters
+
+    build_request_uri action, parameters
+
+    @controller.process @request, @response
   end
+
+  ##
+  # Performs a GET request on +action+ with +params+.
+
+  def get(action, parameters = nil)
+    @request.env['REQUEST_METHOD'] = 'GET'
+    process action, parameters
+  end
+
+  ##
+  # Performs a HEAD request on +action+ with +params+.
+
+  def head(action, parameters = nil)
+    @request.env['REQUEST_METHOD'] = 'HEAD'
+    process action, parameters
+  end
+
+  ##
+  # Performs a POST request on +action+ with +params+.
+
+  def post(action, parameters = nil)
+    @request.env['REQUEST_METHOD'] = 'POST'
+    process action, parameters
+  end
+
+  ##
+  # Performs a PUT request on +action+ with +params+.
+
+  def put(action, parameters = nil)
+    @request.env['REQUEST_METHOD'] = 'PUT'
+    process action, parameters
+  end
+
+  ##
+  # Performs a DELETE request on +action+ with +params+.
+
+  def delete(action, parameters = nil)
+    @request.env['REQUEST_METHOD'] = 'DELETE'
+    process action, parameters
+  end
+
+  ##
+  # Performs a XMLHttpRequest request using +request_method+ on +action+ with
+  # +params+.
+
+  def xml_http_request(request_method, action, parameters = nil)
+    @request.env['REQUEST_METHOD'] = request_method
+
+    @request.env['HTTP_X_REQUESTED_WITH'] = 'XMLHttpRequest'
+    @request.env['HTTP_ACCEPT'] = 'text/javascript, text/html, application/xml, text/xml, */*'
+
+    result = process action, parameters
+
+    @request.env.delete 'HTTP_X_REQUESTED_WITH'
+    @request.env.delete 'HTTP_ACCEPT'
+
+    return result
+  end
+
+  ##
+  # Friendly alias for xml_http_request
+
+  alias xhr xml_http_request
 
   ##
   # Asserts that the assigns variable +ivar+ is assigned to +value+.  If
@@ -167,6 +249,21 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
   def deny_assigned(ivar)
     deny_includes assigns, ivar
   end
+
+  def test_stupid # :nodoc:
+  end
+
+  private
+
+  def build_request_uri(action, parameters)
+    return if @request.env['REQUEST_URI']
+
+    options = @controller.send :rewrite_options, parameters
+    options.update :only_path => true, :action => action
+
+    url = ActionController::UrlRewriter.new @request, parameters
+    @request.set_REQUEST_URI url.rewrite(options)
+  end 
 
 end
 

@@ -20,12 +20,48 @@ class Test::Rails::FunctionalTestCase < Test::Unit::TestCase
 
     @controller = @controller_class.new
 
+    @session = ActionController::TestSession.new
+
+    @flash = ActionController::Flash::FlashHash.new
+    @session['flash'] = @flash
+
     @request = ActionController::TestRequest.new
+    @request.session = @session
+
     @response = ActionController::TestResponse.new
   end
 
   def test_stupid # :nodoc:
   end
+
+  ##
+  # Flash accessor.  The flash can be assigned to before calling process or
+  # render and it will Just Work (yay!)
+  #
+  # view:
+  #   <div class="error"><%= flash[:error] %></div>
+  #
+  # test:
+  #   flash[:error] = 'You did a bad thing.'
+  #   render
+  #   assert_tag :tag => 'div', :attributes => { :class => 'error' },
+  #              :content => 'You did a bad thing.'
+
+  attr_reader :flash
+
+  ##
+  # Session accessor.  The session can be assigned to before calling process
+  # or render and it will Just Work (yay!)
+  #
+  # test:
+  #
+  #   def test_logout
+  #     session[:user] = users(:herbert)
+  #     post :logout
+  #     assert_equal nil, session[:user]
+  #   end
+
+  attr_reader :session
 
 end
 

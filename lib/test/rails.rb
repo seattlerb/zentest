@@ -60,6 +60,14 @@ $TESTING = true
 # To take maximum advantage of Test::Rails you will need to split your view
 # assertions away from your controller assertions.
 #
+# == Biggest Changes
+#
+# Here are some changes to look out for when switching to Test::Rails.
+#
+# * get/post/etc. no longer have a session or flash argument.  Use the session
+#   and flash accessor instead.
+# * assert_tag will not work in controller tests.
+#
 # == Creating view tests
 #
 # View tests live in test/views.  They are named after the controller that is
@@ -153,7 +161,8 @@ $TESTING = true
 #     
 #     # Testing the delete method
 #     def test_delete
-#       @request.session[:username] = users(:herbert).username
+#       # A session accessor is provided instead of passing a hash to get.
+#       session[:username] = users(:herbert).username
 #       
 #       get :delete, :id => routes(:work).id
 #       
@@ -186,7 +195,9 @@ $TESTING = true
 # @request, @response, flash, etc. are available to you just like in a
 # Functional test.
 #
-# get/post/process are available to you just like in functional tests.
+# get, post, process, etc. are available just like in functional tests, but
+# they no longer have arguments for session or flash.  Instead use the session
+# and flash accessors.
 #
 # +assert_assigned :route, routes(:work)+ asserts that the instance variable
 # +@route+ on the RouteController is set to routes(:work).  assert_assigned is
@@ -242,7 +253,7 @@ $TESTING = true
 #
 #   class RouteControllerTest < Test::Rails::ControllerTestCase
 #     def test_flickr_refresh
-#       @request.session[:username] = users(:herbert).username
+#       session[:username] = users(:herbert).username
 #       
 #       get :flickr_refresh, :id => routes(:work).id
 #       

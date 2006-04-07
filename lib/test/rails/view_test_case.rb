@@ -186,23 +186,6 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   end
 
   ##
-  # Flash accessor.  Flash can be assigned to before calling render and it
-  # will Just Work (yay!)
-  #
-  # view:
-  #   <div class="error"><%= flash[:error] %></div>
-  #
-  # test:
-  #   flash[:error] = 'You did a bad thing.'
-  #   render
-  #   assert_tag :tag => 'div', :attributes => { :class => 'error' },
-  #              :content => 'You did a bad thing.'
-
-  def flash
-    return @controller.flash
-  end
-
-  ##
   # Asserts that there is an error on +field+ of type +type+.
 
   def assert_error_on(field, type)
