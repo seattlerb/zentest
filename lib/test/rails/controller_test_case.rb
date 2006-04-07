@@ -245,9 +245,11 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
   #   assert_flash :notice, 'Please log in'
 
   def assert_flash(key, content)
-    assert flash.include?(key), "#{key.inspect} missing from flash"
+    assert flash.include?(key),
+           "#{key.inspect} missing from flash, has #{flash.keys.inspect}"
+
     case content
-    when Regexp
+    when Regexp then
       assert_match content, flash[key],
                    "Content of flash[#{key.inspect}] did not match"
     else
