@@ -1,6 +1,7 @@
 $TESTING = defined? $TESTING
 
 require 'find'
+require 'rbconfig'
 
 ##
 # Autotest continuously runs your tests as you work on your project.
@@ -175,7 +176,7 @@ class Autotest
         puts "# Rerunning failures: #{failed_files.join ' '}"
 
         test_filter = " -n #{filter}" unless filter == "'/^(default_test)/'"
-        cmd = "ruby -Ilib:test #{failed_files.join ' '}#{test_filter} | unit_diff -u"
+        cmd = "#{ruby} -Ilib:test #{failed_files.join ' '}#{test_filter} | unit_diff -u"
 
         puts "+ #{cmd}"
         result = `#{cmd}`
@@ -188,6 +189,14 @@ class Autotest
 
       puts failure_report(failed) if failed.compact! and not failed.empty?
     end
+  end
+
+  ##
+  # The path to this ruby for running tests.
+
+  def ruby
+    return File.join(Config::CONFIG['bindir'],
+                     Config::CONFIG['ruby_install_name'])
   end
 
   ##
@@ -248,7 +257,7 @@ class Autotest
     map_file_names(updated).each do |tests|
       next if tests.empty?
       puts '# Testing updated files'
-      cmd = "ruby -Ilib:test -e '#{tests.inspect}.each { |f| load f }' | unit_diff -u"
+      cmd = "#{ruby} -Ilib:test -e '#{tests.inspect}.each { |f| load f }' | unit_diff -u"
       puts "+ #{cmd}"
       results = `#{cmd}`
       puts results

@@ -62,8 +62,8 @@ class TestAutotest < Test::Unit::TestCase
     ]
 
     expected = [
-      ["'/^(test_a|test_b|test_c)/'", /one/],
-      ["'/^(test_d)/'", /two/],
+      ["'/^(test_a|test_b|test_c)$/'", /one/],
+      ["'/^(test_d)$/'", /two/],
     ]
 
     assert_equal expected,
@@ -185,7 +185,7 @@ class TestAutotest < Test::Unit::TestCase
 
       assert_equal "# Waiting for changes", out.shift
       assert_equal "# Rerunning failures: #{@photo_test_file}", out.shift
-      assert_equal "+ ruby -Ilib:test #{@photo_test_file} -n test_route | unit_diff -u", out.shift
+      assert_equal "+ #{@at.ruby} -Ilib:test #{@photo_test_file} -n test_route | unit_diff -u", out.shift
 
       assert_equal true, @at.backtick_responses.empty?
     end
@@ -203,6 +203,12 @@ class TestAutotest < Test::Unit::TestCase
       assert_not_equal time, @at.files[@photo_test_file]
       assert_equal true, @at.updated?(@photo_test_file), 'Time reset to 0'
     end
+  end
+
+  def test_ruby
+    this_ruby = File.join(Config::CONFIG['bindir'],
+                          Config::CONFIG['ruby_install_name'])
+    assert_equal this_ruby, @at.ruby
   end
 
   def test_updated_eh
