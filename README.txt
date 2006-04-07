@@ -103,8 +103,14 @@ To allow for unmapped test methods (ie, non-unit tests), name them:
 
 == INSTALL
 
-* make test
-* sudo make install
+Using Rubygems:
+
+* sudo gem install ZenTest
+
+Using Rake:
+
+* rake test
+* sudo rake install
 
 == LICENSE
 
