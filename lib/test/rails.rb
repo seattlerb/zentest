@@ -13,35 +13,43 @@ $TESTING = true
 # * Functional tests are split into Controller tests and View tests.
 #   * Helps decouple views from controllers.
 #   * Allows you to test a single partial.
-#   * Less garbage on your screen when assert_tag goes wrong.
+#   * Less garbage on your screen when assert_tag fails.
 # * An auditing script analyzes missing assertions in your controllers and
 #   views.
-# * View testing assertion library.
+# * Library of assertions for testing views.
 #
 # = Using Test::Rails
 #
 # First, be sure you have ZenTest installed.
 #
-# Add this line to test/test_helper.rb:
+# You will need to make three small changes to test/test_helper.rb to set up
+# Test::Rails.
+#
+# First add this line to test/test_helper.rb:
 #
 #   require 'test/rails'
 #
-# Right before you require 'test_help', so your test/test_helper.rb looks like
-# this:
+# Right before you require 'test_help'.
+#
+# Next, switch from Test::Unit::TestCase to Test::Rails::TestCase right after
+# you require 'test_help'.
+#
+# Your test/test_helper.rb will end up looking like this:
 #
 #   ENV["RAILS_ENV"] = "test"
 #   require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
 #   require 'test/rails'
 #   require 'test_help'
+#   
+#   class Test::Rails::TestCase
 #   ...
 #
 #--
 # This lets us undo whatever horrors test_help performs upon
 # Test::Unit::TestCase.
-#
-# TODO Have people switch from Test::Unit::TestCase to Test::Rails::TestCase
-# or similar so we can keep Test::Unit::TestCase virgin.
 #++
+#
+# Finally you need to add the extra rake tasks Test::Rails provides.
 #
 # Add this line to your Rakefile after you require 'test/rails/rake_tasks':
 #
@@ -330,6 +338,8 @@ class Object # :nodoc:
   end
 end
 
+require 'test/zentest_assertions'
+require 'test/rails/test_case'
 require 'test/rails/functional_test_case'
 require 'test/rails/controller_test_case'
 require 'test/rails/ivar_proxy'

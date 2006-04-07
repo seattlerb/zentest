@@ -339,9 +339,6 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
     flunk message.join("\n")
   end
 
-  def test_stupid # :nodoc:
-  end
-
   private
 
   def build_request_uri(action, parameters)
@@ -353,33 +350,6 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
     url = ActionController::UrlRewriter.new @request, parameters
     @request.set_REQUEST_URI url.rewrite(options)
   end 
-
-end
-
-module Test::Unit::Assertions
-
-  def deny(boolean, message = nil)
-    _wrap_assertion do
-      assert_block(build_message(message, "<?> is not false or nil.", boolean)) { not boolean }
-    end
-  end
-
-  alias deny_equal assert_not_equal
-
-  def deny_empty(obj)
-    assert_respond_to obj, :empty?
-    assert_equal false, obj.empty?
-  end
-
-  def assert_includes(obj, item, message = nil)
-    assert_respond_to obj, :include?
-    assert_equal true, obj.include?(item), message
-  end
-
-  def deny_includes(obj, item, message = nil)
-    assert_respond_to obj, :include?
-    assert_equal false, obj.include?(item), message
-  end
 
 end
 

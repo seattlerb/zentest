@@ -2,7 +2,7 @@
 # FunctionalTestCase is an abstract class that sets up a controller instance
 # for its subclasses.
 
-class Test::Rails::FunctionalTestCase < Test::Unit::TestCase
+class Test::Rails::FunctionalTestCase < Test::Rails::TestCase
 
   ##
   # Sets up instance variables to allow tests depending on a controller work.
@@ -29,9 +29,6 @@ class Test::Rails::FunctionalTestCase < Test::Unit::TestCase
     @request.session = @session
 
     @response = ActionController::TestResponse.new
-  end
-
-  def test_stupid # :nodoc:
   end
 
   ##

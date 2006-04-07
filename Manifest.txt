@@ -18,7 +18,9 @@ lib/test/rails/controller_test_case.rb
 lib/test/rails/functional_test_case.rb
 lib/test/rails/ivar_proxy.rb
 lib/test/rails/rake_tasks.rb
+lib/test/rails/test_case.rb
 lib/test/rails/view_test_case.rb
+lib/test/zentest_assertions.rb
 lib/unit_diff.rb
 lib/zentest.rb
 test/data/normal/lib/.#photo.rb
