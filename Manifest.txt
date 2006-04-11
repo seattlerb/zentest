@@ -38,6 +38,7 @@ test/data/rails/app/models/route.rb
 test/data/rails/app/views/route/index.rhtml
 test/data/rails/config/environment.rb
 test/data/rails/config/routes.rb
+test/data/rails/test/controllers/route_controller_test.rb
 test/data/rails/test/fixtures/routes.yml
 test/data/rails/test/functional/admin/themes_controller_test.rb
 test/data/rails/test/functional/dummy_controller_test.rb
@@ -45,6 +46,7 @@ test/data/rails/test/functional/route_controller_test.rb
 test/data/rails/test/unit/flickr_photo_test.rb
 test/data/rails/test/unit/photo_test.rb
 test/data/rails/test/unit/route_test.rb
+test/data/rails/test/views/route_view_test.rb
 test/test_autotest.rb
 test/test_rails_autotest.rb
 test/test_unit_diff.rb
