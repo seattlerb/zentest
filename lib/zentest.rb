@@ -23,9 +23,55 @@ class Module
 
 end
 
+##
+# ZenTest scans your target and unit-test code and writes your missing
+# code based on simple naming rules, enabling XP at a much quicker
+# pace. ZenTest only works with Ruby and Test::Unit.
+#
+# == RULES
+#
+# ZenTest uses the following rules to figure out what code should be
+# generated:
+#
+# * Definition:
+#   * CUT = Class Under Test
+#   * TC = Test Class (for CUT)
+# * TC's name is the same as CUT w/ "Test" prepended at every scope level.
+#   * Example: TestA::TestB vs A::B.
+# * CUT method names are used in CT, with "test_" prependend and optional "_ext" extensions for differentiating test case edge boundaries.
+#   * Example:
+#     * A::B#blah
+#     * TestA::TestB#test_blah_normal
+#     * TestA::TestB#test_blah_missing_file
+# * All naming conventions are bidirectional with the exception of test extensions.
+#
+# == METHOD MAPPING
+#
+# Method names are mapped bidirectionally in the following way:
+#
+#   method	test_method
+#   method?	test_method_eh		(too much exposure to Canadians :)
+#   method!	test_method_bang
+#   method=	test_method_equals
+#   []		test_index
+#   *		test_times
+#   ==		test_equals2
+#   ===		test_equals3
+#
+# Further, any of the test methods should be able to have arbitrary
+# extensions put on the name to distinguish edge cases:
+#
+#   method	test_method
+#   method	test_method_simple
+#   method	test_method_no_network
+#
+# To allow for unmapped test methods (ie, non-unit tests), name them:
+#
+#   test_integration_.*
+
 class ZenTest
 
-  VERSION = '3.1.0'
+  VERSION = '3.2.0'
 
   if $TESTING then
     attr_reader :missing_methods
@@ -51,7 +97,7 @@ class ZenTest
 
     unless file == $0 then
       begin
-	require "#{file}"
+	require file
       rescue LoadError => err
 	puts "Could not load #{file}: #{err}"
       end
