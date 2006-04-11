@@ -6,21 +6,23 @@
 #
 # * ActionMailer is already set up for you.
 # * The session and flash accessors work on both sides of get/post/etc.
-# * Optional automatic auditing for missing assert_assigns.  See
+# * Optional automatic auditing for missing assert_assigns. See
 #   util_audit_assert_assigned
 #
 # = Naming
 #
-# The test class must be named +ControllerNameControllerTest+, so if you're
-# testing actions for the +RouteController+ you would name your test case
-# +RouteControllerTest+.
+# The test class must be named after your controller class name, so if
+# you're testing actions for the +RouteController+ you would name your
+# test case +RouteControllerTest+.
 #
-# The test names should be +test_actionname_extra+ wher the actionname
-# corresponds to the name of the controller action.  If you are testing an
-# action named 'show' your test should be named +test_show+.  If your action
-# behaves differently depending upon its arguments you can make the test name
-# descriptive with extra arguments like +test_show_photos+ and
-# +test_show_no_photos+.
+# The test names should be in the form of +test_action_edgecase+ where
+# 'action' corresponds to the name of the controller action, and
+# 'edgecase' describes the scenario you are testing.
+#
+# If you are testing an action named 'show' your test should be named
+# +test_show+. If your action behaves differently depending upon its
+# arguments then you can make the test name descriptive like
+# +test_show_photos+ and +test_show_no_photos+.
 #
 # = Examples
 #
@@ -114,7 +116,6 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
     request_origin response session template template_class template_root url
     user variables_added
   ]
-
 
   def setup
     return if self.class == Test::Rails::ControllerTestCase
@@ -217,7 +218,7 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
   alias xhr xml_http_request
 
   ##
-  # Asserts that the assigns variable +ivar+ is assigned to +value+.  If
+  # Asserts that the assigns variable +ivar+ is assigned to +value+. If
   # +value+ is omitted, asserts that assigns variable +ivar+ exists.
 
   def assert_assigned(ivar, value = NOTHING)
@@ -235,7 +236,7 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
   end
 
   ##
-  # Asserts that +key+ of flash has +content+.  If +content+ is a Regexp, then
+  # Asserts that +key+ of flash has +content+. If +content+ is a Regexp, then
   # the assertion will fail if the Regexp does not match.
   #
   # controller:
@@ -267,14 +268,24 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
 
   ##
   # Checks your assert_assigned tests against the instance variables in
-  # assigns.  Fails if the two don't match.
+  # assigns. Fails if the two don't match.
   #
-  # Add util_audit_assert_assigned to your teardown.  If you have instance
+  # Add util_audit_assert_assigned to your teardown. If you have instance
   # variables that you don't need to set (for example, were set in a
   # before_filter in ApplicationController) then add them to the
   # @assigns_ignored instance variable in your setup.
   #
   # = Example
+  #
+  # == Controller method
+  #
+  #   class UserController < ApplicationController
+  #     def new
+  #       # ...
+  #
+  #       @login_form = false
+  #     end
+  #   end
   #
   # == Test setup:
   #
@@ -289,20 +300,9 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
   #       get :new
   #       
   #       assert_response :success
-  #       # no assert_assigns for this test
+  #       # no assert_assigns for @login_form
   #     end
   #     
-  #   end
-  #
-  # == Controller method
-  #
-  #   class UserController < ApplicationController
-  #     def new
-  #       redirect_to :action => 'index' and return unless user.nil?
-  #       flash[:redirect] = params[:redirect] if params.include? :redirect
-  #       # @login_form is set but no assert_assigned exists for it
-  #       @login_form = false
-  #     end
   #   end
   #
   # == Output

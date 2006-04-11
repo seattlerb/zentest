@@ -6,35 +6,41 @@ require 'test_help' # hopefully temporary, required for Test::Rails to work
 $TESTING = true
 
 ##
-# Test::Rails is a replacement for Rails' testing.
+# = Introduction
 #
-# = Features
+# Test::Rails helps you build industrial-strength Rails code by:
+# * testing views separate from controllers
+# * enhancing the assertion vocabulary, and
+# * auditing your tests for consistency.
 #
-# * Functional tests are split into Controller tests and View tests.
+# = Details
+#
+# Test::Rails:
+# * splits Functional test into Controller and View tests.
+#   * Splits view assertions away from controller assertions.
 #   * Helps decouple views from controllers.
+#   * Allows you to test AJAX actions in isolation.
 #   * Allows you to test a single partial.
-#   * Less garbage on your screen when assert_tag fails.
+#   * Clearer failures when assert_tag fails.
 # * An auditing script analyzes missing assertions in your controllers and
 #   views.
 # * Library of assertions for testing views.
 #
-# = Using Test::Rails
-#
-# First, be sure you have ZenTest installed.
+# = How to Convert to Test::Rails
 #
 # You will need to make three small changes to test/test_helper.rb to set up
-# Test::Rails.
+# Test::Rails:
 #
-# First add this line to test/test_helper.rb:
+# First, add the following to 'test/test_helper.rb' before you require
+# +test_help+:
 #
 #   require 'test/rails'
 #
-# Right before you require 'test_help'.
+# Next, change the class from "Unit" to "Rails" right after you
+# require +test_help+. This prevents the bad things +test_help+ performs
+# upon Test::Unit::TestCase.
 #
-# Next, switch from Test::Unit::TestCase to Test::Rails::TestCase right after
-# you require 'test_help'.
-#
-# Your test/test_helper.rb will end up looking like this:
+# Your 'test/test_helper.rb' will end up looking like this:
 #
 #   ENV["RAILS_ENV"] = "test"
 #   require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
@@ -44,45 +50,25 @@ $TESTING = true
 #   class Test::Rails::TestCase
 #   ...
 #
-#--
-# This lets us undo whatever horrors test_help performs upon
-# Test::Unit::TestCase.
-#++
-#
-# Finally you need to add the extra rake tasks Test::Rails provides.
-#
-# Add this line to your Rakefile after you require 'test/rails/rake_tasks':
+# Finally, you need to add the extra rake tasks Test::Rails provides.
+# Add the following line to your Rakefile after you require
+# 'tasks/rails':
 #
 #   require 'test/rails/rake_tasks'
 #
-# So your Rakefile looks like this:
-#
-#   ...
-#   require 'tasks/rails'
-#   require 'test/rails/rake_tasks'
-#
-# = Switching your tests to Test::Rails
-#
-# Test::Rails splits functional tests into view tests and controller tests.
-#
-# To take maximum advantage of Test::Rails you will need to split your view
-# assertions away from your controller assertions.
-#
-# == Biggest Changes
-#
-# Here are some changes to look out for when switching to Test::Rails.
+# *NOTE*:
 #
 # * get/post/etc. no longer have a session or flash argument.  Use the session
 #   and flash accessor instead.
-# * assert_tag will not work in controller tests.
+# * assert_tag will (eventually) not work in controller tests.
 #
-# == Creating view tests
+# == Writing View Tests
 #
 # View tests live in test/views.  They are named after the controller that is
 # being tested.  For exampe, RouteViewTest will live in the file
 # test/views/route_view_test.rb.
 #
-# A typical view test looks like this:
+# === Example View Test Case
 #
 #   require 'test/test_helper'
 #   
@@ -114,51 +100,35 @@ $TESTING = true
 #     
 #   end
 #
-# Here are the differences step by step:
-#
-# All view tests are a subclass of Test::Rails::ViewTestCase.  The name of the
-# subclass must match the controller this view depends upon.  ViewTestCase
+# All view tests are a subclass of Test::Rails::ViewTestCase. The name of the
+# subclass must match the controller this view depends upon. ViewTestCase
 # takes care of all the setup necessary for running the tests.
 #
-# Fixtures work just like they do in a functional test.
-#
 # The +test_delete+ method is named after the delete method in
-# RouteController.  The ViewTestCase#render method looks at the name of the
+# RouteController. The ViewTestCase#render method looks at the name of the
 # test and tries to figure out which view file to use, so naming tests after
 # actions will save you headaches and typing.
 #
-# +controller+ is a proxy for the RouteController instance this test case uses.
-# The call +assigns[:route] = routes(:work)+ sets the +@route+ instance
-# variable to +routes(:work)+ just like you would in RouteController#delete.
+# Use +assigns+ to set up the variables the view will use when it renders.
 #
-# The call to render is the equivalent to a functional tests' process/get/post
-# methods.  It makes several assumptions, so be sure to read carefully.
-#
-# +render+ looks at the name of the test, test_delete, and removes the "test_"
-# then looks for a view file matching that name in app/views/route.  So this
-# render will try to render the file app/views/route/delete.rhtml.
-#
-# You can give render all of the render flags listed in the Rails API.
-#
-# By default render has the added option :layout => false, so if you need
-# layout set :layout => true.
-#
-# render will try to figure out the correct view file for the action even if
-# you add extra naming bits to your test like test_delete_logged_out.  Read
-# ViewTestCase#render for the full description of how render goes looking for
-# templates to render.
+# The call to render is the equivalent to a functional tests' get/post
+# methods. It makes several assumptions, so be sure to read
+# ViewTestCase#render carefully.
 #
 # ViewTestCase has a vastly expanded assertion library to help you out with
-# testing.  See ViewTestCase for all the helpful assertions you can use in
+# testing. See ViewTestCase for all the helpful assertions you can use in
 # your view tests.
 #
-# == Creating controller tests
+# == Writing Controller Tests
 #
-# Controller tests live in test/controllers.  They are named after the
-# controller they are testing.  For exampe, RouteControllerTest will live in
-# the file test/controllers/route_controller_test.rb.
+# Controller tests are essentially functional tests without the view assertions.
 #
-# A typical controller test looks like this:
+# They live in test/controllers, subclass ControllerTestCase, and are
+# named after the controller they are testing. For example,
+# RouteControllerTest will live in the file
+# test/controllers/route_controller_test.rb.
+#
+# === Example Controller Test Case
 #
 #   require 'test/test_helper'
 #   
@@ -186,45 +156,15 @@ $TESTING = true
 #     
 #   end
 #
-# The chages in a controller test are much less drastic, but I'll go through
-# them step by step again.
+# == Writing Abstract Test Cases
 #
-# All controller tests are a subclass of Test::Rails::ControllerTestCase.  The
-# name of the subclass must match the controller this test depends upon.
-# ControllerTestCase takes care of all the setup necessary for running the
-# tests.
+# Abstract test cases are a great way to refactor your tests and
+# ensure you do not violate the DRY principal and share code between
+# different test classes. If you have common setup code for your test
+# classes you can create your own subclass of ControllerTestCase or
+# ViewTestCase.
 #
-# Fixtures work just like they do in a functional test.
-#
-# The +test_delete+ method is named after the delete method in
-# RouteController.  This also matches the test_delete test in RouteViewTest
-# which is important for auditing your tests.
-#
-# @request, @response, flash, etc. are available to you just like in a
-# Functional test.
-#
-# get, post, process, etc. are available just like in functional tests, but
-# they no longer have arguments for session or flash.  Instead use the session
-# and flash accessors.
-#
-# +assert_assigned :route, routes(:work)+ asserts that the instance variable
-# +@route+ on the RouteController is set to routes(:work).  assert_assigned is
-# used by the auditing script to match up a controller's set instance
-# variables with which instance variables a view test needs to work.
-#
-# == Creating abstract test cases
-#
-# If you have common setup code for your controller or view tests you can
-# create your own subclass of ControllerTestCase or ViewTestCase.  If the name
-# of your abstract test case ends in TestCase then it will be treated as
-# abstract and no setup will be performed when running tests in the abstract
-# TestCase.  (Something Test::Unit will do automatically.)
-#
-#--
-# TODO: I don't like this verbage much.
-#++
-#
-# === Example abstract test case
+# === Example Abstract Test Case
 #
 #   class RobotControllerTestCase < Test::Rails::ControllerTestCase
 #     
@@ -251,27 +191,25 @@ $TESTING = true
 #     
 #   end
 #
-# = Auditing your tests
+# = How to Audit Your Tests
 #
-# Test::Rails adds a script that looks at your controller tests and your view
-# tests and checks for places you use an instance variable on one side but
-# forgot to check for it on the other.
+# <tt>bin/rails_test_audit</tt> ensures that your view tests'
+# +assign+s are compared against your controller tests'
+# assert_assigned, warning you when you've forgotten to test
+# something.
 #
-# Here's a controller test that's missing an assert_assigned for @route:
+# Given:
 #
 #   class RouteControllerTest < Test::Rails::ControllerTestCase
 #     def test_flickr_refresh
-#       session[:username] = users(:herbert).username
-#       
 #       get :flickr_refresh, :id => routes(:work).id
-#       
 #       assert_success
 #       
 #       assert_assigned :tz_name, 'Pacific Time (US & Canada)'
 #     end
 #   end
 #
-# And here's a view test with all of its instance variable assignments:
+# And:
 #
 #   class RouteViewTest < Test::Rails::ViewTestCase
 #     def test_flickr_refresh
@@ -280,25 +218,13 @@ $TESTING = true
 #       
 #       render
 #       
-#       form_url = '/route/flickr_refetch'
-#       assert_post_form form_url
-#       assert_input form_url, :hidden, :id
-#       assert_input form_url, :text, :flickr_user
-#       assert_tag_in_form form_url, :tag => 'select', :attributes => {
-#                            :name => 'tz_name' }
-#       assert_tag_in_form form_url, :tag => 'option', :attributes => {
-#                            :selected => true, :value => /Pacific/ },
-#                          :content => /Pacific/
-#       assert_submit form_url, 'Refresh!'
+#       # ...
 #     end
 #   end
 #
-# As you can see there's an ivar assignment for +@loggedin_user+, +@route+ and
-# +@tz_name+, but there are no checks for +@route+ in the controller test.
-# rails_test_audit will examine your view and controller tests and tell you
-# where your controller tests are missing assert_assigns:
+# +rails_test_audit+ will see that you don't have an +assert_assigned+
+# for +route+ and will output:
 #
-#   $ rails_test_audit
 #   require 'test/test_helper'
 #   
 #   class RouteControllerTest < Test::Rails::ControllerTestCase
@@ -309,13 +235,7 @@ $TESTING = true
 #     
 #   end
 #
-# So here rails_test_audit is telling me I should add an assertion for
-# +@route+ to +test_flickr_refresh+, which I indeed forgot.
-#
-# = Changes to rake tasks
-#
-# When you add "require 'test/rails/rake_tasks'" to your Rakefile the following
-# changes get made to the rake tasks:
+# = How 'rake test' Changed
 #
 # test:views and test:controllers targets get added so you can run just the
 # view or controller tests.
@@ -323,10 +243,10 @@ $TESTING = true
 # The "test" target runs tests in the following order: units, controllers,
 # views, functionals, integration.
 #
-# The test target no longer runs all tests, it stops on the first failure.
-# This way a failure in a unit test doesn't fill your screen with crap because
-# the brokenness also affected your controllers and views.  (Which it should
-# have unless you're adding new features.)
+# The test target no longer runs all tests, it stops on the first
+# failure. This way a failure in a unit test doesn't fill your screen
+# with less important errors because the underlying failure also
+# affected your controllers and views. 
 #
 # The stats target is updated to account for controller and view tests.
 

@@ -3,28 +3,31 @@
 # Testcase implementors must set up the instance variables the view needs to
 # render itself.
 #
-# == Naming
+# = Features
 #
-# The test class must be named +ControllerNameViewTest+, so if you're testing
-# views for the +RouteController+ you would name your test case
-# +RouteViewTest+.  The test case will expect to find your view files in
-# +app/views/route/+.
+# * Allows testing of individual AJAX templates.
+# * Allows testing of individual partials.
+# * Large library of helful assertions.
 #
-# The test names should be +test_viewname_extra+ where the viewname
-# corresponds to the name of the view file.  If you are testing a view file
-# named 'show.rhtml' your test should be named +test_show+.  If your view is
-# behaves differently depending upon its arguments you can make the test name
-# descriptive with extra arguments like +test_show_photos+ and
-# +test_show_no_photos+.
+# = Naming
 #
-# If there is behavior tied to a different controller action you should name
-# your test after that action and use the :action option for render.  This
-# aids in automatic auditing of testing between controllers and views.  For
-# example, if the controller action +create+ may render the +new+ action on
-# invalid arguments the test should be named +test_create+ and you should call
-# +render :action => 'new'+.
+# The test class must be named after your controller class name, so if
+# you're testing views for the +RouteController+ you would name your
+# test case +RouteViewTest+. The test case will expect to find your
+# view files in <tt>app/views/route</tt>.
 #
-# == Examples
+# The test names should be in the form of +test_view_edgecase+ where
+# 'view' corresponds to the name of the view file, and 'edgecase'
+# describes the scenario you are testing.
+#
+# If you are testing a view file named 'show.rhtml' your test should
+# be named +test_show+. If your view is behaves differently depending
+# upon its parameters then you can make the test name descriptive like
+# +test_show_photos+ and +test_show_no_photos+.
+#
+# = Examples
+#
+# == Typical View Test
 #
 #   class RouteViewTest < Test::Rails::ViewTestCase
 #   
@@ -51,14 +54,11 @@
 #   
 #   end
 #
-# === Testing Layouts
-#
-# Layouts can be tested independent of your application's controllers.  Here's
-# an example layout view test:
+# == Typical Layout Test
 #
 #   require 'test/test_helper'
 #   
-#   # Create a dummy controller for layout views.  This lets the setup use the
+#   # Create a dummy controller for layout views. This lets the setup use the
 #   # right path with minimum fuss.
 #   class LayoutsController < ApplicationController; end
 #   
@@ -120,9 +120,12 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   end
 
   ##
-  # Renders the template.  The template is determined from the test name.  If
+  # Renders the template. The template is determined from the test name. If
   # you have multiple tests for the same view render will try to Do The Right
   # Thing and remove parts of the name looking for the template file.
+  #
+  # By default, render has the added option <tt>:layout => false</tt>,
+  # so if want to test behavior in your layout add <tt>:layout => true</tt>.
   #
   # The action can be forced by using the options:
   #
@@ -131,6 +134,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #   render :template => 'profile/index'
   #
   # For this test:
+  #
   #   class RouteViewTest < Test::Rails::ViewTestCase
   #     def test_show_photos
   #       render
@@ -366,7 +370,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   # Asserts that a form with +form_action+ has a descendent that matches
   # +options+.
   #
-  # Typically this is not used directly in tests.  Instead use it to build
+  # Typically this is not used directly in tests. Instead use it to build
   # expressive tests that assert which fields are in what form.
   #
   # view:
@@ -382,7 +386,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   end
 
   ##
-  # Creates a new Paginator that uses the current controller.  +item_count+,
+  # Creates a new Paginator that uses the current controller. +item_count+,
   # +items_per_page+ and +page_number+ are passed straight through.
 
   def util_make_paginator(item_count, items_per_page, page_number)

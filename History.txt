@@ -1,3 +1,15 @@
+*** 3.2.0 / 2006-04-10
+
++ 1 major enhancement:
+	+ Added Test::Rails.
++ 1 minor enhancement:
+	+ Extended autotest for Test::Rails.
++ 4 bug fixes:
+	+ Autotest now detects changes in rhtml.
+	+ Improved autotest's file mapping and choice of ruby.
+	+ We've got RDoc, yes we do!
+	+ Removed redundancies in rakefile. Using gem spec for most stuff now.
+
 *** 3.1.0 / 2006-03-29
 
 + 2 major enhancements
@@ -15,10 +27,10 @@
 	+ autotest can now run cvs/svn/p4 up periodically to be a mini-tinderbox.
 	+ autotest now has real help.
 + 4 bug fixes
-	- ZenTest is now zentest. Yay for consistency! (do a rake uninstall to clean)
-	- ZenTest excludes pretty_print methods.
-	- Fixed unary operator issues (they were backwards... oops!) for ZenTest.
-	- unit_diff now runs diff.exe on Windoze. dunno if that will work.
+	+ ZenTest is now zentest. Yay for consistency! (do a rake uninstall to clean)
+	+ ZenTest excludes pretty_print methods.
+	+ Fixed unary operator issues (they were backwards... oops!) for ZenTest.
+	+ unit_diff now runs diff.exe on Windoze. dunno if that will work.
 
 *** 3.0.0 / 2006-03-06
 

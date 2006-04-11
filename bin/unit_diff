@@ -15,18 +15,17 @@
 #    -v display version
 
 require 'unit_diff'
+require 'zentest'
 
 ############################################################
 
-UNIT_DIFF_VERSION = '1.1.0'
-
 if defined? $v then
-  puts "#{File.basename $0} v. #{UNIT_DIFF_VERSION}"
-  exit
+  puts "#{File.basename $0} v. #{ZenTest::VERSION}"
+  exit 0
 end
 
 if defined? $h then
-  File.open(File.basename($0)) do |f|
+  File.open($0) do |f|
     begin; end until f.readline =~ /usage:/
     f.readline
     while line = f.readline and line.sub!(/^# ?/, '')
@@ -37,4 +36,3 @@ if defined? $h then
 end
 
 puts UnitDiff.unit_diff(ARGF)
-
