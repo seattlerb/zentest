@@ -137,6 +137,8 @@ class Autotest
       end
     end
 
+    tests.uniq!
+
     return [tests]
   end
 
@@ -254,7 +256,12 @@ class Autotest
   def test(updated)
     ever_failed = false
 
-    map_file_names(updated).each do |tests|
+    # Don't run tests if there's nothing to test.
+    all_tests = map_file_names updated
+    all_tests = all_tests.map { |tests| tests.empty? ? nil : tests }.compact
+    return if all_tests.empty?
+
+    all_tests.each do |tests|
       next if tests.empty?
       puts '# Testing updated files'
       cmd = "#{ruby} -Ilib:test -e '#{tests.inspect}.each { |f| load f }' | unit_diff -u"
