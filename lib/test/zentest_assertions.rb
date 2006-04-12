@@ -42,5 +42,34 @@ module Test::Unit::Assertions
     assert_equal false, obj.include?(item), message
   end
 
+  ##
+  # Captures $stdout and $stderr to StringIO objects and returns them.
+  # Restores $stdout and $stderr when done.
+  #
+  # Usage:
+  #   def test_puts
+  #     out, err = capture do
+  #       puts 'hi'
+  #       STDERR.puts 'bye!'
+  #     end
+  #     assert_equal "hi\n", out.string
+  #     assert_equal "bye!\n", err.string
+  #   end
+
+  def util_capture
+    require 'stringio'
+    orig_stdout = $stdout.dup
+    orig_stderr = $stderr.dup
+    captured_stdout = StringIO.new
+    captured_stderr = StringIO.new
+    $stdout = captured_stdout
+    $stderr = captured_stderr
+    yield
+    return captured_stdout, captured_stderr
+  ensure
+    $stdout = orig_stdout
+    $stderr = orig_stderr
+  end
+
 end
 

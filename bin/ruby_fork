@@ -1,0 +1,6 @@
+#!/usr/local/bin/ruby
+
+require 'ruby_fork'
+
+RubyFork.start_server ARGV
+
