@@ -28,6 +28,12 @@ class TestUnitDiff < Test::Unit::TestCase
     assert_equal expected, @diff.input(input)
   end
 
+  def test_unit_diff_empty # simulates broken pipe at the least
+    input = ""
+    expected = ""
+    assert_equal expected, @diff.unit_diff(input)
+  end
+
   def test_parse_diff1
     input = ["  1) Failure:\n",
              "test_test1(TestBlah) [./blah.rb:25]:\n",

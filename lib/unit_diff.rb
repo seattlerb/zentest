@@ -193,8 +193,10 @@ class UnitDiff
       end
     end
 
-    footer.shift if footer.first.strip.empty?
-    output.push footer.compact.map {|line| line.strip}.join("\n")
+    if footer then
+      footer.shift if footer.first.strip.empty?
+      output.push footer.compact.map {|line| line.strip}.join("\n")
+    end
 
     return output.flatten.join("\n")
   end
