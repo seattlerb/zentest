@@ -280,10 +280,9 @@ class Autotest
 
       if failed.empty? then
         puts '# Test::Unit exited without a parseable failure or error message.'
-        puts '# You probably have a syntax error in your code.'
-        puts '# I\'ll retry in 10 seconds'
-        sleep 10
-        redo
+        puts '# You probably have a syntax error in your code, or a missing file, or something...'
+        puts '# Waiting for changes'
+        return true
       end
 
       failed = consolidate_failures(failed)
