@@ -166,7 +166,7 @@ class Autotest
     # match both filters, so figure out which TestCase to run from the filename,
     # and use -n on that.
     until failed.empty? do
-      sleep 5 unless $TESTING
+      sleep 2 unless $TESTING
 
       updated = updated_files
 
@@ -237,7 +237,7 @@ class Autotest
 
         files = updated_files
         test files unless files.empty?
-        sleep 5
+        sleep 2
       end
     rescue Interrupt
       @interrupt = false # they didn't hit ^C in time
