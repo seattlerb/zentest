@@ -86,6 +86,19 @@ class TestUnitDiff < Test::Unit::TestCase
     assert_equal expected, @diff.parse_diff(input)
   end
 
+  def test_parse_diff_NOT_suspect_equals
+    input = ["1) Failure:\n",
+             "test_util_capture(AssertionsTest) [test/test_zentest_assertions.rb:53]:\n",
+             "<\"out\"> expected but was\n",
+             "<\"out\\n\">.\n"]
+    expected = [["1) Failure:\n",
+                 "test_util_capture(AssertionsTest) [test/test_zentest_assertions.rb:53]:\n"],
+                ["out"],
+                ["out\\n"]]
+
+    assert_equal expected, @diff.parse_diff(input)
+  end
+
   def test_unit_diff1
     input = "Loaded suite ./blah\nStarted\nF\nFinished in 0.035332 seconds.\n\n  1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n<\"line1\\nline2\\nline3\\n\"> expected but was\n<\"line4\\nline5\\nline6\\n\">.\n\n1 tests, 1 assertions, 1 failures, 0 errors\n"
 
@@ -97,7 +110,7 @@ class TestUnitDiff < Test::Unit::TestCase
   def test_unit_diff2
     input = "Loaded suite ./blah\nStarted\nFF\nFinished in 0.035332 seconds.\n\n  1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n<\"line1\\nline2\\nline3\\n\"> expected but was\n<\"line4\\nline5\\nline6\\n\">.\n\n  2) Failure:\ntest_test2(TestBlah) [./blah.rb:29]:\n<\"line1\"> expected but was\n<\"line2\\nline3\\n\\n\">.\n\n2 tests, 2 assertions, 2 failures, 0 errors\n"
 
-    expected = "Loaded suite ./blah\nStarted\nFF\nFinished in 0.035332 seconds.\n\n1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n1,3c1,3\n< line1\n< line2\n< line3\n---\n> line4\n> line5\n> line6\n\n2) Failure:\ntest_test2(TestBlah) [./blah.rb:29]:\n1c1,3\n< line1\n---\n> line2\n> line3\n>\n\n2 tests, 2 assertions, 2 failures, 0 errors"
+    expected = "Loaded suite ./blah\nStarted\nFF\nFinished in 0.035332 seconds.\n\n1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n1,3c1,3\n< line1\n< line2\n< line3\n---\n> line4\n> line5\n> line6\n\n2) Failure:\ntest_test2(TestBlah) [./blah.rb:29]:\n1c1,4\n< line1\n---\n> line2\n> line3\n>\n>\n\n2 tests, 2 assertions, 2 failures, 0 errors"
 
     assert_equal expected, @diff.unit_diff(input)
   end
@@ -111,24 +124,17 @@ class TestUnitDiff < Test::Unit::TestCase
   end
 
   def test_unit_diff_suspect_equals
-    input = ".............................................F............................................
-Finished in 0.834671 seconds.
+    input = ".............................................F............................................\nFinished in 0.834671 seconds.\n\n  1) Failure:\ntest_unit_diff_suspect_equals(TestUnitDiff) [./test/test_unit_diff.rb:122]:\n<\"out\"> expected but was\n<\"out\">.\n\n90 tests, 241 assertions, 1 failures, 0 errors"
 
-  1) Failure:
-test_unit_diff_suspect_equals(TestUnitDiff) [./test/test_unit_diff.rb:122]:
-<\"out\"> expected but was
-<\"out\">.
+    expected = ".............................................F............................................\nFinished in 0.834671 seconds.\n\n1) Failure:\ntest_unit_diff_suspect_equals(TestUnitDiff) [./test/test_unit_diff.rb:122]:\n[no difference--suspect ==]\n\n90 tests, 241 assertions, 1 failures, 0 errors"
 
-90 tests, 241 assertions, 1 failures, 0 errors"
+    assert_equal expected, @diff.unit_diff(input)
+  end
 
-    expected = ".............................................F............................................
-Finished in 0.834671 seconds.
+  def test_unit_diff_NOT_suspect_equals
+    input = ".\nFinished in 0.0 seconds.\n\n  1) Failure:\ntest_blah(TestBlah)\n<\"out\"> expected but was\n<\"out\\n\">.\n\n1 tests, 1 assertions, 1 failures, 0 errors"
 
-1) Failure:
-test_unit_diff_suspect_equals(TestUnitDiff) [./test/test_unit_diff.rb:122]:
-[no difference--suspect ==]
-
-90 tests, 241 assertions, 1 failures, 0 errors"
+    expected = ".\nFinished in 0.0 seconds.\n\n1) Failure:\ntest_blah(TestBlah)\n1a2\n>\n\n1 tests, 1 assertions, 1 failures, 0 errors"
 
     assert_equal expected, @diff.unit_diff(input)
   end
