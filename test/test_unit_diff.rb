@@ -73,6 +73,19 @@ class TestUnitDiff < Test::Unit::TestCase
     assert_equal expected, @diff.parse_diff(input)
   end
 
+  def test_parse_diff_suspect_equals
+    input = ["1) Failure:\n",
+             "test_util_capture(AssertionsTest) [test/test_zentest_assertions.rb:53]:\n",
+             "<\"out\"> expected but was\n",
+             "<\"out\">.\n"]
+    expected = [["1) Failure:\n",
+                 "test_util_capture(AssertionsTest) [test/test_zentest_assertions.rb:53]:\n"],
+                ["out"],
+                ["out"]]
+
+    assert_equal expected, @diff.parse_diff(input)
+  end
+
   def test_unit_diff1
     input = "Loaded suite ./blah\nStarted\nF\nFinished in 0.035332 seconds.\n\n  1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n<\"line1\\nline2\\nline3\\n\"> expected but was\n<\"line4\\nline5\\nline6\\n\">.\n\n1 tests, 1 assertions, 1 failures, 0 errors\n"
 
@@ -93,6 +106,18 @@ class TestUnitDiff < Test::Unit::TestCase
     input = " 13) Failure:\ntest_case_stmt(TestRubyToRubyC) [./r2ctestcase.rb:1198]:\nUnknown expected data.\n<false> is not true.\n"
 
     expected = "13) Failure:\ntest_case_stmt(TestRubyToRubyC) [./r2ctestcase.rb:1198]:\nUnknown expected data.\n<false> is not true."
+
+    assert_equal expected, @diff.unit_diff(input)
+  end
+
+  def test_unit_diff_suspect_equals
+    input = " 13) Failure:
+test_util_capture(AssertionsTest) [test/test_zentest_assertions.rb:53]:
+<\"out\"> expected but was
+<\"out\">."
+    expected = " 13) Failure:
+test_util_capture(AssertionsTest) [test/test_zentest_assertions.rb:53]:
+[no difference--suspect ==]\n"
 
     assert_equal expected, @diff.unit_diff(input)
   end
