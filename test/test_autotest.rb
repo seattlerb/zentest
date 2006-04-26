@@ -72,8 +72,8 @@ class TestAutotest < Test::Unit::TestCase
     ]
 
     expected = [
-      ["'/^(test_a|test_b|test_c)$/'", /one/],
-      ["'/^(test_d)$/'", /two/],
+      ['"/^(test_a|test_b|test_c)$/"', /one/],
+      ['"/^(test_d)$/"', /two/],
     ]
 
     assert_equal expected,

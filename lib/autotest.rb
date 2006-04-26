@@ -64,7 +64,7 @@ class Autotest
     end
 
     return filters.map do |klass, methods|
-      ["'/^(#{methods.join('|')})$/'", /#{klass}/]
+      ["\"/^(#{methods.join('|')})$/\"", /#{klass}/]
     end
   end
 
@@ -256,10 +256,11 @@ class Autotest
     all_tests = all_tests.map { |tests| tests.empty? ? nil : tests }.compact
     return if all_tests.empty?
 
-    all_tests.each do |tests|
-      next if tests.empty?
+    all_tests.each do |files|
+      next if files.empty?
+      test_files = files.map { |file| "'#{file}'" }.join ', '
       puts '# Testing updated files'
-      cmd = "#{ruby} -Ilib:test -e '#{tests.inspect}.each { |f| load f }' | unit_diff -u"
+      cmd = "#{ruby} -Ilib:test -e \"[#{test_files}].each { |f| load f }\" | unit_diff -u"
       puts "+ #{cmd}"
       results = `#{cmd}`
       puts results
@@ -283,7 +284,7 @@ class Autotest
       failed = consolidate_failures(failed)
 
       # REFACTOR: I don't think the two routines merit real differences
-      retest_failed failed, tests
+      retest_failed failed, files
 
       break
     end
