@@ -330,7 +330,7 @@ class Autotest
         end
       end
 
-      Find.prune if f =~ /(?:\.svn|CVS)$/       # version control files
+      Find.prune if f =~ /(?:\.svn|CVS|tmp|public)$/ # prune dirs
 
       next if File.directory? f
       next if f =~ /(?:swp|~|rej|orig)$/        # temporary/patch files
