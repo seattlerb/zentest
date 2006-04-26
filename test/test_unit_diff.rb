@@ -111,13 +111,24 @@ class TestUnitDiff < Test::Unit::TestCase
   end
 
   def test_unit_diff_suspect_equals
-    input = " 13) Failure:
-test_util_capture(AssertionsTest) [test/test_zentest_assertions.rb:53]:
+    input = ".............................................F............................................
+Finished in 0.834671 seconds.
+
+  1) Failure:
+test_unit_diff_suspect_equals(TestUnitDiff) [./test/test_unit_diff.rb:122]:
 <\"out\"> expected but was
-<\"out\">."
-    expected = " 13) Failure:
-test_util_capture(AssertionsTest) [test/test_zentest_assertions.rb:53]:
-[no difference--suspect ==]\n"
+<\"out\">.
+
+90 tests, 241 assertions, 1 failures, 0 errors"
+
+    expected = ".............................................F............................................
+Finished in 0.834671 seconds.
+
+1) Failure:
+test_unit_diff_suspect_equals(TestUnitDiff) [./test/test_unit_diff.rb:122]:
+[no difference--suspect ==]
+
+90 tests, 241 assertions, 1 failures, 0 errors"
 
     assert_equal expected, @diff.unit_diff(input)
   end
