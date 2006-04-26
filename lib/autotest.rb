@@ -48,6 +48,7 @@ class Autotest
     @interrupt = false
     @files = Hash.new Time.at(0)
     @exceptions = nil
+    @last_vcs_update = Time.at 0
   end
 
   ##
@@ -111,6 +112,23 @@ class Autotest
     end
 
     return out.join("\n")
+  end
+
+  ##
+  # Installs the SIGINT handler.
+
+  def add_sigint_handler
+    trap 'INT' do
+      if @interrupt then
+        puts "# Ok, you really want to quit, doing so"
+        exit
+      end
+      # STDERR.puts "\t#{caller.join "\n\t"}"
+      puts "# hit ^C again to quit"
+      sleep 1.5 # give them enough time to hit ^C again
+      @interrupt = true # if they hit ^C again, 
+      raise Interrupt # let the run loop catch it
+    end
   end
 
   ##
@@ -205,35 +223,12 @@ class Autotest
   # Repeatedly scans for updated files and runs their tests.
 
   def run
-    trap 'INT' do
-      if @interrupt then
-        puts "# Ok, you really want to quit, doing so"
-        exit
-      end
-      # STDERR.puts "\t#{caller.join "\n\t"}"
-      puts "# hit ^C again to quit"
-      sleep 1.5 # give them enough time to hit ^C again
-      @interrupt = true # if they hit ^C again, 
-      raise Interrupt # let the run loop catch it
-    end
-      
+    add_sigint_handler
+
     begin
-      last_update = Time.at 0
 
       loop do
-        if $vcs and Time.now > last_update + $vcstime then
-          last_update = Time.now
-          case $vcs
-          when 'cvs' then
-            system 'cvs up'
-          when 'p4' then
-            system 'p4 sync'
-          when 'svn' then
-            system 'svn up'
-          else
-            puts "# Sorry, I don't know what version control system \"#{$vcs}\" is"
-          end
-        end
+        vcs_update
 
         files = updated_files
         test files unless files.empty?
@@ -342,6 +337,24 @@ class Autotest
     end
 
     return updated
+  end
+
+  ##
+  # Updates the files from the VCS system, if any.
+
+  def vcs_update
+    return if $vcs.nil? or Time.now <= @last_vcs_update + $vcstime
+    @last_vcs_update = Time.now
+    case $vcs
+    when 'cvs' then
+      system 'cvs up'
+    when 'p4' then
+      system 'p4 sync'
+    when 'svn' then
+      system 'svn up'
+    else
+      puts "# Sorry, I don't know what version control system \"#{$vcs}\" is"
+    end
   end
 
 end

@@ -2,6 +2,7 @@ $TESTING = true
 
 require 'stringio'
 require 'test/unit'
+require 'test/zentest_assertions'
 
 require 'autotest'
 
@@ -9,21 +10,29 @@ Dir.chdir File.join(File.dirname(__FILE__), "..")
 
 class Autotest
 
-  attr_accessor :system_responses
   attr_reader :files
 
+  attr_accessor :system_responses, :system_cmds
+
   def system(cmd)
-    @system_responses ||= []
+    @system_cmds << cmd
     raise 'Out of system responses' if @system_responses.empty?
     return @system_responses.shift
   end
 
-  attr_accessor :backtick_responses
+  attr_accessor :backtick_responses, :backtick_cmds
 
   def `(cmd)                            # ` appeases emacs
-    @backtick_responses ||= []
+    @backtick_cmds << cmd
     raise 'Out of backtick responses' if @backtick_responses.empty?
     return @backtick_responses.shift
+  end
+
+  def test_initialize
+    @backtick_cmds = []
+    @system_cmds = []
+    @backtick_responses = []
+    @system_responses = []
   end
 
 end
@@ -51,6 +60,7 @@ class TestAutotest < Test::Unit::TestCase
     end
 
     @at = Autotest.new
+    @at.test_initialize
   end
 
   def test_consolidate_failures
@@ -233,6 +243,37 @@ class TestAutotest < Test::Unit::TestCase
 
       assert_not_equal expected['test/test_photo.rb'], @at.files
     end
+  end
+
+  def test_vcs_update_no_vcs
+    $vcstime = 600
+    $vcs = nil
+    @at.vcs_update
+    assert_empty @at.system_cmds
+  end
+
+  def test_vcs_update_cvs
+    @at.system_responses << ''
+    $vcstime = -1
+    $vcs = 'cvs'
+    @at.vcs_update
+    assert_equal ['cvs up'], @at.system_cmds
+  end
+
+  def test_vcs_update_p4
+    @at.system_responses << "File(s) up-to-date.\n"
+    $vcstime = -1
+    $vcs = 'p4'
+    @at.vcs_update
+    assert_equal ['p4 sync'], @at.system_cmds
+  end
+
+  def test_vcs_update_svn
+    @at.system_responses << ''
+    $vcstime = -1
+    $vcs = 'svn'
+    @at.vcs_update
+    assert_equal ['svn up'], @at.system_cmds
   end
 
   def util_add_map(file, *tests)

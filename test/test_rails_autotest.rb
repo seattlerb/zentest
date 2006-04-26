@@ -7,6 +7,7 @@ class TestRailsAutotest < TestAutotest
     super
 
     @at = RailsAutotest.new
+    @at.test_initialize # HACK DRY
 
     @rails_tests_dir = 'test/data/rails'
 
