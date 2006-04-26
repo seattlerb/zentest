@@ -18,6 +18,14 @@ module Test::Unit::Assertions
   alias deny_equal assert_not_equal
 
   ##
+  # Asserts that +obj+ responds to #empty? and #empty? returns true.
+
+  def assert_empty(obj)
+    assert_respond_to obj, :empty?
+    assert_equal true, obj.empty?
+  end
+
+  ##
   # Asserts that +obj+ responds to #empty? and #empty? returns false.
 
   def deny_empty(obj)
