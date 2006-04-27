@@ -215,8 +215,14 @@ class Autotest
   # The path to this ruby for running tests.
 
   def ruby
-    return File.join(Config::CONFIG['bindir'],
+    ruby = File.join(Config::CONFIG['bindir'],
                      Config::CONFIG['ruby_install_name'])
+
+    unless File::ALT_SEPARATOR.nil? then
+      ruby.gsub! File::SEPARATOR, File::ALT_SEPARATOR
+    end
+
+    return ruby
   end
 
   ##

@@ -221,6 +221,19 @@ class TestAutotest < Test::Unit::TestCase
     assert_equal this_ruby, @at.ruby
   end
 
+  def test_ruby_win32
+    orig_sep = File::ALT_SEPARATOR
+    File.send :remove_const, :ALT_SEPARATOR
+    File.const_set :ALT_SEPARATOR, '\\'
+    this_ruby = File.join(Config::CONFIG['bindir'],
+                          Config::CONFIG['ruby_install_name'])
+    this_ruby.gsub! File::SEPARATOR, File::ALT_SEPARATOR
+    assert_equal this_ruby, @at.ruby
+  ensure
+    File.send :remove_const, :ALT_SEPARATOR
+    File.const_set :ALT_SEPARATOR, orig_sep
+  end
+
   def test_updated_eh
     Dir.chdir @normal_tests_dir do
       assert_equal true,  @at.updated?(@photo_test_file), 'Not in @files'
