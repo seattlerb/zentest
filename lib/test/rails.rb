@@ -37,8 +37,7 @@ $TESTING = true
 #   require 'test/rails'
 #
 # Next, change the class from "Unit" to "Rails" right after you
-# require +test_help+. This prevents the bad things +test_help+ performs
-# upon Test::Unit::TestCase.
+# require +test_help+.
 #
 # Your 'test/test_helper.rb' will end up looking like this:
 #
