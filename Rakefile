@@ -4,6 +4,7 @@ require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
 require 'rake/gempackagetask'
+require 'rake/contrib/sshpublisher'
 require 'rbconfig'
 
 require './lib/zentest.rb'
@@ -68,6 +69,15 @@ Rake::RDocTask.new :rdoc do |rd|
   rd.main = 'README.txt'
   rd.options << '-d' if `which dot` =~ /\/dot/ unless RUBY_PLATFORM =~ /win32/
   rd.options << '-t ZenTest RDoc'
+end
+
+desc 'Upload RDoc to RubyForge'
+task :upload => :rdoc do
+  user = "#{ENV['USER']}@rubyforge.org"
+  project = '/var/www/gforge-projects/zentest'
+  local_dir = 'doc'
+  pub = Rake::SshDirPublisher.new user, project, local_dir
+  pub.upload
 end
 
 $prefix = ENV['PREFIX'] || Config::CONFIG['prefix']
