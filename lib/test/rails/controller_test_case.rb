@@ -199,7 +199,7 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
   # +params+.
 
   def xml_http_request(request_method, action, parameters = nil)
-    @request.env['REQUEST_METHOD'] = request_method
+    @request.env['REQUEST_METHOD'] = request_method.to_s
 
     @request.env['HTTP_X_REQUESTED_WITH'] = 'XMLHttpRequest'
     @request.env['HTTP_ACCEPT'] = 'text/javascript, text/html, application/xml, text/xml, */*'
