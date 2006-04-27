@@ -71,8 +71,8 @@
 #       @request.request_uri = '/foo'
 #       assigns[:action_title] = 'Hello & Goodbye'
 #   
-#       # Render an empty string with the 'default' layout.
-#       render :text => '', :layout => 'default'
+#       # Render an empty string with the 'application' layout.
+#       render :text => '', :layout => 'application'
 #   
 #       # Assert content just like a regular view test.
 #       assert_links_to '/', 'Home'
