@@ -17,7 +17,10 @@ if $h or $help then
   help << nil
   help << "\t-rails\t\tForce rails mode."
   help << "\t\t\tRails will be automatically detected by the presence of"
-  help << "\t\t\tconfig/environment.rb"
+  help << "\t\t\tconfig/environment.rb. Use this if you don't have one."
+  help << nil
+  help << "\t\t\tYou may need to run 'rake db:test:prepare' before"
+  help << "\t\t\tstarting autotest on a rails project."
   help << nil
   help << "\t-vcs=NAME\tVersion control system to update."
   help << "\t\t\tAutotest will automatically update every vcstime"

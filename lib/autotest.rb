@@ -13,6 +13,13 @@ require 'rbconfig'
 # If you want Autotest to start over from the top, hit ^C.  If you want
 # Autotest to quit, hit ^C twice.
 #
+# The autotest command will automatically discover a Rails directory by
+# looking for config/environment.rb.  If you don't have one you can force
+# rails mode by passing -rails to autotest.
+#
+# When Rails is discovered autotest uses RailsAutotest to perform file
+# mappings and other work.  See RailsAutotest for details.
+#
 # Autotest uses a simple naming scheme to figure out how to map implementation
 # files to test files following the Test::Unit naming scheme.
 #

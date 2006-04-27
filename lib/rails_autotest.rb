@@ -3,7 +3,9 @@ require 'autotest'
 ##
 # RailsAutotest is an Autotest subclass designed for use with Rails projects.
 #
-# To use RailsAutotest pass the -rails flag to autotest.
+# RailsAutotest does not run any rake tasks before starting or during its run,
+# so if you haven't prepared your test database you'll need to run the
+# db:test:prepare rake task before starting autotest.
 
 class RailsAutotest < Autotest
 
