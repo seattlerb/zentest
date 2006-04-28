@@ -216,22 +216,34 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_ruby
-    this_ruby = File.join(Config::CONFIG['bindir'],
-                          Config::CONFIG['ruby_install_name'])
-    assert_equal this_ruby, @at.ruby
+    assert_equal util_this_ruby, @at.ruby
   end
 
   def test_ruby_win32
     orig_sep = File::ALT_SEPARATOR
     File.send :remove_const, :ALT_SEPARATOR
     File.const_set :ALT_SEPARATOR, '\\'
-    this_ruby = File.join(Config::CONFIG['bindir'],
-                          Config::CONFIG['ruby_install_name'])
-    this_ruby.gsub! File::SEPARATOR, File::ALT_SEPARATOR
+    this_ruby = util_this_ruby.gsub File::SEPARATOR, File::ALT_SEPARATOR
     assert_equal this_ruby, @at.ruby
   ensure
     File.send :remove_const, :ALT_SEPARATOR
     File.const_set :ALT_SEPARATOR, orig_sep
+  end
+
+  def test_make_test_cmd
+    cmd = @at.make_test_cmd "-e \"['test/test_x.rb'].each { |f| load f }\""
+
+    expected = "#{util_this_ruby} -Ilib:test -e \"['test/test_x.rb'].each { |f| load f }\" | unit_diff -u"
+
+    assert_equal expected, cmd
+  end
+
+  def test_make_test_cmd_with_filter
+    cmd = @at.make_test_cmd 'test/test_x.rb', '/test_do_stuff/'
+
+    expected = "#{util_this_ruby} -Ilib:test test/test_x.rb -n /test_do_stuff/ | unit_diff -u"
+
+    assert_equal expected, cmd
   end
 
   def test_updated_eh
@@ -313,6 +325,10 @@ class TestAutotest < Test::Unit::TestCase
   ensure
     $stdout = old_stdout
     $stderr = old_stderr
+  end
+
+  def util_this_ruby
+    File.join Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name']
   end
 
   def util_touch(file, t = Time.now)

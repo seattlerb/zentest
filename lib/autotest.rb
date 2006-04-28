@@ -56,6 +56,7 @@ class Autotest
     @files = Hash.new Time.at(0)
     @exceptions = nil
     @last_vcs_update = Time.at 0
+    @libs = 'lib:test'
   end
 
   ##
@@ -139,6 +140,17 @@ class Autotest
   end
 
   ##
+  # Builds a ruby command to run some tests.
+  #
+  # +command+ contains the tests to run and +filter+ contains the Test::Unit
+  # filters.
+
+  def make_test_cmd(command, filter = nil)
+    filter = " -n #{filter}" unless filter.nil?
+    return "#{ruby} -I#{@libs} #{command}#{filter} | unit_diff -u"
+  end
+
+  ##
   # Maps implementation files to test files.  Returns an Array of one or more
   # Arrays of test filenames.
 
@@ -202,8 +214,8 @@ class Autotest
 
         puts "# Rerunning failures: #{failed_files.join ' '}"
 
-        test_filter = " -n #{filter}" unless filter == "'/^(default_test)/'"
-        cmd = "#{ruby} -Ilib:test #{failed_files.join ' '}#{test_filter} | unit_diff -u"
+        test_filter = (filter == "'/^(default_test)/'") ? nil : filter
+        cmd = make_test_cmd failed_files.join(' '), test_filter
 
         puts "+ #{cmd}"
         result = `#{cmd}`
@@ -272,8 +284,10 @@ class Autotest
     all_tests.each do |files|
       next if files.empty?
       test_files = files.map { |file| "'#{file}'" }.join ', '
+
+      cmd = make_test_cmd "-e \"[#{test_files}].each { |f| load f }\""
+
       puts '# Testing updated files'
-      cmd = "#{ruby} -Ilib:test -e \"[#{test_files}].each { |f| load f }\" | unit_diff -u"
       puts "+ #{cmd}"
       results = `#{cmd}`
       puts results
