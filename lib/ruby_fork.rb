@@ -137,20 +137,25 @@ module RubyFork
       settings[:daemonize]
 
     loop do
-      socket = server.accept
+      begin
+        socket = server.accept
 
-      args_length = socket.gets.to_i
-      settings, argv = Marshal.load socket.read(args_length)
+        args_length = socket.gets.to_i
+        args = socket.read args_length
+        settings, argv = Marshal.load args
 
-      fork do
-        daemonize socket do
-          ARGV.replace argv
-          setup_environment settings
-          socket.close
+        fork do
+          daemonize socket do
+            ARGV.replace argv
+            setup_environment settings
+            socket.close
+          end
         end
-      end
 
-      socket.close # close my copy.
+        socket.close # close my copy.
+      rescue => e
+        socket.close if socket
+      end
     end
   end
 
