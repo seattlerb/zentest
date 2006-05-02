@@ -36,13 +36,13 @@ module RubyFork
   end
 
   def self.daemonize(io = File.open('/dev/null', 'r+'))
-    exit!(0) if fork
-    Process::setsid
-    exit!(0) if fork
+    fork and exit!
+    Process.setsid
+    fork and exit!
 
     STDIN.reopen io
     STDOUT.reopen io
-    STDERR.reopen io
+    #STDERR.reopen io
 
     yield if block_given?
   end
@@ -126,10 +126,10 @@ module RubyFork
   end
 
   def self.start_server(args = ARGV)
-    settings = RubyFork.parse_server_args args
-    RubyFork.setup_environment settings
+    settings = parse_server_args args
+    setup_environment settings
 
-    RubyFork.daemonize if settings[:daemonize]
+    daemonize if settings[:daemonize]
 
     server = TCPServer.new 'localhost', settings[:port]
 
@@ -137,26 +137,29 @@ module RubyFork
       settings[:daemonize]
 
     loop do
-      begin
-        socket = server.accept
+      Thread.new server.accept do |socket|
+        begin
+          args_length = socket.gets.to_i
+          args = socket.read args_length
+          settings, argv = Marshal.load args
 
-        args_length = socket.gets.to_i
-        args = socket.read args_length
-        settings, argv = Marshal.load args
-
-        fork do
-          daemonize socket do
-            ARGV.replace argv
-            setup_environment settings
-            socket.close
+          fork do
+            daemonize socket do
+              ARGV.replace argv
+              setup_environment settings
+              socket.close
+            end
           end
-        end
 
-        socket.close # close my copy.
-      rescue => e
-        socket.close if socket
+          socket.close # close my copy.
+        rescue => e
+          socket.close if socket
+        end
       end
     end
+  rescue Exception => e
+    puts "Failed to catch #{e.class}:#{e.message}"
+    puts "\t#{e.backtrace.join "\n\t"}"
   end
 
   def self.setup_environment(settings)
