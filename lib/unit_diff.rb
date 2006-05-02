@@ -80,6 +80,7 @@ class UnitDiff
   # Handy wrapper for UnitDiff#unit_diff.
 
   def self.unit_diff(input)
+    trap 'INT' do exit 1 end
     ud = UnitDiff.new
     ud.unit_diff(input)
   end
