@@ -36,8 +36,13 @@ Dir.chdir root_dir do
     end
   end
 
+  tarballs = Dir["versions/rubygems*.tgz"]
+  raise "You should delete all but one rubygem tarball" if tarballs.size > 1
+  rubygem_tarball = File.expand_path tarballs.last
+
   Dir.chdir "build" do
     Dir["../versions/ruby*.tar.gz"].each do |tarball|
+      next if tarball =~ /rubygems/
       build_dir = File.basename tarball, ".tar.gz"
       version = build_dir.sub(/^ruby-?/, '')
       versions << version
@@ -46,15 +51,26 @@ Dir.chdir root_dir do
         unless test ?d, build_dir then
           puts "creating #{inst_dir}"
           Dir.mkdir inst_dir
-          puts "unpacking #{tarball}"
-          system "tar zxf #{tarball}"
+          run "tar zxf #{tarball}"
         end
         Dir.chdir build_dir do
+          puts "building and installing #{version}"
           run "autoconf" unless test ?f, "configure"
           FileUtils.rm_r "ext/readline" if test ?d, "ext/readline"
-          run "./configure --prefix #{inst_dir} &> log.configure"
-          run "make -j4 &> log.build"
+          run "./configure --prefix #{inst_dir} &> log.configure" unless test ?f, "Makefile"
+          run "nice make -j4 &> log.build"
           run "make install &> log.install"
+          build_dir = Dir.pwd
+
+          if rubygem_tarball then
+            next if version.gsub(/\./, '') =~ /^19/ # doesn't seem to work w/ ruby 1.9, filed bug
+            rubygems = File.basename rubygem_tarball, ".tgz"
+            run "tar zxf #{rubygem_tarball}" unless test ?d, rubygems
+
+            Dir.chdir rubygems do
+              run "../ruby ./setup.rb &> ../log.rubygems"
+            end
+          end
         end
       end
     end
@@ -78,5 +94,3 @@ puts
 puts "TOTAL RESULT = #{result} failures"
 
 exit result
-
-
