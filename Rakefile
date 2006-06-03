@@ -26,8 +26,12 @@ spec = Gem::Specification.new do |s|
   s.instance_variable_set "@description", paragraphs[3..10].join("\n\n")
   s.instance_variable_set "@summary", paragraphs[12]
 
+  s.homepage = "http://www.zenspider.com/ZSS/Products/ZenTest/"
+  s.rubyforge_project = "zentest"
+  s.has_rdoc = true
+
   if $DEBUG then
-    puts "ZenTest #{s.version}"
+    puts "#{s.name} #{s.version}"
     puts
     puts s.executables.sort.inspect
     puts
@@ -37,10 +41,6 @@ spec = Gem::Specification.new do |s|
     puts "** description:"
     puts s.description
   end
-
-  s.homepage = "http://www.zenspider.com/ZSS/Products/ZenTest/"
-  s.rubyforge_project = "zentest"
-  s.has_rdoc = true
 end
 
 desc 'Build Gem'
@@ -70,9 +70,10 @@ Rake::RDocTask.new :rdoc do |rd|
   rd.options << '-d' if `which dot` =~ /\/dot/ unless RUBY_PLATFORM =~ /win32/
   rd.options << '-t ZenTest RDoc'
 end
-
+  
 desc 'Upload RDoc to RubyForge'
 task :upload => :rdoc do
+    
   user = "#{ENV['USER']}@rubyforge.org"
   project = '/var/www/gforge-projects/zentest'
   local_dir = 'doc'
@@ -122,6 +123,11 @@ end
 desc 'Clean up'
 task :clean => [ :clobber_rdoc, :clobber_package ] do
   rm_f Dir["**/*~"]
+end
+
+task :help do
+  Rake.application.options.show_task_pattern = //
+  Rake.application.display_tasks_and_comments
 end
 
 # vim:syntax=ruby
