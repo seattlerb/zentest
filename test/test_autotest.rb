@@ -1,339 +1,170 @@
+#!/usr/local/bin/ruby -w
+
 $TESTING = true
 
+require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 require 'stringio'
-require 'test/unit'
-require 'test/zentest_assertions'
-
 require 'autotest'
 
-Dir.chdir File.join(File.dirname(__FILE__), "..")
-
-class Autotest
-
-  attr_reader :files
-
-  attr_accessor :system_responses, :system_cmds
-
-  def system(cmd)
-    @system_cmds << cmd
-    raise 'Out of system responses' if @system_responses.empty?
-    return @system_responses.shift
-  end
-
-  attr_accessor :backtick_responses, :backtick_cmds
-
-  def `(cmd)                            # ` appeases emacs
-    @backtick_cmds << cmd
-    raise 'Out of backtick responses' if @backtick_responses.empty?
-    return @backtick_responses.shift
-  end
-
-  def test_initialize
-    @backtick_cmds = []
-    @system_cmds = []
-    @backtick_responses = []
-    @system_responses = []
-  end
-
-end
+# NOT TESTED:
+#   class_run
+#   add_sigint_handler
+#   all_good
+#   get_to_green
+#   reset
+#   ruby
+#   run
+#   run_tests
 
 class TestAutotest < Test::Unit::TestCase
-
   def setup
-    @normal_tests_dir = 'test/data/normal'
-
-    @blah_file           = 'lib/blah.rb'
-    @photo_file          = 'lib/photo.rb'
-    @photo_test_file     = 'test/test_photo.rb'
-    @route_test_file     = 'test/test_route.rb'
-    @user_test_file      = 'test/test_user.rb'
-    @camelcase_test_file = 'test/test_camelcase.rb'
-
-    @file_map = {}
-
-    @all_files = [ @blah_file, @photo_file, @photo_test_file, @route_test_file, @user_test_file, @camelcase_test_file ]
-
-    Dir.chdir @normal_tests_dir do
-      util_touch @photo_file, (Time.now - 60)
-      util_touch @photo_test_file, (Time.now - 60)
-      util_touch @camelcase_test_file, (Time.now - 60)
-    end
-
-    @at = Autotest.new
-    @at.test_initialize
+    @a = Autotest.new
+    @a.files = {
+      'lib/blah.rb' => 1,
+      'test/test_blah.rb' => 2,
+    }
+    @a.files.default = 0
+    @a.output = StringIO.new
   end
 
-  def test_consolidate_failures
-    failed = [
-      %w[test_a TestOne],
-      %w[test_b TestOne],
-      %w[test_c TestOne],
-      %w[test_d TestTwo],
-    ]
-
-    expected = [
-      ['"/^(test_a|test_b|test_c)$/"', /one/],
-      ['"/^(test_d)$/"', /two/],
-    ]
-
-    assert_equal expected,
-                 @at.consolidate_failures(failed).sort_by { |f,k| k.source }
+  def test_consolidate_failures_experiment
+    @a.files = {
+      'lib/autotest.rb' => 1,
+      'test/test_autotest.rb' => 2,
+    }
+    @a.files.default = 0
+    input = [["test_fail1", "TestAutotest"], ["test_fail2", "TestAutotest"], ["test_error1", "TestAutotest"], ["test_error2", "TestAutotest"]]
+    result = @a.consolidate_failures input
+    expected = { "test/test_autotest.rb" => %w( test_fail1 test_fail2 test_error1 test_error2 ) }
+    assert_equal expected, result
   end
 
-  # 0 files update, 0 run
-  def test_failed_test_files_no_updates
-    tests = [@user_test_file, @photo_test_file]
-    updated_files = []
-
-    failed_files = @at.failed_test_files(/photo/, tests, updated_files)
-
-    assert_equal [], failed_files
+  def test_consolidate_failures_green
+    result = @a.consolidate_failures([])
+    expected = {}
+    assert_equal expected, result
   end
 
-  # 1 test changes, 1 test runs
-  def test_failed_test_files_test_updated
-    tests = [@user_test_file, @photo_test_file]
-    updated_files = [@photo_test_file]
-
-    failed_files = @at.failed_test_files(/photo/, tests, updated_files)
-
-    assert_equal [@photo_test_file], failed_files
+  def test_consolidate_failures_multiple_matches
+    @a.files['test/test_blah_again.rb'] = 42
+    result = @a.consolidate_failures([['test_unmatched', 'TestBlah']])
+    expected = {}
+    assert_equal expected, result
+    expected = "multiple files matched class TestBlah [\"test/test_blah.rb\", \"test/test_blah_again.rb\"].\n"
+    assert_equal expected, @a.output.string
   end
 
-  # non-matching test class changed, 0 test runs
-  def test_failed_test_files_unrelated_test_updated
-    tests = [@user_test_file, @photo_test_file]
-    updated_files = [@user_test_file]
-
-    failed_files = @at.failed_test_files(/photo/, tests, updated_files)
-
-    assert_equal [], failed_files
+  def test_consolidate_failures_no_match
+    result = @a.consolidate_failures([['test_blah1', 'TestBlah'], ['test_blah2', 'TestBlah'], ['test_blah1', 'TestUnknown']])
+    expected = {'test/test_blah.rb' => ['test_blah1', 'test_blah2']}
+    assert_equal expected, result
+    expected = "Unable to map class TestUnknown to a file\n"
+    assert_equal expected, @a.output.string
   end
 
-  # tests handling of camelcase test matching
-  def test_failed_test_files_camelcase_updated
-    tests = [@camelcase_test_file]
-    updated_files = [@camelcase_test_file]
-
-    failed_files = @at.failed_test_files(/camel_?case/, tests, updated_files)
-
-    assert_equal [@camelcase_test_file], failed_files
+  def test_consolidate_failures_red
+    result = @a.consolidate_failures([['test_blah1', 'TestBlah'], ['test_blah2', 'TestBlah']])
+    expected = {'test/test_blah.rb' => ['test_blah1', 'test_blah2']}
+    assert_equal expected, result
   end
 
-  # running back to back with different classes should give updates for each
-  # class.
-  def test_failed_test_files_implementation_updated_both
-    tests = [@photo_test_file, @user_test_file]
-    updated_files = [@blah_file]
+  def test_handle_results
+    @a.files = {
+      'lib/autotest.rb' => 1,
+      'test/test_autotest.rb' => 2,
+    }
+    @a.files.default = 0
 
-    failed_files = @at.failed_test_files(/photo/, tests, updated_files)
+    s = "Loaded suite -e
+Started
+............
+Finished in 0.001655 seconds.
 
-    assert_equal [@photo_test_file], failed_files
+12 tests, 18 assertions, 0 failures, 0 errors
+"
 
-    failed_files = @at.failed_test_files(/user/, tests, updated_files)
+    @a.handle_results(s)
+    empty = {}
+    assert_equal empty, @a.files_to_test
 
-    assert_equal [@user_test_file], failed_files
-  end
+    s = "
+  1) Failure:
+test_fail1(TestAutotest) [./test/test_autotest.rb:59]:
+  2) Failure:
+test_fail2(TestAutotest) [./test/test_autotest.rb:59]:
+  3) Error:
+test_error1(TestAutotest):
+  3) Error:
+test_error2(TestAutotest):
+"
 
-  # "general" file changes, run all failures + mapped file
-  def test_failed_test_files_implementation_updated
-    tests = [@user_test_file, @photo_test_file]
-    updated_files = [@blah_file]
-
-    failed_files = @at.failed_test_files(/photo/, tests, updated_files)
-
-    assert_equal [@photo_test_file], failed_files
-  end
-
-  def test_failure_report
-    @at.files['test/test_one.rb'] = Time.at 0
-    @at.files['test/test_two.rb'] = Time.at 0
-
-    failures = [
-      ["'/^(test_a|test_b|test_c)/'", /one/],
-      ["'/^(test_d)/'", /two/],
-    ]
-
-    expected = "# failures remain in 2 files:
-#  test/test_one.rb:
-#    test_a
-#    test_b
-#    test_c
-#  test/test_two.rb:
-#    test_d"
-
-    assert_equal expected, @at.failure_report(failures)
-  end
-
-  def test_map_file_names
-    util_add_map('lib/untested.rb', [])
-    util_add_map('lib/autotest.rb', ['test/test_autotest.rb'])
-    util_add_map('lib/auto_test.rb', ['test/test_autotest.rb'])
-    util_add_map('test/test_autotest.rb', ['test/test_autotest.rb'])
-
-    @file_map.keys.each { |file| @at.files[file] = Time.at 0 }
-
-    util_test_map_file_names @normal_tests_dir
-  end
-
-  def test_retest_failed_modified
-    Dir.chdir @normal_tests_dir do
-      @all_files.each do |f| @at.updated? f; end
-
-      failed = [['test_route', /photo/]]
-      tests = [@photo_test_file]
-
-      @at.backtick_responses = ['1 tests, 1 assertions, 0 failures, 0 errors']
-
-      util_touch @photo_test_file
-
-      out, err = util_capture do
-        @at.retest_failed failed, tests
-      end
-
-      out = out.split $/
-
-      assert_equal "# Waiting for changes", out.shift
-      assert_equal "# Rerunning failures: #{@photo_test_file}", out.shift
-      assert_equal "+ #{@at.ruby} -Ilib:test #{@photo_test_file} -n test_route | unit_diff -u", out.shift
-
-      assert_equal true, @at.backtick_responses.empty?
-    end
-  end
-
-  def test_reset_times
-    Dir.chdir @normal_tests_dir do
-      @at.updated?(@photo_test_file)
-
-      assert_equal false, @at.updated?(@photo_test_file), 'In @files'
-      time = @at.files[@photo_test_file]
-
-      @at.reset_times
-
-      assert_not_equal time, @at.files[@photo_test_file]
-      assert_equal true, @at.updated?(@photo_test_file), 'Time reset to 0'
-    end
-  end
-
-  def test_ruby
-    assert_equal util_this_ruby, @at.ruby
-  end
-
-  def test_ruby_win32
-    orig_sep = File::ALT_SEPARATOR
-    File.send :remove_const, :ALT_SEPARATOR
-    File.const_set :ALT_SEPARATOR, '\\'
-    this_ruby = util_this_ruby.gsub File::SEPARATOR, File::ALT_SEPARATOR
-    assert_equal this_ruby, @at.ruby
-  ensure
-    File.send :remove_const, :ALT_SEPARATOR
-    File.const_set :ALT_SEPARATOR, orig_sep
+    @a.handle_results(s)
+    expected = { "test/test_autotest.rb" => %w( test_fail1 test_fail2 test_error1 test_error2 ) }
+    assert_equal expected, @a.files_to_test
   end
 
   def test_make_test_cmd
-    cmd = @at.make_test_cmd "-e \"['test/test_x.rb'].each { |f| load f }\""
+    f = {
+      'test/test_blah.rb' => [],
+      'test/test_fooby.rb' => [ 'test_something1', 'test_something2' ]
+    }
+    expected = [ "/usr/local/bin/ruby -I.:lib:test -e \"%w[test/test_blah.rb].each { |f| load f }\" | unit_diff -u",
+                 "/usr/local/bin/ruby -I.:lib:test test/test_fooby.rb -n \"/test_something1|test_something2/\" | unit_diff -u" ].join("; ")
 
-    expected = "#{util_this_ruby} -Ilib:test -e \"['test/test_x.rb'].each { |f| load f }\" | unit_diff -u"
-
-    assert_equal expected, cmd
+    result = @a.make_test_cmd f
+    assert_equal expected, result
   end
 
-  def test_make_test_cmd_with_filter
-    cmd = @at.make_test_cmd 'test/test_x.rb', '/test_do_stuff/'
+  def test_update_files_to_test_dunno
+    empty = {}
 
-    expected = "#{util_this_ruby} -Ilib:test test/test_x.rb -n /test_do_stuff/ | unit_diff -u"
-
-    assert_equal expected, cmd
+    files = { "fooby.rb" => 42 }
+    @a.update_files_to_test files
+    result = @a.files_to_test
+    assert_equal empty, result
+    assert_equal "Dunno! fooby.rb\n", @a.output.string
   end
 
-  def test_updated_eh
-    Dir.chdir @normal_tests_dir do
-      assert_equal true,  @at.updated?(@photo_test_file), 'Not in @files'
-      assert_equal false, @at.updated?(@photo_test_file), 'In @files'
-      @at.files[@photo_test_file] = Time.at 1
-      util_touch @photo_test_file
-      assert_equal true,  @at.updated?(@photo_test_file), 'Touched'
-    end
+  # TODO: lots of filename edgecases for update_files_to_test
+
+  def test_update_files_to_test_lib
+    # ensure we add test_blah.rb when blah.rb updates
+    util_update_files_to_test("lib/blah.rb", 'test/test_blah.rb' => [])
   end
 
-  def test_updated_files
-    Dir.chdir @normal_tests_dir do
-      @at.updated_files
+  def test_update_files_to_test_no_change
+    empty = {}
 
-      expected = Hash[*@all_files.map { |f| [f, File.stat(f).mtime] }.flatten]
+    # ensure world is virginal
+    assert_equal empty, @a.files_to_test
 
-      assert_equal expected, @at.files
+    # ensure we do nothing when nothing changes...
+    files = { "lib/blah.rb" => @a.files["lib/blah.rb"] } # same time
+    @a.update_files_to_test files
+    result = @a.files_to_test
+    assert_equal empty, result
+    assert_equal "", @a.output.string
 
-      util_touch @photo_test_file
-
-      assert_not_equal expected['test/test_photo.rb'], @at.files
-    end
+    files = { "lib/blah.rb" => @a.files["lib/blah.rb"] } # same time
+    @a.update_files_to_test files
+    result = @a.files_to_test
+    assert_equal empty, result
+    assert_equal "", @a.output.string
   end
 
-  def test_vcs_update_no_vcs
-    $vcstime = 600
-    $vcs = nil
-    @at.vcs_update
-    assert_empty @at.system_cmds
+  def test_update_files_to_test_test
+    # ensure we add test_blah.rb when test_blah.rb itself updates
+    util_update_files_to_test("test/test_blah.rb", 'test/test_blah.rb' => [])
   end
 
-  def test_vcs_update_cvs
-    @at.system_responses << ''
-    $vcstime = -1
-    $vcs = 'cvs'
-    @at.vcs_update
-    assert_equal ['cvs up'], @at.system_cmds
-  end
+  def util_update_files_to_test(f, expected)
+    t = @a.files[f] + 1
+    files = { f => t }
+    @a.update_files_to_test files
+    result = @a.files_to_test
 
-  def test_vcs_update_p4
-    @at.system_responses << "File(s) up-to-date.\n"
-    $vcstime = -1
-    $vcs = 'p4'
-    @at.vcs_update
-    assert_equal ['p4 sync'], @at.system_cmds
+    assert_equal expected, result
+    assert_equal t, @a.files[f]
+    assert_equal "", @a.output.string
   end
-
-  def test_vcs_update_svn
-    @at.system_responses << ''
-    $vcstime = -1
-    $vcs = 'svn'
-    @at.vcs_update
-    assert_equal ['svn up'], @at.system_cmds
-  end
-
-  def util_add_map(file, *tests)
-    @file_map[file] = tests
-  end
-
-  def util_test_map_file_names(dir)
-    Dir.chdir dir do
-      @file_map.each do |name, expected|
-        assert_equal expected, @at.map_file_names([name.dup]), "test #{name}"
-      end
-    end
-  end
-
-  def util_capture
-    old_stdout = $stdout
-    old_stderr = $stderr
-    out = StringIO.new
-    err = StringIO.new
-    $stdout = out
-    $stderr = err
-    yield
-    return out.string, err.string
-  ensure
-    $stdout = old_stdout
-    $stderr = old_stderr
-  end
-
-  def util_this_ruby
-    File.join Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name']
-  end
-
-  def util_touch(file, t = Time.now)
-    File.utime(t, t, file)
-  end
-
 end
-
