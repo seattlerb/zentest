@@ -73,6 +73,8 @@ module Test::Unit::Assertions
     $stdout = captured_stdout
     $stderr = captured_stderr
     yield
+    captured_stdout.rewind
+    captured_stderr.rewind
     return captured_stdout, captured_stderr
   ensure
     $stdout = orig_stdout
