@@ -110,6 +110,8 @@ module RubyFork
   end
 
   def self.start_client(args = ARGV)
+    trap 'INT' do exit 1 end # Exit gracefully
+
     settings = parse_client_args args
 
     args = Marshal.dump [settings, ARGV]
@@ -121,7 +123,7 @@ module RubyFork
     socket.close_write
 
     until socket.eof?
-      STDOUT.puts socket.gets
+      $stdout.puts socket.gets
     end
   end
 
