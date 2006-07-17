@@ -32,7 +32,7 @@ class Test::Rails::HelperTestCase < Test::Rails::FunctionalTestCase
   include ActionView::Helpers::FormHelper
   include ActionView::Helpers::UrlHelper
   include ActionView::Helpers::AssetTagHelper
-  include ActionView::Helpers::PrototypeHelper
+  include ActionView::Helpers::PrototypeHelper rescue nil # Rails 1.0 only
 
   ##
   # Automatically includes the helper module into the test sublcass.
