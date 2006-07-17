@@ -19,7 +19,9 @@ lib/ruby_fork.rb
 lib/test/rails.rb
 lib/test/rails/controller_test_case.rb
 lib/test/rails/functional_test_case.rb
+lib/test/rails/helper_test_case.rb
 lib/test/rails/ivar_proxy.rb
+lib/test/rails/pp_html_document.rb
 lib/test/rails/rake_tasks.rb
 lib/test/rails/test_case.rb
 lib/test/rails/view_test_case.rb

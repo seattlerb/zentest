@@ -1,25 +1,25 @@
 require 'code_statistics'
 
-namespace :test do
-  desc 'Run the view tests in test/views'
-  Rake::TestTask.new :views => [ 'db:test:prepare' ] do |t|
+def define_test_task(test_type)
+  desc "Run the #{test_type} tests in test/#{test_type}s"
+  Rake::TestTask.new "#{test_type}s" => [ 'db:test:prepare' ] do |t|
     t.libs << 'test'
-    t.pattern = 'test/views/**/*_test.rb'
+    t.pattern = "test/#{test_type}s/**/*_test.rb"
     t.verbose = true
   end
+end
 
-  desc 'Run the controller tests in test/controllers'
-  Rake::TestTask.new :controllers => [ 'db:test:prepare' ] do |t|
-    t.libs << 'test'
-    t.pattern = 'test/controllers/**/*_test.rb'
-    t.verbose = true
-  end
+namespace :test do
+  define_test_task 'helper'
+  define_test_task 'view'
+  define_test_task 'controller'
 end
 
 desc 'Run all tests'
 task :test => %w[
   test:units
   test:controllers
+  test:helpers
   test:views
   test:functionals
   test:integration
@@ -32,6 +32,7 @@ dirs = [
   %w[Components         components],
   %w[Controllers        app/controllers],
   %w[Controller\ tests  test/controllers],
+  %w[Helper\ tests      test/helpers],
   %w[View\ tests        test/views],
   %w[Functional\ tests  test/functional],
   %w[Integration\ tests test/integration],
@@ -44,6 +45,6 @@ dirs = dirs.select { |name, dir| File.directory? dir }
 
 STATS_DIRECTORIES.replace dirs
 
-CodeStatistics::TEST_TYPES << 'View tests'
-CodeStatistics::TEST_TYPES << 'Controller tests'
+new_test_types = ['Controller tests', 'Helper tests', 'View tests']
+CodeStatistics::TEST_TYPES.push(*new_test_types)
 
