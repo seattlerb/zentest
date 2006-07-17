@@ -35,13 +35,15 @@ class Test::Rails::HelperTestCase < Test::Rails::FunctionalTestCase
   include ActionView::Helpers::PrototypeHelper
 
   ##
-  # Automatically includes the helper into the helper module into the test
-  # sublcass.
+  # Automatically includes the helper module into the test sublcass.
 
   def self.inherited(helper_testcase)
-    helper_name = helper_testcase.name.sub 'HelperTest', ''
+    super
+    helper_name = helper_testcase.name.sub 'Test', ''
     helper_module = Object.const_get helper_name
-    helper_testcase.extend helper_module
+    helper_testcase.send :include, helper_module
+  rescue NameError
+    raise "Unable to find helper #{helper_name}"
   end
 
   def setup
