@@ -22,7 +22,7 @@ class Autotest
     new.run
   end
 
-  attr_accessor :files, :files_to_test, :output if $TESTING
+  attr_accessor :files, :files_to_test, :output, :last_mtime if $TESTING
 
   def initialize
     @files = Hash.new Time.at(0)
@@ -40,6 +40,8 @@ class Autotest
     loop do # ^c handler
       begin
         get_to_green
+        rerun_all_tests if @tainted
+        wait_for_changes
       rescue Interrupt
         if @wants_to_quit then
           break
@@ -50,47 +52,22 @@ class Autotest
     end
   end
 
-  def get_to_green # TODO: think about inlining this
-    log_method
-    loop do
-      log 'status', 'running all tests'
-      reset
-      run_tests # run all tests each full pass
-      @last_mtime = @files.values.sort.last
-      run_tests until all_good
+  def get_to_green
+    until all_good do # TODO: all_good
+      run_tests
+      wait_for_changes unless all_good
     end
   end
 
-  def run_tests # TODO: and possibly rename this get_to_green
+  def run_tests
     log_method
     update_files_to_test # failed + changed/affected
-
-    cmd = make_test_cmd @files_to_test
-
-    log 'data', "@files_to_test = #{@files_to_test.inspect}"
-    log 'status', 'Testing updated files'
-    log 'cmd', cmd
+    cmd = make_test_cmd(@files_to_test)
     results = `#{cmd}`
 
     puts results
 
     handle_results(results)
-  end
-
-  def all_good
-    log_method
-    unless @files_to_test.empty? then
-      newest = nil
-      loop do
-        update_files_to_test
-        newest = @files.values.sort.last
-        break if newest > @last_mtime
-        #log 'status', "waiting because of #{newest} > #{@last_mtime} in #{@files_to_test.inspect}"
-        sleep @sleep # TODO unless testing ?
-      end
-      @last_mtime = newest
-    end
-    @files_to_test.empty?
   end
 
   ############################################################
@@ -121,6 +98,10 @@ class Autotest
         raise Interrupt                 # let the run loop catch it
       end
     end
+  end
+
+  def all_good
+    @files_to_test.empty?
   end
 
   def consolidate_failures(failed)
@@ -161,28 +142,15 @@ class Autotest
   end
 
   def handle_results(results)
-    log_method
-
-    # TODO: get rid of this
-    if results =~ / 0 failures, 0 errors\Z/ then
-      log 'status', 'Passed'
-      return
-    end
-
     failed = results.scan(/^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/)
-
-    # TODO: get rid of this
-    if failed.empty? then
-      log 'status', 'tests exited without a parseable failure or error message.'
-      log 'status', 'check for a syntax error in your code, or something...'
-      return
-    end
-
-    log 'data', "@files = #{@files.inspect}"
-    log 'data', "failed = #{failed.inspect}"
-    log 'data', "old @files_to_test = #{@files_to_test.inspect}"
     @files_to_test = consolidate_failures failed
-    log 'data', "new @files_to_test = #{@files_to_test.inspect}"
+    @tainted = true unless @files_to_test.empty?
+  end
+
+  def has_new_files?
+    previous = @last_mtime
+    @last_mtime = @files.values.sort.last
+    @last_mtime > previous
   end
 
   def make_test_cmd files_to_test
@@ -195,7 +163,7 @@ class Autotest
     end
 
     partial.each do |klass, methods|
-      cmds << "#{ruby} -I#{@libs} #{klass} -n \"#{Regexp.union(*methods).inspect}\" | unit_diff -u" 
+      cmds << "#{ruby} -I#{@libs} #{klass} -n \"/^(#{Regexp.union(*methods).source})$/\" | unit_diff -u" 
     end
 
     return cmds.join('; ')
@@ -208,6 +176,8 @@ class Autotest
     @files_to_test.clear
     @last_mtime = Time.at(0)
     update_files_to_test # failed + changed/affected
+    @last_mtime = @files.values.sort.last # FIX
+    @tainted = false
   end
   
   def ruby
@@ -221,7 +191,12 @@ class Autotest
     return ruby
   end
 
-  def update_files_to_test(files=find_files)
+  def rerun_all_tests
+    reset
+    run_tests
+  end
+
+  def update_files_to_test(files=find_files) # TODO: give better name
     updated = []
 
     files.each do |filename, mtime|
@@ -241,10 +216,18 @@ class Autotest
         when %r%^(doc|pkg)/% then
           # ignore
         else
-          @output.puts "Dunno! #{filename}" if $v or $TESTING
+          @output.puts "Dunno! #{filename}" if $TESTING
         end
         @files[filename] = mtime
       end
     end
+  end
+
+  def wait_for_changes
+    log_method
+    begin
+      sleep @sleep
+      update_files_to_test
+    end until has_new_files?
   end
 end

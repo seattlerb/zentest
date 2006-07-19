@@ -87,9 +87,8 @@ $lib  = Config::CONFIG['sitelibdir']
 $bins = spec.executables
 $libs = spec.files.grep(/^lib\//).map { |f| f.sub(/^lib\//, '') }.sort
 
-task :blah do
-    p $bins
-    p $libs
+task :autotest do
+  ruby "-Ilib ./bin/autotest"
 end
 
 task :install do

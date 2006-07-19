@@ -19,20 +19,18 @@ require 'autotest'
 class TestAutotest < Test::Unit::TestCase
   def setup
     @a = Autotest.new
-    @a.files = {
-      'lib/blah.rb' => 1,
-      'test/test_blah.rb' => 2,
-    }
-    @a.files.default = 0
+    @a.files.clear
+    @a.files['lib/blah.rb'] = Time.at(1)
+    @a.files['test/test_blah.rb'] = Time.at(2)
+
     @a.output = StringIO.new
   end
 
   def test_consolidate_failures_experiment
-    @a.files = {
-      'lib/autotest.rb' => 1,
-      'test/test_autotest.rb' => 2,
-    }
-    @a.files.default = 0
+    @a.files.clear
+    @a.files['lib/autotest.rb'] = Time.at(1)
+    @a.files['test/test_autotest.rb'] = Time.at(2)
+
     input = [["test_fail1", "TestAutotest"], ["test_fail2", "TestAutotest"], ["test_error1", "TestAutotest"], ["test_error2", "TestAutotest"]]
     result = @a.consolidate_failures input
     expected = { "test/test_autotest.rb" => %w( test_fail1 test_fail2 test_error1 test_error2 ) }
@@ -68,14 +66,32 @@ class TestAutotest < Test::Unit::TestCase
     assert_equal expected, result
   end
 
-  def test_handle_results
-    @a.files = {
-      'lib/autotest.rb' => 1,
-      'test/test_autotest.rb' => 2,
-    }
-    @a.files.default = 0
+  def test_flunk
+    # flunk
+  end
 
-    s = "Loaded suite -e
+  def test_has_new_files_eh
+    @a.files_to_test.clear
+    @a.files.clear
+    @a.files['lib/autotest.rb'] = Time.at(1)
+    @a.files['test/test_autotest.rb'] = Time.at(2)
+    @a.last_mtime = Time.at(0)
+
+    assert @a.has_new_files?
+
+    @a.last_mtime = Time.at(3)
+    assert ! @a.has_new_files?
+  end
+
+  def test_handle_results
+    @a.files_to_test.clear
+    @a.files.clear
+    @a.files['lib/autotest.rb'] = Time.at(1)
+    @a.files['test/test_autotest.rb'] = Time.at(2)
+    empty = {}
+    assert_equal empty, @a.files_to_test, "must start empty"
+
+    s1 = "Loaded suite -e
 Started
 ............
 Finished in 0.001655 seconds.
@@ -83,11 +99,10 @@ Finished in 0.001655 seconds.
 12 tests, 18 assertions, 0 failures, 0 errors
 "
 
-    @a.handle_results(s)
-    empty = {}
-    assert_equal empty, @a.files_to_test
+    @a.handle_results(s1)
+    assert_equal empty, @a.files_to_test, "must stay empty"
 
-    s = "
+    s2 = "
   1) Failure:
 test_fail1(TestAutotest) [./test/test_autotest.rb:59]:
   2) Failure:
@@ -98,9 +113,12 @@ test_error1(TestAutotest):
 test_error2(TestAutotest):
 "
 
-    @a.handle_results(s)
+    @a.handle_results(s2)
     expected = { "test/test_autotest.rb" => %w( test_fail1 test_fail2 test_error1 test_error2 ) }
     assert_equal expected, @a.files_to_test
+
+    @a.handle_results(s1)
+    assert_equal empty, @a.files_to_test
   end
 
   def test_make_test_cmd
@@ -118,7 +136,7 @@ test_error2(TestAutotest):
   def test_update_files_to_test_dunno
     empty = {}
 
-    files = { "fooby.rb" => 42 }
+    files = { "fooby.rb" => Time.at(42) }
     @a.update_files_to_test files
     result = @a.files_to_test
     assert_equal empty, result
