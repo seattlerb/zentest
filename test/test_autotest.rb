@@ -18,12 +18,15 @@ require 'autotest'
 
 class TestAutotest < Test::Unit::TestCase
   def setup
-    @a = Autotest.new
-    @a.files.clear
-    @a.files['lib/blah.rb'] = Time.at(1)
-    @a.files['test/test_blah.rb'] = Time.at(2)
+    @test_class = 'TestBlah'
+    @test = 'test/test_blah.rb'
+    @impl = 'lib/blah.rb'
 
+    @a = Autotest.new
     @a.output = StringIO.new
+    @a.files.clear
+    @a.files[@impl] = Time.at(1)
+    @a.files[@test] = Time.at(2)
   end
 
   def test_consolidate_failures_experiment
@@ -31,9 +34,9 @@ class TestAutotest < Test::Unit::TestCase
     @a.files['lib/autotest.rb'] = Time.at(1)
     @a.files['test/test_autotest.rb'] = Time.at(2)
 
-    input = [["test_fail1", "TestAutotest"], ["test_fail2", "TestAutotest"], ["test_error1", "TestAutotest"], ["test_error2", "TestAutotest"]]
+    input = [['test_fail1', 'TestAutotest'], ['test_fail2', 'TestAutotest'], ['test_error1', 'TestAutotest'], ['test_error2', 'TestAutotest']]
     result = @a.consolidate_failures input
-    expected = { "test/test_autotest.rb" => %w( test_fail1 test_fail2 test_error1 test_error2 ) }
+    expected = { 'test/test_autotest.rb' => %w( test_fail1 test_fail2 test_error1 test_error2 ) }
     assert_equal expected, result
   end
 
@@ -44,8 +47,8 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_consolidate_failures_multiple_matches
-    @a.files['test/test_blah_again.rb'] = 42
-    result = @a.consolidate_failures([['test_unmatched', 'TestBlah']])
+    @a.files['test/test_blah_again.rb'] = Time.at(42)
+    result = @a.consolidate_failures([['test_unmatched', @test_class]])
     expected = {}
     assert_equal expected, result
     expected = "multiple files matched class TestBlah [\"test/test_blah.rb\", \"test/test_blah_again.rb\"].\n"
@@ -53,16 +56,16 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_consolidate_failures_no_match
-    result = @a.consolidate_failures([['test_blah1', 'TestBlah'], ['test_blah2', 'TestBlah'], ['test_blah1', 'TestUnknown']])
-    expected = {'test/test_blah.rb' => ['test_blah1', 'test_blah2']}
+    result = @a.consolidate_failures([['test_blah1', @test_class], ['test_blah2', @test_class], ['test_blah1', 'TestUnknown']])
+    expected = {@test => ['test_blah1', 'test_blah2']}
     assert_equal expected, result
     expected = "Unable to map class TestUnknown to a file\n"
     assert_equal expected, @a.output.string
   end
 
   def test_consolidate_failures_red
-    result = @a.consolidate_failures([['test_blah1', 'TestBlah'], ['test_blah2', 'TestBlah']])
-    expected = {'test/test_blah.rb' => ['test_blah1', 'test_blah2']}
+    result = @a.consolidate_failures([['test_blah1', @test_class], ['test_blah2', @test_class]])
+    expected = {@test => ['test_blah1', 'test_blah2']}
     assert_equal expected, result
   end
 
@@ -123,62 +126,72 @@ test_error2(TestAutotest):
 
   def test_make_test_cmd
     f = {
-      'test/test_blah.rb' => [],
+      @test => [],
       'test/test_fooby.rb' => [ 'test_something1', 'test_something2' ]
     }
-    expected = [ "/usr/local/bin/ruby -I.:lib:test -e \"%w[test/test_blah.rb].each { |f| load f }\" | unit_diff -u",
+    expected = [ "/usr/local/bin/ruby -I.:lib:test -e \"%w[#{@test}].each { |f| load f }\" | unit_diff -u",
                  "/usr/local/bin/ruby -I.:lib:test test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\" | unit_diff -u" ].join("; ")
 
     result = @a.make_test_cmd f
     assert_equal expected, result
   end
 
-  def test_update_files_to_test_dunno
+  def test_find_files_to_test_dunno
     empty = {}
 
     files = { "fooby.rb" => Time.at(42) }
-    @a.update_files_to_test files
+    @a.find_files_to_test files
     result = @a.files_to_test
     assert_equal empty, result
     assert_equal "Dunno! fooby.rb\n", @a.output.string
   end
 
-  # TODO: lots of filename edgecases for update_files_to_test
+  # TODO: lots of filename edgecases for find_files_to_test
 
-  def test_update_files_to_test_lib
+  def test_find_files_to_test_lib
     # ensure we add test_blah.rb when blah.rb updates
-    util_update_files_to_test("lib/blah.rb", 'test/test_blah.rb' => [])
+    util_find_files_to_test(@impl, @test => [])
   end
 
-  def test_update_files_to_test_no_change
+  def test_find_files_to_test_no_change
     empty = {}
 
     # ensure world is virginal
     assert_equal empty, @a.files_to_test
 
     # ensure we do nothing when nothing changes...
-    files = { "lib/blah.rb" => @a.files["lib/blah.rb"] } # same time
-    @a.update_files_to_test files
+    files = { @impl => @a.files[@impl] } # same time
+    @a.find_files_to_test files
     result = @a.files_to_test
     assert_equal empty, result
     assert_equal "", @a.output.string
 
-    files = { "lib/blah.rb" => @a.files["lib/blah.rb"] } # same time
-    @a.update_files_to_test files
+    files = { @impl => @a.files[@impl] } # same time
+    @a.find_files_to_test files
     result = @a.files_to_test
     assert_equal empty, result
     assert_equal "", @a.output.string
   end
 
-  def test_update_files_to_test_test
+  def test_find_files_to_test
     # ensure we add test_blah.rb when test_blah.rb itself updates
-    util_update_files_to_test("test/test_blah.rb", 'test/test_blah.rb' => [])
+    util_find_files_to_test(@test, @test => [])
   end
 
-  def util_update_files_to_test(f, expected)
+  def test_tests_for_file
+    assert_equal [@test], @a.tests_for_file(@impl)
+    assert_equal [@test], @a.tests_for_file(@test)
+
+    assert_equal ['test/test_unknown.rb'], @a.tests_for_file('test/test_unknown.rb')
+    assert_equal [], @a.tests_for_file('lib/unknown.rb')
+    assert_equal [], @a.tests_for_file('unknown.rb')
+    assert_equal [], @a.tests_for_file('test_unknown.rb')
+  end
+
+  def util_find_files_to_test(f, expected)
     t = @a.files[f] + 1
     files = { f => t }
-    @a.update_files_to_test files
+    @a.find_files_to_test files
     result = @a.files_to_test
 
     assert_equal expected, result

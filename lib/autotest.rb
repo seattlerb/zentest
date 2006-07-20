@@ -27,13 +27,13 @@ class Autotest
   def initialize
     @files = Hash.new Time.at(0)
     @files_to_test = Hash.new { |h,k| h[k] = [] }
+    @exceptions = false
     @libs = '.:lib:test'
     @output = $stderr
     @sleep = 1
   end
 
   def run
-    log_method
     reset
     add_sigint_handler
 
@@ -53,16 +53,18 @@ class Autotest
   end
 
   def get_to_green
-    until all_good do # TODO: all_good
+    until all_good do
       run_tests
       wait_for_changes unless all_good
     end
   end
 
   def run_tests
-    log_method
-    update_files_to_test # failed + changed/affected
+    find_files_to_test # failed + changed/affected
     cmd = make_test_cmd(@files_to_test)
+
+    puts cmd
+
     results = `#{cmd}`
 
     puts results
@@ -73,17 +75,7 @@ class Autotest
   ############################################################
   # Utility Methods, not essential to reading of logic
 
-  def log(cat, msg)
-    @output.puts "# AUTOTEST:#{cat}:#{msg}" unless $TESTING
-  end
-
-  def log_method
-    meth = caller[0].split(/:/).last[4..-2]
-    log 'meth', meth
-  end
-
   def add_sigint_handler
-    log_method
     trap 'INT' do
       if @interrupted then
         puts "# quitting"
@@ -105,7 +97,6 @@ class Autotest
   end
 
   def consolidate_failures(failed)
-    log_method
     filters = Hash.new { |h,k| h[k] = [] }
 
     failed.each do |method, klass|
@@ -128,15 +119,16 @@ class Autotest
   def find_files
     result = {}
     Find.find '.' do |f|
-      Find.prune if f =~ /(?:\.svn|CVS|tmp|public)$/ # prune dirs
+      Find.prune if @exceptions and f =~ @exceptions and test ?d, f
+      Find.prune if f =~ /(?:\.svn|CVS|tmp|public|doc|pkg)$/ # prune dirs
 
-      next if File.directory? f
+      next if test ?d, f
       next if f =~ /(?:swp|~|rej|orig)$/        # temporary/patch files
       next if f =~ /\/\.?#/                     # Emacs autosave/cvs merge files
 
       filename = f.sub(/^\.\//, '')
-      mtime = File.stat(filename).mtime
-      result[filename] = mtime
+
+      result[filename] = File.stat(filename).mtime
     end
     return result
   end
@@ -170,12 +162,11 @@ class Autotest
   end
 
   def reset
-    log_method
     @interrupted = @wants_to_quit = false
     @files.clear
     @files_to_test.clear
     @last_mtime = Time.at(0)
-    update_files_to_test # failed + changed/affected
+    find_files_to_test # failed + changed/affected
     @last_mtime = @files.values.sort.last # FIX
     @tainted = false
   end
@@ -196,38 +187,40 @@ class Autotest
     run_tests
   end
 
-  def update_files_to_test(files=find_files) # TODO: give better name
+  def tests_for_file(filename)
+    case filename
+    when /^lib\/.*\.rb$/ then
+      impl = File.basename(filename).gsub '_', '_?'
+      @files.keys.select do |k|
+        k =~ %r%^test/.*#{impl}$%
+      end
+    when /^test\/test_.*rb$/ then
+      [filename]
+    else
+      @output.puts "Dunno! #{filename}" if $TESTING
+      []
+    end
+  end
+
+  def find_files_to_test(files=find_files) # TODO: give better name
     updated = []
 
+    # TODO: keep an mtime at app level and drop the files hash
     files.each do |filename, mtime|
-      if @files[filename] < mtime then
-        # TODO: keep an mtime at app level and drop the files hash
-        case filename
-        when %r%^lib/(?:.*/)?(.*\.rb)$% then
-          impl = $1.gsub '_', '_?'
-          found = @files.keys.select do |k|
-            k =~ %r%^test/.*#{impl}$%
-          end
-          found.each do |f|
-            @files_to_test[f] # creates key with default value
-          end
-        when %r%^test/test_% then
-          @files_to_test[filename] # creates key with default value
-        when %r%^(doc|pkg)/% then
-          # ignore
-        else
-          @output.puts "Dunno! #{filename}" if $TESTING
-        end
-        @files[filename] = mtime
+      next if @files[filename] >= mtime
+
+      tests_for_file(filename).each do |f|
+        @files_to_test[f] # creates key with default value
       end
+
+      @files[filename] = mtime
     end
   end
 
   def wait_for_changes
-    log_method
     begin
       sleep @sleep
-      update_files_to_test
+      find_files_to_test
     end until has_new_files?
   end
 end
