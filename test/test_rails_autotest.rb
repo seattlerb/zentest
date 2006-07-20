@@ -7,11 +7,9 @@ class TestRailsAutotest < TestAutotest
     super
 
     # TODO: rename @a and make superclass tests less brittle
-    @at = RailsAutotest.new # REFACTOR
-    @at.files.clear
-    @at.output = StringIO.new
-
-    @a = @at
+    @a = RailsAutotest.new # REFACTOR
+    @a.files.clear
+    @a.output = StringIO.new
 
     @test_class = 'RouteTest'
     @test = 'test/unit/route_test.rb'
@@ -49,11 +47,11 @@ class TestRailsAutotest < TestAutotest
      @rails_view_tests +
      @rails_functional_tests +
      @extra_files).flatten.each_with_index do |path, t|
-      @at.files[path] = Time.at(t+1)
+      @a.files[path] = Time.at(t+1)
     end
   end
 
-  # REFACTOR
+  # Overridden from superclass... the scenario just doesn't happen the same way.
   def test_consolidate_failures_multiple_matches
     @test2 = 'test/unit/route_again_test.rb'
     @a.files[@test2] = Time.at(42)
@@ -65,8 +63,8 @@ class TestRailsAutotest < TestAutotest
 
   def test_tests_for_file
     empty = []
-    assert_equal empty, @at.tests_for_file('blah.rb')
-    assert_equal empty, @at.tests_for_file('test_blah.rb')
+    assert_equal empty, @a.tests_for_file('blah.rb')
+    assert_equal empty, @a.tests_for_file('test_blah.rb')
 
     # controllers
     util_tests_for_file('app/controllers/admin/themes_controller.rb',
@@ -169,7 +167,7 @@ class TestRailsAutotest < TestAutotest
 
   def util_tests_for_file(file, *expected)
     assert_equal(expected.flatten.sort.uniq,
-                 @at.tests_for_file(file).sort.uniq, "tests for #{file}")
+                 @a.tests_for_file(file).sort.uniq, "tests for #{file}")
   end
 end
 
