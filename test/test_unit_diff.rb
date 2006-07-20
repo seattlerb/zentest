@@ -34,6 +34,18 @@ class TestUnitDiff < Test::Unit::TestCase
     assert_equal expected, @diff.unit_diff(input)
   end
 
+  def test_parse_diff_angles
+    input = ["  1) Failure:\n",
+             "test_test1(TestBlah) [./blah.rb:25]:\n",
+             "<\"<html>\"> expected but was\n",
+             "<\"<body>\">.\n"
+            ]
+
+    expected = [["  1) Failure:\n", "test_test1(TestBlah) [./blah.rb:25]:\n"], ["<html>"], ["<body>"]]
+
+    assert_equal expected, @diff.parse_diff(input)
+  end
+
   def test_parse_diff1
     input = ["  1) Failure:\n",
              "test_test1(TestBlah) [./blah.rb:25]:\n",
@@ -97,6 +109,14 @@ class TestUnitDiff < Test::Unit::TestCase
                 ["out\\n"]]
 
     assert_equal expected, @diff.parse_diff(input)
+  end
+
+  def test_unit_diff_angles
+    input = "Loaded suite ./blah\nStarted\nF\nFinished in 0.035332 seconds.\n\n  1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n<\"<html>\"> expected but was\n<\"<body>\">.\n\n1 tests, 1 assertions, 1 failures, 0 errors\n"
+
+    expected = "Loaded suite ./blah\nStarted\nF\nFinished in 0.035332 seconds.\n\n1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n1c1\n< <html>\n---\n> <body>\n\n1 tests, 1 assertions, 1 failures, 0 errors"
+
+    assert_equal expected, @diff.unit_diff(input)
   end
 
   def test_unit_diff1

@@ -125,12 +125,13 @@ test_error2(TestAutotest):
   end
 
   def test_make_test_cmd
+    ruby_cmd = Config::CONFIG['ruby_install_name']
     f = {
       @test => [],
       'test/test_fooby.rb' => [ 'test_something1', 'test_something2' ]
     }
-    expected = [ "/usr/local/bin/ruby -I.:lib:test -e \"%w[#{@test}].each { |f| load f }\" | unit_diff -u",
-                 "/usr/local/bin/ruby -I.:lib:test test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\" | unit_diff -u" ].join("; ")
+    expected = [ "/usr/local/bin/#{ruby_cmd} -I.:lib:test -e \"%w[#{@test}].each { |f| load f }\" | unit_diff -u",
+                 "/usr/local/bin/#{ruby_cmd} -I.:lib:test test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\" | unit_diff -u" ].join("; ")
 
     result = @a.make_test_cmd f
     assert_equal expected, result
