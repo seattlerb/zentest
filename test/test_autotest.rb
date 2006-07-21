@@ -22,11 +22,12 @@ class TestAutotest < Test::Unit::TestCase
     @test = 'test/test_blah.rb'
     @impl = 'lib/blah.rb'
 
-    @a = Autotest.new
+    @a = Object.const_get(self.class.name[4..-1]).new
     @a.output = StringIO.new
     @a.files.clear
     @a.files[@impl] = Time.at(1)
     @a.files[@test] = Time.at(2)
+    @a.last_mtime = Time.at(2)
   end
 
   def test_consolidate_failures_experiment
@@ -69,21 +70,51 @@ class TestAutotest < Test::Unit::TestCase
     assert_equal expected, result
   end
 
-  def test_flunk
-    # flunk
+  # TODO: lots of filename edgecases for find_files_to_test
+
+  def test_find_files_to_test
+    @a.last_mtime = Time.at(0)
+    assert @a.find_files_to_test(@a.files)
+
+    @a.last_mtime = @a.files.values.sort.last + 1
+    assert ! @a.find_files_to_test(@a.files)
   end
 
-  def test_has_new_files_eh
-    @a.files_to_test.clear
-    @a.files.clear
-    @a.files['lib/autotest.rb'] = Time.at(1)
-    @a.files['test/test_autotest.rb'] = Time.at(2)
-    @a.last_mtime = Time.at(0)
+  def test_find_files_to_test_dunno
+    empty = {}
 
-    assert @a.has_new_files?
+    files = { "fooby.rb" => Time.at(42) }
+    assert @a.find_files_to_test(files)  # we find fooby,
+    assert_equal empty, @a.files_to_test # but it isn't something to test
+    assert_equal "Dunno! fooby.rb\n", @a.output.string
+  end
 
-    @a.last_mtime = Time.at(3)
-    assert ! @a.has_new_files?
+  def test_find_files_to_test_lib
+    # ensure we add test_blah.rb when blah.rb updates
+    util_find_files_to_test(@impl, @test => [])
+  end
+
+  def test_find_files_to_test_no_change
+    empty = {}
+
+    # ensure world is virginal
+    assert_equal empty, @a.files_to_test
+
+    # ensure we do nothing when nothing changes...
+    files = { @impl => @a.files[@impl] } # same time
+    assert ! @a.find_files_to_test(files)
+    assert_equal empty, @a.files_to_test
+    assert_equal "", @a.output.string
+
+    files = { @impl => @a.files[@impl] } # same time
+    assert(! @a.find_files_to_test(files))
+    assert_equal empty, @a.files_to_test
+    assert_equal "", @a.output.string
+  end
+
+  def test_find_files_to_test_test
+    # ensure we add test_blah.rb when test_blah.rb itself updates
+    util_find_files_to_test(@test, @test => [])
   end
 
   def test_handle_results
@@ -137,48 +168,6 @@ test_error2(TestAutotest):
     assert_equal expected, result
   end
 
-  def test_find_files_to_test_dunno
-    empty = {}
-
-    files = { "fooby.rb" => Time.at(42) }
-    @a.find_files_to_test files
-    result = @a.files_to_test
-    assert_equal empty, result
-    assert_equal "Dunno! fooby.rb\n", @a.output.string
-  end
-
-  # TODO: lots of filename edgecases for find_files_to_test
-
-  def test_find_files_to_test_lib
-    # ensure we add test_blah.rb when blah.rb updates
-    util_find_files_to_test(@impl, @test => [])
-  end
-
-  def test_find_files_to_test_no_change
-    empty = {}
-
-    # ensure world is virginal
-    assert_equal empty, @a.files_to_test
-
-    # ensure we do nothing when nothing changes...
-    files = { @impl => @a.files[@impl] } # same time
-    @a.find_files_to_test files
-    result = @a.files_to_test
-    assert_equal empty, result
-    assert_equal "", @a.output.string
-
-    files = { @impl => @a.files[@impl] } # same time
-    @a.find_files_to_test files
-    result = @a.files_to_test
-    assert_equal empty, result
-    assert_equal "", @a.output.string
-  end
-
-  def test_find_files_to_test
-    # ensure we add test_blah.rb when test_blah.rb itself updates
-    util_find_files_to_test(@test, @test => [])
-  end
-
   def test_tests_for_file
     assert_equal [@test], @a.tests_for_file(@impl)
     assert_equal [@test], @a.tests_for_file(@test)
@@ -190,12 +179,11 @@ test_error2(TestAutotest):
   end
 
   def util_find_files_to_test(f, expected)
-    t = @a.files[f] + 1
+    t = @a.last_mtime + 1
     files = { f => t }
-    @a.find_files_to_test files
-    result = @a.files_to_test
 
-    assert_equal expected, result
+    assert @a.find_files_to_test(files)
+    assert_equal expected, @a.files_to_test
     assert_equal t, @a.files[f]
     assert_equal "", @a.output.string
   end

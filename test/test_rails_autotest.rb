@@ -6,11 +6,6 @@ class TestRailsAutotest < TestAutotest
   def setup
     super
 
-    # TODO: rename @a and make superclass tests less brittle
-    @a = RailsAutotest.new # REFACTOR
-    @a.files.clear
-    @a.output = StringIO.new
-
     @test_class = 'RouteTest'
     @test = 'test/unit/route_test.rb'
     @impl = 'app/models/route.rb'
@@ -42,6 +37,8 @@ class TestRailsAutotest < TestAutotest
                       test/views/articles_view_test.rb
                       test/views/layouts_view_test.rb)
 
+    @a.files.clear
+
     (@rails_unit_tests +
      @rails_controller_tests +
      @rails_view_tests +
@@ -49,6 +46,7 @@ class TestRailsAutotest < TestAutotest
      @extra_files).flatten.each_with_index do |path, t|
       @a.files[path] = Time.at(t+1)
     end
+    @a.last_mtime = @a.files.values.sort.last
   end
 
   # Overridden from superclass... the scenario just doesn't happen the same way.

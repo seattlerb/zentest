@@ -1,5 +1,3 @@
-$TESTING = defined? $TESTING
-
 require 'find'
 require 'rbconfig'
 
@@ -31,6 +29,7 @@ class Autotest
     @libs = '.:lib:test'
     @output = $stderr
     @sleep = 1
+    hook :init
   end
 
   def run
@@ -40,16 +39,20 @@ class Autotest
     loop do # ^c handler
       begin
         get_to_green
+#        was_tainted = @tainted
         rerun_all_tests if @tainted
+#        hook :all_good if was_tainted
         wait_for_changes
       rescue Interrupt
         if @wants_to_quit then
           break
         else
           reset
+          hook :interrupt
         end
       end
     end
+    hook :quit
   end
 
   def get_to_green
@@ -78,15 +81,11 @@ class Autotest
   def add_sigint_handler
     trap 'INT' do
       if @interrupted then
-        puts "# quitting"
         @wants_to_quit = true
       else
-        puts "quitting"
-        exit # HACK
-        puts "# hit ^C again to quit"
-        # FIX: shouldn't sleep come AFTER @interrupted = true?
-        sleep 1.5                       # give them enough time to hit ^C again
-        @interrupted = true             # if they hit ^C again, 
+        puts "Interrupt a second time to quit"
+        @interrupted = true
+        sleep 1.5
         raise Interrupt                 # let the run loop catch it
       end
     end
@@ -100,7 +99,7 @@ class Autotest
     filters = Hash.new { |h,k| h[k] = [] }
 
     failed.each do |method, klass|
-      failed_file_name = klass.gsub(/(.)([A-Z])/, '\1_?\2') # HACK: was stripping of Test
+      failed_file_name = klass.gsub(/(.)([A-Z])/, '\1_?\2')
       failed_files = @files.keys.grep(/#{failed_file_name}/i)
       case failed_files.size
       when 0 then
@@ -133,16 +132,35 @@ class Autotest
     return result
   end
 
-  def handle_results(results)
-    failed = results.scan(/^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/)
-    @files_to_test = consolidate_failures failed
-    @tainted = true unless @files_to_test.empty?
-  end
+  def find_files_to_test(files=find_files)
+    updated = []
 
-  def has_new_files?
+    # TODO: keep an mtime at app level and drop the files hash
+    files.each do |filename, mtime|
+      next if @files[filename] >= mtime
+
+      tests_for_file(filename).each do |f|
+        @files_to_test[f] # creates key with default value
+      end
+
+      @files[filename] = mtime
+    end
+
     previous = @last_mtime
     @last_mtime = @files.values.sort.last
     @last_mtime > previous
+  end
+
+  def handle_results(results)
+    failed = results.scan(/^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/)
+    @files_to_test = consolidate_failures failed
+    unless @files_to_test.empty? then
+      hook :red
+      hook :blah
+    else
+      hook :green
+    end unless $TESTING
+    @tainted = true unless @files_to_test.empty?
   end
 
   def make_test_cmd files_to_test
@@ -161,13 +179,18 @@ class Autotest
     return cmds.join('; ')
   end
 
+  def rerun_all_tests
+    reset
+    run_tests
+    hook :all_good if all_good
+  end
+
   def reset
     @interrupted = @wants_to_quit = false
     @files.clear
     @files_to_test.clear
     @last_mtime = Time.at(0)
     find_files_to_test # failed + changed/affected
-    @last_mtime = @files.values.sort.last # FIX
     @tainted = false
   end
   
@@ -180,11 +203,6 @@ class Autotest
     end
 
     return ruby
-  end
-
-  def rerun_all_tests
-    reset
-    run_tests
   end
 
   def tests_for_file(filename)
@@ -202,25 +220,26 @@ class Autotest
     end
   end
 
-  def find_files_to_test(files=find_files) # TODO: give better name
-    updated = []
-
-    # TODO: keep an mtime at app level and drop the files hash
-    files.each do |filename, mtime|
-      next if @files[filename] >= mtime
-
-      tests_for_file(filename).each do |f|
-        @files_to_test[f] # creates key with default value
-      end
-
-      @files[filename] = mtime
-    end
-  end
-
   def wait_for_changes
     begin
       sleep @sleep
-      find_files_to_test
-    end until has_new_files?
+    end until find_files_to_test
+  end
+
+  ############################################################
+  # Hooks:
+
+  def hook(name)
+    meth = :"#{name}_hook"
+    send meth if respond_to? meth
   end
 end
+
+if test ?f, './.autotest' then
+  load './.autotest'
+elsif test ?f, File.expand_path('~/.autotest') then
+  load File.expand_path('~/.autotest')
+else
+  puts "couldn't find ./.autotest in #{Dir.pwd}"
+end
+
