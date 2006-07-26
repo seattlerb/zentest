@@ -2,7 +2,8 @@
 
 $TESTING = true
 
-require 'test/unit' unless defined? $ZENTEST and $ZENTEST
+require 'test/unit/testcase'
+require 'test/unit' if $0 == __FILE__
 require 'stringio'
 require 'autotest'
 
@@ -29,6 +30,32 @@ class TestAutotest < Test::Unit::TestCase
     @a.files[@test] = Time.at(2)
     @a.last_mtime = Time.at(2)
   end
+
+  def test_hooks
+    @a.instance_variable_set :@reset1, false
+    @a.instance_variable_set :@reset2, false
+    @a.instance_variable_set :@reset3, false
+
+    Autotest.add_hook(:reset) do |at|
+      at.instance_variable_set :@reset1, true
+    end
+
+    Autotest.add_hook(:reset) do |at|
+      at.instance_variable_set :@reset2, true
+    end
+
+    Autotest.add_hook(:reset) do |at|
+      at.instance_variable_set :@reset3, true
+    end
+
+    @a.reset
+
+    assert @a.instance_variable_get(:@reset1), "Hook1 should work on reset"
+    assert @a.instance_variable_get(:@reset2), "Hook2 should work on reset"
+    assert @a.instance_variable_get(:@reset3), "Hook3 should work on reset"
+  end
+
+  # TODO BUG /usr/local/bin/ruby -I.:lib:test test/test_rails_autotest.rb -n "/^(test_hooks)$/" | unit_diff -u; /usr/local/bin/ruby -I.:lib:test test/test_autotest.rb -n "/^(test_hooks|test_hooks)$/" | unit_diff -u
 
   def test_consolidate_failures_experiment
     @a.files.clear
@@ -161,7 +188,7 @@ test_error2(TestAutotest):
       @test => [],
       'test/test_fooby.rb' => [ 'test_something1', 'test_something2' ]
     }
-    expected = [ "/usr/local/bin/#{ruby_cmd} -I.:lib:test -e \"%w[#{@test}].each { |f| load f }\" | unit_diff -u",
+    expected = [ "/usr/local/bin/#{ruby_cmd} -I.:lib:test -rtest/unit -e \"%w[#{@test}].each { |f| load f }\" | unit_diff -u",
                  "/usr/local/bin/#{ruby_cmd} -I.:lib:test test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\" | unit_diff -u" ].join("; ")
 
     result = @a.make_test_cmd f

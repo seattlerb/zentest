@@ -15,12 +15,14 @@ $TESTING = false unless defined? $TESTING
 # 6) when 0 defects, goto 2
 
 class Autotest
-  
+
+  HOOKS = Hash.new { |h,k| h[k] = [] }
+
   def self.run
     new.run
   end
 
-  attr_accessor :files, :files_to_test, :output, :last_mtime if $TESTING
+  attr_accessor :exceptions, :files, :files_to_test, :interrupted, :last_mtime, :libs, :output, :tainted
 
   def initialize
     @files = Hash.new Time.at(0)
@@ -29,19 +31,17 @@ class Autotest
     @libs = '.:lib:test'
     @output = $stderr
     @sleep = 1
-    hook :init
   end
 
   def run
+    hook :run
     reset
     add_sigint_handler
 
     loop do # ^c handler
       begin
         get_to_green
-#        was_tainted = @tainted
         rerun_all_tests if @tainted
-#        hook :all_good if was_tainted
         wait_for_changes
       rescue Interrupt
         if @wants_to_quit then
@@ -169,7 +169,7 @@ class Autotest
 
     unless full.empty? then
       classes = full.map {|k,v| k}.flatten.join(' ')
-      cmds << "#{ruby} -I#{@libs} -e \"%w[#{classes}].each { |f| load f }\" | unit_diff -u"
+      cmds << "#{ruby} -I#{@libs} -rtest/unit -e \"%w[#{classes}].each { |f| load f }\" | unit_diff -u"
     end
 
     partial.each do |klass, methods|
@@ -192,6 +192,7 @@ class Autotest
     @last_mtime = Time.at(0)
     find_files_to_test # failed + changed/affected
     @tainted = false
+    hook :reset
   end
   
   def ruby
@@ -230,8 +231,13 @@ class Autotest
   # Hooks:
 
   def hook(name)
-    meth = :"#{name}_hook"
-    send meth if respond_to? meth
+    HOOKS[name].each do |plugin|
+      plugin[self]
+    end
+  end
+
+  def self.add_hook(name, &block)
+    HOOKS[name] << block
   end
 end
 
@@ -242,4 +248,3 @@ elsif test ?f, File.expand_path('~/.autotest') then
 else
   puts "couldn't find ./.autotest in #{Dir.pwd}"
 end
-

@@ -1,3 +1,4 @@
+require 'test/unit' if $0 == __FILE__
 require 'test_autotest'
 require 'rails_autotest'
 
