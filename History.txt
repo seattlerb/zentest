@@ -1,3 +1,24 @@
+*** 3.3.0 / 2006-07-28
+
++ 1 major enhancement:
+	+ autotest has been rewritten to be much cleaner, now has a plugin system.
++ 5 minor enhancement:
+	+ test/rails adds helper tests, "stolen" from Geoff's work, (which was "stolen" from ryan's work. :P)
+	+ autotest turnaround is now faster.
+	+ Added more prune dirs to autotest.
+	+ test/rails rewinds IOs containing captured output. Added assert_empty.
+	+ Document that autotest doesn't run the db:test:prepare rake task when in Rails mode.
+	+ Added ruby_fork, but haven't fully plugged into autotest yet.
++ 7 bug fixes:
+	+ Add SIGINT handler to unit_diff to give a more graceful exit.
+	+ Don't strip <> from tempfiles, parse_diff does it for us.
+	+ Fixed autotest problems on windoze. Ugh.
+	+ Fixed broken pipe bug and newline bug in unit_diff.
+	+ Make request_method in ControllerTestCase a String.
+	+ multitest installs rubygems if tarball found in versions dir.
+	+ multitest only configures when makefile is missing. Rebuilds much faster now.
+	+ ruby_fork exits without backtrace and allows redirection of output.
+
 *** 3.2.0 / 2006-04-10
 
 + 1 major enhancement:

@@ -116,6 +116,10 @@ class TestAutotest < Test::Unit::TestCase
     assert_equal "Dunno! fooby.rb\n", @a.output.string
   end
 
+  def test_flunk
+    flunk
+  end
+
   def test_find_files_to_test_lib
     # ensure we add test_blah.rb when blah.rb updates
     util_find_files_to_test(@impl, @test => [])

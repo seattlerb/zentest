@@ -13,6 +13,7 @@ bin/zentest
 example.txt
 example1.rb
 example2.rb
+example_dot_autotest.rb
 lib/autotest.rb
 lib/rails_autotest.rb
 lib/ruby_fork.rb

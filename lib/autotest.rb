@@ -3,14 +3,54 @@ require 'rbconfig'
 
 $TESTING = false unless defined? $TESTING
 
-# New (proposed) strategy:
+##
+# Autotest continuously scans the files in your project for changes
+# and runs the appropriate tests.  Test failures are run until they
+# have all passed. Then the full test suite is run to ensure that
+# nothing else was inadvertantly broken.
+#
+# If you want Autotest to start over from the top, hit ^C once.  If
+# you want Autotest to quit, hit ^C twice.
+#
+# Rails:
+#
+# The autotest command will automatically discover a Rails directory
+# by looking for config/environment.rb. When Rails is discovered,
+# autotest uses RailsAutotest to perform file mappings and other work.
+# See RailsAutotest for details.
+#
+# Plugins:
+#
+# Plugins are available by creating a .autotest file either in your
+# project root or in your home directory. You can then write event
+# handlers in the form of:
+#
+#   Autotest.add_hook hook_name { |autotest| ... }
+#
+# The available hooks are: run, interrupt, quit, ran_command, red,
+#   green, all_good, and reset.
+#
+# See example_dot_autotest.rb for more details.
+#
+# Naming:
+#
+# Autotest uses a simple naming scheme to figure out how to map
+# implementation files to test files following the Test::Unit naming
+# scheme.
+#
+# * Test files must be stored in test/
+# * Test files names must start with test_
+# * Test class names must start with Test
+# * Implementation files must be stored in lib/
+# * Implementation files must match up with a test file named
+#   test_.*implementation.rb
+#
+# Strategy:
 #
 # 1) find all files and associate them from impl <-> test
 # 2) run all tests
 # 3) scan for failures
 # 4) detect changes in ANY (ruby?) file, rerun all failures + changed files
-#    NOTE: this runs in a loop, loop handling should be improved slightly to
-#          have less crap (ruby command, failure count).
 # 5) until 0 defects, goto 3
 # 6) when 0 defects, goto 2
 
@@ -30,7 +70,7 @@ class Autotest
     @exceptions = false
     @libs = '.:lib:test'
     @output = $stderr
-    @sleep = 1
+    @sleep = 2
   end
 
   def run
@@ -156,7 +196,6 @@ class Autotest
     @files_to_test = consolidate_failures failed
     unless @files_to_test.empty? then
       hook :red
-      hook :blah
     else
       hook :green
     end unless $TESTING
