@@ -64,15 +64,15 @@ class Autotest
 
   def run_tests
     find_files_to_test # failed + changed/affected
-    cmd = make_test_cmd(@files_to_test)
+    cmd = make_test_cmd @files_to_test
 
     puts cmd
 
-    results = `#{cmd}`
+    @results = `#{cmd}`
+    hook :ran_command
+    puts @results
 
-    puts results
-
-    handle_results(results)
+    handle_results(@results)
   end
 
   ############################################################
@@ -119,10 +119,10 @@ class Autotest
     result = {}
     Find.find '.' do |f|
       Find.prune if @exceptions and f =~ @exceptions and test ?d, f
-      Find.prune if f =~ /(?:\.svn|CVS|tmp|public|doc|pkg)$/ # prune dirs
+      Find.prune if f =~ /(\.(svn|hg)|CVS|tmp|public|doc|pkg)$/ # prune dirs
 
       next if test ?d, f
-      next if f =~ /(?:swp|~|rej|orig)$/        # temporary/patch files
+      next if f =~ /(swp|~|rej|orig)$/        # temporary/patch files
       next if f =~ /\/\.?#/                     # Emacs autosave/cvs merge files
 
       filename = f.sub(/^\.\//, '')
