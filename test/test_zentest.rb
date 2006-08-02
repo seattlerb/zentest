@@ -5,10 +5,7 @@ require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 $TESTING = true
 
 # I do this so I can still run ZenTest against the tests and itself...
-#if __FILE__ == $0 then
-  puts "Requiring ZenTest"
-  require 'ZenTest'
-#end
+require 'ZenTest' unless defined? $ZENTEST
 
 # These are just classes set up for quick testing.
 # TODO: need to test a compound class name Mod::Cls
@@ -136,9 +133,7 @@ class MyClass8
   def MyClass8.foobaz; end
 end
 
-class TestTrueClass
-
-end
+class TestTrueClass; end
 
 class TestZenTest < Test::Unit::TestCase
 

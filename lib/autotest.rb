@@ -62,7 +62,7 @@ class Autotest
     new.run
   end
 
-  attr_accessor :exceptions, :files, :files_to_test, :interrupted, :last_mtime, :libs, :output, :tainted
+  attr_accessor :exceptions, :files, :files_to_test, :interrupted, :last_mtime, :libs, :output, :tainted, :wants_to_quit
 
   def initialize
     @files = Hash.new Time.at(0)
@@ -70,7 +70,8 @@ class Autotest
     @exceptions = false
     @libs = '.:lib:test'
     @output = $stderr
-    @sleep = 2
+    @sleep = 1
+    hook :initialize
   end
 
   def run
@@ -88,7 +89,6 @@ class Autotest
           break
         else
           reset
-          hook :interrupt
         end
       end
     end
@@ -123,9 +123,11 @@ class Autotest
       if @interrupted then
         @wants_to_quit = true
       else
-        puts "Interrupt a second time to quit"
-        @interrupted = true
-        sleep 1.5
+        unless hook :interrupt then
+          puts "Interrupt a second time to quit"
+          @interrupted = true
+          sleep 1.5
+        end
         raise Interrupt                 # let the run loop catch it
       end
     end
@@ -139,6 +141,7 @@ class Autotest
     filters = Hash.new { |h,k| h[k] = [] }
 
     failed.each do |method, klass|
+      klass = klass.split(/::/).first
       failed_file_name = klass.gsub(/(.)([A-Z])/, '\1_?\2')
       failed_files = @files.keys.grep(/#{failed_file_name}/i)
       case failed_files.size
@@ -173,17 +176,19 @@ class Autotest
   end
 
   def find_files_to_test(files=find_files)
-    updated = []
+    updated = files.select { |filename, mtime|
+      @files[filename] < mtime
+    }
 
     # TODO: keep an mtime at app level and drop the files hash
-    files.each do |filename, mtime|
-      next if @files[filename] >= mtime
+    updated.each do |filename, mtime|
+      @files[filename] = mtime
+    end
 
+    updated.each do |filename, mtime|
       tests_for_file(filename).each do |f|
         @files_to_test[f] # creates key with default value
       end
-
-      @files[filename] = mtime
     end
 
     previous = @last_mtime
@@ -258,6 +263,24 @@ class Autotest
       @output.puts "Dunno! #{filename}" if $TESTING
       []
     end
+
+#     result =
+#       case File::basename filename
+#       when /^test\/test_.*rb$/, /^test_.*rb$/ then
+#         @files.keys.select do |k|
+#           k =~ %r%#{filename}$%
+#         end
+#       when /^lib\/.*\.rb$/, /\.rb$/ then
+#         impl = File.basename(filename).gsub '_', '_?'
+#         @files.keys.select do |k|
+#           k =~ %r%test_#{impl}$%
+#         end
+#       else
+#         []
+#       end
+
+#     @output.puts "Dunno! #{filename}" if result.empty? and ($DEBUG or $TESTING)
+#     return result
   end
 
   def wait_for_changes
@@ -270,8 +293,8 @@ class Autotest
   # Hooks:
 
   def hook(name)
-    HOOKS[name].each do |plugin|
-      plugin[self]
+    HOOKS[name].inject(false) do |handled,plugin|
+      plugin[self] || handled
     end
   end
 
@@ -284,6 +307,4 @@ if test ?f, './.autotest' then
   load './.autotest'
 elsif test ?f, File.expand_path('~/.autotest') then
   load File.expand_path('~/.autotest')
-else
-  puts "couldn't find ./.autotest in #{Dir.pwd}"
 end

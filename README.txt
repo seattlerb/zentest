@@ -66,6 +66,7 @@ implementation.
 * Ruby 1.6+
 * Test::Unit
 * Rake or rubygems for install/uninstall
+* diff.exe on windoze. Try http://gnuwin32.sourceforge.net/packages.html
 
 == INSTALL
 
