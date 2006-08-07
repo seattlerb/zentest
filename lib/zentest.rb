@@ -5,9 +5,13 @@ $:.unshift( *$I.split(/:/) ) if defined? $I and String === $I
 $r = false unless defined? $r # reverse mapping for testclass names
 
 if $r then
-  $-w = false # rails is retarded
-  $: << 'config'
-  require 'environment'
+  # all this is needed because rails is retarded
+  $-w = false
+  $: << 'test'
+  $: << 'lib'
+  require 'config/environment'
+  f = './app/controllers/application.rb'
+  require f if test ?f, f
 end
 
 $ZENTEST = true

@@ -62,7 +62,7 @@ class Autotest
     new.run
   end
 
-  attr_accessor :exceptions, :files, :files_to_test, :interrupted, :last_mtime, :libs, :output, :tainted, :wants_to_quit
+  attr_accessor :exceptions, :files, :files_to_test, :interrupted, :last_mtime, :libs, :output, :results, :tainted, :wants_to_quit
 
   def initialize
     @files = Hash.new Time.at(0)
