@@ -29,15 +29,15 @@ dirs = [
   %w[Libraries          lib/],
   %w[Models             app/models],
   %w[Unit\ tests        test/unit],
+  %w[Helpers            app/helpers],
+  %w[Helper\ tests      test/helpers],
   %w[Components         components],
   %w[Controllers        app/controllers],
   %w[Controller\ tests  test/controllers],
-  %w[Helper\ tests      test/helpers],
   %w[View\ tests        test/views],
   %w[Functional\ tests  test/functional],
   %w[Integration\ tests test/integration],
   %w[APIs               app/apis],
-  %w[Helpers            app/helpers],
 ]
 
 dirs = dirs.map { |name, dir| [name, File.join(RAILS_ROOT, dir)] }
