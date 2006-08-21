@@ -54,6 +54,8 @@ class TestRailsAutotest < TestAutotest
   def test_consolidate_failures_multiple_matches
     @test2 = 'test/unit/route_again_test.rb'
     @a.files[@test2] = Time.at(42)
+    @a.files['app/views/routes/edit.rhtml'] = Time.at(42)
+    @a.files['app/views/routes/list.rhtml'] = Time.at(42)
     result = @a.consolidate_failures([['test_unmatched', @test_class]])
     expected = {"test/unit/route_test.rb"=>["test_unmatched"]}
     assert_equal expected, result

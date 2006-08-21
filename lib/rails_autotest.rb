@@ -15,13 +15,7 @@ class RailsAutotest < Autotest
        "test/controllers/#{$1}_controller_test.rb",
        "test/views/#{$1}_view_test.rb",
        "test/functional/#{$1}_controller_test.rb"]
-    when %r%^test/unit/.*rb$% then
-      [filename]
-    when %r%^test/controllers/.*\.rb$% then
-      [filename]
-    when %r%^test/views/.*\.rb$% then
-      [filename]
-    when %r%^test/functional/.*\.rb$% then
+    when %r%^test/(unit|integration|controllers|views|functional)/.*rb$% then
       [filename]
     when %r%^app/models/(.*)\.rb$% then
       ["test/unit/#{$1}_test.rb"]
@@ -29,10 +23,10 @@ class RailsAutotest < Autotest
       @files.keys.select { |f|
         f =~ %r%^test/(views|functional)/.*_test\.rb$%
       }
-    when %r%^app/helpers/(.*)_helper.rb% then
+    when %r%^app/helpers/(.*)_helper.rb%, %r%^app/views/(.*)/% then
       ["test/views/#{$1}_view_test.rb",
        "test/functional/#{$1}_controller_test.rb"]
-    when %r%^app/controllers/application.rb$% then
+    when %r%^app/controllers/application.rb$% then # FIX: wtf?
       ["test/controllers/dummy_controller_test.rb",
        "test/functional/dummy_controller_test.rb"]
     when %r%^app/controllers/(.*)\.rb$% then
@@ -40,9 +34,6 @@ class RailsAutotest < Autotest
        "test/functional/#{$1}_test.rb"]
     when %r%^app/views/layouts/% then
       ["test/views/layouts_view_test.rb"]
-    when %r%^app/views/(.*)/% then
-      ["test/views/#{$1}_view_test.rb",
-       "test/functional/#{$1}_controller_test.rb"]
     when %r%^config/routes.rb$% then
       @files.keys.select do |f|
         f =~ %r%^test/(controllers|views|functional)/.*_test\.rb$%

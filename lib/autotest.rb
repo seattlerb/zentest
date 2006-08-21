@@ -68,7 +68,7 @@ class Autotest
     @files = Hash.new Time.at(0)
     @files_to_test = Hash.new { |h,k| h[k] = [] }
     @exceptions = false
-    @libs = '.:lib:test'
+    @libs = %w[. lib test].join(File::PATH_SEPARATOR)
     @output = $stderr
     @sleep = 1
     hook :initialize
@@ -141,7 +141,7 @@ class Autotest
     filters = Hash.new { |h,k| h[k] = [] }
 
     failed.each do |method, klass|
-      klass = klass.split(/::/).first
+      klass = klass.split(/::/).last
       failed_file_name = klass.gsub(/(.)([A-Z])/, '\1_?\2')
       failed_files = @files.keys.grep(/#{failed_file_name}/i)
       case failed_files.size

@@ -25,8 +25,8 @@ end
 
 class TestAutotest < Test::Unit::TestCase
 
-  WINDOZE = /win32/ =~ RUBY_PLATFORM
-  RUBY = (WINDOZE ? 'c:\ruby\bin\ruby' : '/usr/local/bin/ruby')
+  WINDOZE = /win32/ =~ RUBY_PLATFORM unless defined? WINDOZE
+  RUBY = (WINDOZE ? 'c:\ruby\bin\ruby' : '/usr/local/bin/ruby')  unless defined? RUBY
 
   def setup
     @test_class = 'TestBlah'
@@ -76,8 +76,13 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_consolidate_failures_nested_classes
-    result = @a.consolidate_failures([['test_blah1', "#{@test_class}::Inner"]])
-    expected = {@test => ['test_blah1']}
+    @a.files.clear
+    @a.files['lib/outer/inner.rb'] = Time.at(5)
+    @a.files['test/outer/test_inner.rb'] = Time.at(5)
+    @a.files['lib/outer.rb'] = Time.at(5)
+    @a.files['test/test_outer.rb'] = Time.at(5)
+    result = @a.consolidate_failures([['test_blah1', "TestOuter::TestInner"]])
+    expected = {'test/outer/test_inner.rb' => ['test_blah1']}
     assert_equal expected, result
     expected = ""
     assert_equal expected, @a.output.string

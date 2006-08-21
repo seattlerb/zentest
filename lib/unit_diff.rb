@@ -73,8 +73,8 @@ end
 
 class UnitDiff
 
-  WINDOZE  = /win32/ =~ RUBY_PLATFORM
-  DIFF = (WINDOZE ? 'diff.exe' : 'diff')
+  WINDOZE  = /win32/ =~ RUBY_PLATFORM unless defined? WINDOZE
+  DIFF = (WINDOZE ? 'diff.exe' : 'diff') unless defined? DIFF
 
   ##
   # Handy wrapper for UnitDiff#unit_diff.

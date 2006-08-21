@@ -1,7 +1,7 @@
 #!/usr/local/bin/ruby -w
 
 module AutoMenu
-  WINDOZE = /win32/ =~ RUBY_PLATFORM
+  WINDOZE = /win32/ =~ RUBY_PLATFORM unless defined? WINDOZE
 
   if WINDOZE then
     require "Win32API"
