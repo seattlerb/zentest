@@ -1,6 +1,6 @@
 # -*- mode -*-
 
-module AutoGrowl
+module Autotest::Growl
   def self.growl title, msg, pri=0
     system "growlnotify -n autotest --image /Applications/Mail.app/Contents/Resources/Caution.tiff -p #{pri} -m #{msg.inspect} #{title}"
   end

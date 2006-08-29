@@ -7,7 +7,7 @@ include OSX
 OSX::NSBundle.bundleWithPath(File.expand_path("~/Library/Frameworks/Aquaterm.framework")).load
 OSX.ns_import :AQTAdapter
 
-class StatusBoard
+class Autotest::Pretty
   BLACK = 0
   WHITE = 1
   RED = 2
@@ -32,7 +32,6 @@ class StatusBoard
   end
 
   def draw
-#    @past = @past[10..-1] if @past.size >= 100
     @past.shift if @past.size > 100
 
     @adapter.takeColorFromColormapEntry(@past.last ? GREEN : RED)
@@ -72,7 +71,7 @@ class StatusBoard
 end
 
 unless $TESTING then
-  board = StatusBoard.new
+  board = Autotest::Pretty.new
 
   Autotest.add_hook :red do |at|
     board.fail unless $TESTING

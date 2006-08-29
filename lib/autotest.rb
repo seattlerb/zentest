@@ -170,7 +170,7 @@ class Autotest
 
       filename = f.sub(/^\.\//, '')
 
-      result[filename] = File.stat(filename).mtime
+      result[filename] = File.stat(filename).mtime rescue next
     end
     return result
   end
@@ -284,6 +284,7 @@ class Autotest
   end
 
   def wait_for_changes
+    hook :waiting
     begin
       sleep @sleep
     end until find_files_to_test

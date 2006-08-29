@@ -5,3 +5,4 @@
 # require 'autotest/menu'
 # require 'autotest/pretty'
 # require 'autotest/redgreen'
+# require 'autotest/timestamp'

@@ -38,7 +38,7 @@ Dir.chdir root_dir do
 
   tarballs = Dir["versions/rubygems*.tgz"]
   raise "You should delete all but one rubygem tarball" if tarballs.size > 1
-  rubygem_tarball = File.expand_path tarballs.last
+  rubygem_tarball = File.expand_path tarballs.last rescue nil
 
   Dir.chdir "build" do
     Dir["../versions/ruby*.tar.gz"].each do |tarball|

@@ -1,6 +1,6 @@
 # -*- mode -*-
 
-module HtmlConsole
+module Autotest::HtmlConsole
   MAX = 30
   STATUS = {}
   PATH = File.expand_path("~/Sites/autotest.html")

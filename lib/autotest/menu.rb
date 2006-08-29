@@ -1,6 +1,6 @@
 #!/usr/local/bin/ruby -w
 
-module AutoMenu
+module Autotest::Menu
   WINDOZE = /win32/ =~ RUBY_PLATFORM unless defined? WINDOZE
 
   if WINDOZE then

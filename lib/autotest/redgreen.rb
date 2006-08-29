@@ -1,7 +1,7 @@
 # -*- ruby -*-
 
 # special thanks to Pat Eyler, Sean Carley, and Rob Sanheim
-module RedGreen
+module Autotest::RedGreen
   BAR = "=" * 80
 
   Autotest.add_hook :ran_command do |at|
