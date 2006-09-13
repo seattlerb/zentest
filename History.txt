@@ -1,6 +1,6 @@
 *** 3.4.0 / 2006-09-12
 
-+ 10 minor enhancements:
++ 13 minor enhancements:
 	* Broke out example_dot_autotest into multiple files in lib.
 	* Enhanced hook system so it can return true if event handled.
 	* Sleep is now 1 second by default because life is too short.
