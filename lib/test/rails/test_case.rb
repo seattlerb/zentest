@@ -5,8 +5,7 @@
 
 class Test::Rails::TestCase < Test::Unit::TestCase
 
-  def test_stupid # :nodoc:
-  end
+  undef_method :default_test
 
 end
 

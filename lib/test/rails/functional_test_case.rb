@@ -11,6 +11,10 @@ class Test::Rails::FunctionalTestCase < Test::Rails::TestCase
   # controller class to instantiate.
   #
   # setup also instantiates a new @request and @response object.
+  #
+  # If you need to perform extra setup actions, define #setup_extra and
+  # FunctionalTestCase will call it after performing the rest of its setup
+  # actions.
 
   def setup
     return if self.class.name =~ /TestCase$/
@@ -29,6 +33,8 @@ class Test::Rails::FunctionalTestCase < Test::Rails::TestCase
     @request.session = @session
 
     @response = ActionController::TestResponse.new
+
+    setup_extra if respond_to? :setup_extra
   end
 
   ##
