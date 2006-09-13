@@ -1,3 +1,10 @@
+*** dev
+
++ minor enhancements:
+	* Accurate test counts for Test::Rails.
+	* Added hack to display a tree of render calls.
+	* Added hook to perform extra setup for 
+
 *** 3.4.0 / 2006-09-12
 
 + 10 minor enhancements:
