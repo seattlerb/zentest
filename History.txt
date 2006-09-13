@@ -1,10 +1,3 @@
-*** dev
-
-+ minor enhancements:
-	* Accurate test counts for Test::Rails.
-	* Added hack to display a tree of render calls.
-	* Added hook to perform extra setup for 
-
 *** 3.4.0 / 2006-09-12
 
 + 10 minor enhancements:
@@ -13,18 +6,20 @@
 	* Sleep is now 1 second by default because life is too short.
 	* Hooked interrupt with new hook system. First handler wins.
 	* Hooked test results before output
+	* Accurate test counts for Test::Rails.
 	* Added snarl autotest plugin, thanks to Patrick Hurley.
 	* Added timestamp autotest plugin, thanks to Joe Goldberg.
 	* Added redgreen, thanks to Pat Eyler, Sean Carley, and Rob Sanheim.
 	* Added kdenotify autotest plugin, thanks to Geir Freysson.
 	* Added markaby support for Test::Rails.
+	* Added hack to display a tree of render calls.
+	* Added hook to perform extra setup for 
 + 5 bug fixes:
 	- Extended zentest to deal with rails a bit better... ugh.
 	- Fixed @libs for windoze.
 	- Fixed inner class/test identification in autotest.
 	- Namespaced all plugins... eric is anal.
 	- No longer freak out if rubygems tarball not in multiruby/versions.
-
 
 *** 3.3.0 / 2006-07-28
 
