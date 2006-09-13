@@ -15,6 +15,14 @@ example1.rb
 example2.rb
 example_dot_autotest.rb
 lib/autotest.rb
+lib/autotest/growl.rb
+lib/autotest/html_report.rb
+lib/autotest/kdenotify.rb
+lib/autotest/menu.rb
+lib/autotest/pretty.rb
+lib/autotest/redgreen.rb
+lib/autotest/snarl.rb
+lib/autotest/timestamp.rb
 lib/rails_autotest.rb
 lib/ruby_fork.rb
 lib/test/rails.rb
