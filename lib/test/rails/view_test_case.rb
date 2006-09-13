@@ -415,14 +415,15 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
     controller = @controller.class.name.sub('Controller', '')
     controller = controller.gsub(/([A-Z])/, '_\1'.downcase).sub('_', '')
     
+    extensions = %w(rhtml rxml mab)
+    
     while test =~ /_/ do
-      return test if File.file? "app/views/#{controller}/#{test}.rhtml"
-      return test if File.file? "app/views/#{controller}/#{test}.rxml"
+      return test if extensions.any? { |ext| File.file? "app/views/#{controller}/#{test}.#{ext}" }
+
       test = test.sub(/_[^_]+$/, '')
     end
 
-    return test if File.file? "app/views/#{controller}/#{test}.rhtml"
-    return test if File.file? "app/views/#{controller}/#{test}.rxml"
+    return test if extensions.any? { |ext| File.file? "app/views/#{controller}/#{test}.#{ext}" }
 
     flunk "Couldn't find view for test_#{orig_name}"
   end

@@ -1,8 +1,29 @@
+*** 3.4.0 / 2006-09-12
+
++ 10 minor enhancements:
+	* Broke out example_dot_autotest into multiple files in lib.
+	* Enhanced hook system so it can return true if event handled.
+	* Sleep is now 1 second by default because life is too short.
+	* Hooked interrupt with new hook system. First handler wins.
+	* Hooked test results before output
+	* Added snarl autotest plugin, thanks to Patrick Hurley.
+	* Added timestamp autotest plugin, thanks to Joe Goldberg.
+	* Added redgreen, thanks to Pat Eyler, Sean Carley, and Rob Sanheim.
+	* Added kdenotify autotest plugin, thanks to Geir Freysson.
+	* Added markaby support for Test::Rails.
++ 5 bug fixes:
+	- Extended zentest to deal with rails a bit better... ugh.
+	- Fixed @libs for windoze.
+	- Fixed inner class/test identification in autotest.
+	- Namespaced all plugins... eric is anal.
+	- No longer freak out if rubygems tarball not in multiruby/versions.
+
+
 *** 3.3.0 / 2006-07-28
 
 + 1 major enhancement:
 	+ autotest has been rewritten to be much cleaner, now has a plugin system.
-+ 5 minor enhancement:
++ 5 minor enhancements:
 	+ test/rails adds helper tests, "stolen" from Geoff's work, (which was "stolen" from ryan's work. :P)
 	+ autotest turnaround is now faster.
 	+ Added more prune dirs to autotest.
@@ -33,10 +54,10 @@
 
 *** 3.1.0 / 2006-03-29
 
-+ 2 major enhancements
++ 2 major enhancements:
 	+ Added multiruby! YAY!
 	+ Massive improvements to autotest: speed, reliability, reporting, etc.
-+ 10 minor enhancements
++ 10 minor enhancements:
 	+ multiruby builds in a centralized location. YAY!
 	+ multiruby now allows reinstalls quickly and easily (can even skip config).
 	+ multiruby exits with total sum of exit codes.
@@ -47,7 +68,7 @@
 	+ autotest always runs with unit_diff -u.
 	+ autotest can now run cvs/svn/p4 up periodically to be a mini-tinderbox.
 	+ autotest now has real help.
-+ 4 bug fixes
++ 4 bug fixes:
 	+ ZenTest is now zentest. Yay for consistency! (do a rake uninstall to clean)
 	+ ZenTest excludes pretty_print methods.
 	+ Fixed unary operator issues (they were backwards... oops!) for ZenTest.
@@ -55,25 +76,25 @@
 
 *** 3.0.0 / 2006-03-06
 
-+ 2 major enhancements
++ 2 major enhancements:
 	+ Added autotest and rails_autotest. YAY for continous testing!
 	+ Repackaged and gemified. YAY for gemification!
-+ 3 minor enhancements
++ 3 minor enhancements:
 	+ Added non-mappable tests starting with test_integration_.
 	+ Lots of code and test refactoring and cleanup.
 	+ Massive improvement on unit tests.
-+ 3 bug fixes
++ 3 bug fixes:
 	+ Cleaned up class method inheritence. Esp relevant for rails testing.
 	+ Finally fixed the unit_diff parse bug!
 	+ Fixed improper counting of errors if a class was missing, should be 1 + missing methods.
 
 *** 2.4.0 / 2005-03-21
 
-+ 3 minor enhancements
++ 3 minor enhancements:
 	+ Able to audit standard class library (so now we can audit rubicon!).
 	+ Able to map against class methods (self.blah <=> test_class_blah).
 	+ Added -I=rubypath support 
-+ 4 bug fixes
++ 4 bug fixes:
 	+ bug:1151 Fixed stupid problem w/ unit_diff.
 	+ bug:1454 code generation correctly matches class/module for nested classes.
 	+ bug:1455 Updated method mapping to work on all operators listed in my quickref.
@@ -81,14 +102,14 @@
 
 *** 2.3.0 / 2004-11-18
 
-+ 6 minor enhancements
++ 6 minor enhancements:
 	+ Massively expanded the method name mappings.
 	+ Added -r flag to reverse map names, for Rails style testing.
 	+ Added -e to auto eval tests generated.
 	+ Added -b & -c flags in unit_diff (passed to diff)
 	+ Added install and uninstall rules to Makefile.
 	+ Added some more doco to README.txt
-+ 7 bug fixes
++ 7 bug fixes:
 	+ Cleaned up and refactored tests.
 	+ Changed the way files are generated, to accomodate new flags.
 	+ Added some more tests.
@@ -99,19 +120,19 @@
 
 *** 2.2.0 / 2004-10-18
 
-+ 4 minor enhancements
++ 4 minor enhancements:
 	+ Added LinuxJournalArticle.txt! WOOT!
 	+ Added unit_diff.rb - a very cool filter for test output!
 	+ Extended ZenTest to work with standard input
 	+ Added "ZenTest FULL" to force ZenTest to analyze inherited methods, for subclasses of the standard library.
-+ 3 bug fixes
++ 3 bug fixes:
 	+ Extended makefile to be more dynamic and stop diffing versions. ugh.
 	+ Expanded the method rename map to handle <<, *, +, and ==. 
 	+ Added more test cases.
 
 *** 2.1.2 / 2004-03-08
 
-+ 3 bug fixes
++ 4 bug fixes:
 	+ Fixed yet another 1.8ism, results will be the same in 1.8 and 1.6.
 	+ Fixed code responsible for method name conversion.
 	+ I am a moron... didn't run tests after updating version.
@@ -119,41 +140,41 @@
 
 *** 2.1.1 / 2004-03-06
 
-+ 3 bug fixes
++ 3 bug fixes:
 	+ Fixed a 1.8ism.
 	+ Removed zentestrunner. Older ruby users will just have to suffer.
 	+ Updated history to ZenWeb format.
 
 *** 2.1.0 / 2003-01-07
 
-+ 3 major enhancements
++ 3 major enhancements:
 	+ Output is runnable as-is thanks to zentestrunner.rb.
 	+ Wrapped up all running functionality into ZenTest.fix
 	+ Added simple statistic output... Thanks Dave & Andy!!!
-+ 1 minor enhancement
++ 2 minor enhancements:
 	+ Added zentestrunner.rb until Nathaniel accepts my changes!
-+ 3 bug fixes
-	+ Removed at_exit override and avoided test/unit altogether.
 	+ Added a clean rule to Makefile
++ 3 bug fixes:
+	+ Removed at_exit override and avoided test/unit altogether.
 	+ Extended README.txt to include some of the rules.
 	+ Fixed several tests and added assertions for new stats
 
 *** 2.0.0 / 2002-10-29
 
-+ 2 major enhancements
++ 2 major enhancements:
 	+ Rewrite of ZenTest.rb into actual OO design.
 	+ Added unit tests, finally...
 
 *** 1.0.1 / 2002-09-28
 
-+ 1 minor enhancements
++ 1 minor enhancement:
 	+ Only loads when a class is detected, allows some scripts to be skipped.
-+ 3 bug fixes
++ 3 bug fixes:
 	+ Cleaned up output. Verbose when $DEBUG is true.
 	+ Added an error count that is output at end.
 	+ Better filtering or conversion on some method names.
 
 *** 1.0.0 / 2002-09-24
 
-+ 1 major enhancements
++ 1 major enhancement:
 	+ Birthday!

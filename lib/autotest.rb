@@ -263,24 +263,6 @@ class Autotest
       @output.puts "Dunno! #{filename}" if $TESTING
       []
     end
-
-#     result =
-#       case File::basename filename
-#       when /^test\/test_.*rb$/, /^test_.*rb$/ then
-#         @files.keys.select do |k|
-#           k =~ %r%#{filename}$%
-#         end
-#       when /^lib\/.*\.rb$/, /\.rb$/ then
-#         impl = File.basename(filename).gsub '_', '_?'
-#         @files.keys.select do |k|
-#           k =~ %r%test_#{impl}$%
-#         end
-#       else
-#         []
-#       end
-
-#     @output.puts "Dunno! #{filename}" if result.empty? and ($DEBUG or $TESTING)
-#     return result
   end
 
   def wait_for_changes
