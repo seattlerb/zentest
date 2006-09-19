@@ -20,7 +20,7 @@ spec = Gem::Specification.new do |s|
   s.files = IO.readlines("Manifest.txt").map {|f| f.chomp }
   s.require_path = 'lib'
 
-  s.executables = s.files.grep(/^bin\//).map { |f| File.basename f }
+  s.executables = s.files.grep(/^bin/) { |f| File.basename f }
 
   paragraphs = File.read("README.txt").split(/\n\n+/)
   s.instance_variable_set "@description", paragraphs[3..10].join("\n\n")
@@ -73,8 +73,8 @@ end
   
 desc 'Upload RDoc to RubyForge'
 task :upload => :rdoc do
-    
-  user = "#{ENV['USER']}@rubyforge.org"
+  config = YAML.load(File.read(File.expand_path("~/.rubyforge/config.yml")))
+  user = "#{config["username"]}@rubyforge.org"
   project = '/var/www/gforge-projects/zentest'
   local_dir = 'doc'
   pub = Rake::SshDirPublisher.new user, project, local_dir
@@ -120,7 +120,7 @@ task :uninstall do
 end
 
 desc 'Clean up'
-task :clean => [ :clobber_rdoc, :clobber_package ] do
+task :clean => [ :clobber_docs, :clobber_package ] do
   rm_f Dir["**/*~"]
 end
 

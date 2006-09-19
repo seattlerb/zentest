@@ -18,6 +18,7 @@ class Test::Rails::FunctionalTestCase < Test::Rails::TestCase
 
   def setup
     return if self.class.name =~ /TestCase$/
+    super
 
     @controller_class = Object.path2class @controller_class_name
     raise "Can't determine controller class for #{self.class}" if @controller_class.nil?

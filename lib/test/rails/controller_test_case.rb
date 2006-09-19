@@ -33,14 +33,18 @@
 #     fixtures :users, :routes, :points, :photos
 #     
 #     def test_delete
+#       # Store current count
+#       count = Route.count
 #       # Set up our environment
 #       session[:username] = users(:herbert).username
 #       
-#       # perform the delet action
+#       # perform the delete action
 #       get :delete, :id => routes(:work).id
 #       
 #       # Assert we got a 200
 #       assert_response :success
+#       # Assert controller deleted route
+#       assert_equal count-1, Route.count
 #       # Ensure that @action_title is set properly
 #       assert_assigned :action_title, "Deleting \"#{routes(:work).name}\""
 #       # Ensure that @route is set properly
