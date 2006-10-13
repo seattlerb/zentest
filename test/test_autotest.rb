@@ -25,8 +25,7 @@ end
 
 class TestAutotest < Test::Unit::TestCase
 
-  WINDOZE = /win32/ =~ RUBY_PLATFORM unless defined? WINDOZE
-  RUBY = (WINDOZE ? 'c:\ruby\bin\ruby' : '/usr/local/bin/ruby')  unless defined? RUBY
+  RUBY = File.join(Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name']) unless defined? RUBY
 
   def setup
     @test_class = 'TestBlah'

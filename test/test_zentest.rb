@@ -5,7 +5,7 @@ require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 $TESTING = true
 
 # I do this so I can still run ZenTest against the tests and itself...
-require 'ZenTest' unless defined? $ZENTEST
+require 'zentest' unless defined? $ZENTEST
 
 # These are just classes set up for quick testing.
 # TODO: need to test a compound class name Mod::Cls
