@@ -1,8 +1,5 @@
 require 'test/unit'
 require 'test/zentest_assertions'
-
-class ApplicationController; end
-
 require 'test/rails'
 
 begin
