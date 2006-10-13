@@ -40,7 +40,7 @@ class Test::Rails::HelperTestCase < Test::Rails::FunctionalTestCase
   def self.inherited(helper_testcase)
     super
     helper_name = helper_testcase.name.sub 'Test', ''
-    helper_module = Object.const_get helper_name
+    helper_module = Object.path2class helper_name
     helper_testcase.send :include, helper_module
   rescue NameError
     raise "Unable to find helper #{helper_name}"

@@ -83,3 +83,11 @@ module Test::Unit::Assertions
 
 end
 
+class Object # :nodoc:
+  unless respond_to? :path2class then
+    def path2class(path) # :nodoc:
+      path.split('::').inject(Object) { |k,n| k.const_get n }
+    end
+  end
+end
+
