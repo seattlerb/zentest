@@ -324,12 +324,10 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
     all_assigns = assigns.keys.sort
 
     assigns_ignored = DEFAULT_ASSIGNS | @assigns_ignored
+    assigns_ignored = assigns_ignored.map { |a| a.to_s }
 
     assigns_created = all_assigns - assigns_ignored
     assigns_asserted = @assigns_asserted - assigns_ignored
-
-    assigns_created = assigns_created
-    assigns_asserted = assigns_asserted
 
     assigns_missing = assigns_created - assigns_asserted
 
