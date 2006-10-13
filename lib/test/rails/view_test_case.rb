@@ -375,7 +375,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #
   # view:
   #   <%= start_form_tag :action => 'save' %>
-  #   <table>
+  #   [...]
   #
   # test:
   #   assert_tag_in_form '/route/save', :tag => 'table'
@@ -383,6 +383,33 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   def assert_tag_in_form(form_action, options)
     assert_tag :tag => 'form', :attributes => { :action => form_action },
                  :descendant => options
+  end
+
+  ##
+  # Asserts that a form with +form_action+ has a textarea with name +name+ and
+  # optionally +value?.
+  #
+  # view:
+  #   <%= text_area 'post', 'body' %>
+  #
+  # test:
+  #   assert_text_area '/post/save', 'post[body]'
+  #
+  # view:
+  #   <textarea id="post_body" name="post[body]">
+  #   <%= @post.body %>
+  #   </textarea>
+  #
+  # test:
+  #   assert_text_area '/post/save', 'post[body]', posts(:post).body
+
+  def assert_text_area(form_action, name, value = nil)
+    attribs = {
+      :tag => 'textarea',
+      :attributes => { :name => name },
+    }
+    attribs[:content] = value if value
+    assert_tag_in_form form_action, attribs
   end
 
   ##
