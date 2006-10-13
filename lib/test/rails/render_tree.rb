@@ -69,11 +69,15 @@ class ActionView::Base
       p args.first
     when Hash then
       hash = args.first
-      found = hash.keys & RENDERS
-      if found.length == 1 then
-        puts "%p => %p" % [found.first, hash[found.first]]
+      if hash.include? :collection and hash.include? :partial then
+        puts "%p => %p" % [:collection, hash[:partial]]
       else
-        raise "Dunno: %p" % [hash]
+        found = hash.keys & RENDERS
+        if found.length == 1 then
+          puts "%p => %p" % [found.first, hash[found.first]]
+        else
+          raise "Dunno: %p" % [hash]
+        end
       end
     else
       raise "Dunno: %p" % [args]
