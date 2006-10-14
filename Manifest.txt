@@ -39,7 +39,10 @@ lib/test/zentest_assertions.rb
 lib/unit_diff.rb
 lib/zentest.rb
 test/test_autotest.rb
+test/test_help.rb
 test/test_rails_autotest.rb
+test/test_rails_helper_test_case.rb
+test/test_rails_view_test_case.rb
 test/test_ruby_fork.rb
 test/test_unit_diff.rb
 test/test_zentest.rb
