@@ -332,10 +332,10 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #   <%= collection_select :game, :location_id, @locations, :id, :name %>
   #
   # test:
-  #   assert_select '/games/save', :game, :location_id,
-  #                 'Ballet' => 1, 'Guaymas' => 2
+  #   assert_select_tag '/games/save', :game, :location_id,
+  #                     'Ballet' => 1, 'Guaymas' => 2
 
-  def assert_select(form_action, model, column, options)
+  def assert_select_tag(form_action, model, column, options)
     assert_kind_of Hash, options, "options needs to be a Hash"
     deny options.empty?, "options must not be empty"
     options.each do |option_name, option_id|
