@@ -48,5 +48,13 @@ class RailsAutotest < Autotest
       []
     end.uniq.select { |f| @files.has_key? f }
   end
+
+  def path_to_classname(s)
+    sep = File::SEPARATOR
+    f = s.sub(/^test#{sep}((unit|functional|integration|views|controllers|helpers)#{sep})?/, '').sub(/\.rb$/, '').split(sep)
+    f = f.map { |path| path.split(/_/).map { |seg| seg.capitalize }.join }
+    f = f.map { |path| path =~ /Test$/ ? path : "#{path}Test"  }
+    f.join('::')
+  end
 end
 

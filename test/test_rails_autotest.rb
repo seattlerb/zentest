@@ -10,6 +10,9 @@ class TestRailsAutotest < TestAutotest
     @test_class = 'RouteTest'
     @test = 'test/unit/route_test.rb'
     @impl = 'app/models/route.rb'
+    @inner_test = 'test/outer/inner_test.rb'
+    @outer_test = 'test/outer_test.rb'
+    @inner_test_class = "OuterTest::InnerTest"
 
     @rails_unit_tests = [@test]
 
@@ -166,9 +169,35 @@ class TestRailsAutotest < TestAutotest
     util_tests_for_file('Rakefile')
   end
 
+  def test_consolidate_failures_multiple_matches_before
+    @test_class = 'BlahTest'
+    @a.files.clear
+    @a.files['app/model/blah.rb'] = Time.at(42)
+    @a.files['app/model/different_blah.rb'] = Time.at(42)
+    @a.files['test/unit/blah_test.rb'] = Time.at(42)
+    @a.files['test/unit/different_blah_test.rb'] = Time.at(42)
+    result = @a.consolidate_failures([['test_matched', @test_class]])
+    expected = { 'test/unit/blah_test.rb' => [ 'test_matched' ] }
+    assert_equal expected, result
+    assert_equal "", @a.output.string
+  end
+
   def util_tests_for_file(file, *expected)
     assert_equal(expected.flatten.sort.uniq,
                  @a.tests_for_file(file).sort.uniq, "tests for #{file}")
+  end
+
+  def test_path_to_classname
+    # rails
+    util_path_to_classname 'BlahTest', 'test/blah_test.rb'
+    util_path_to_classname 'BlahTest', 'test/unit/blah_test.rb'
+    util_path_to_classname 'BlahTest', 'test/functional/blah_test.rb'
+    util_path_to_classname 'BlahTest', 'test/integration/blah_test.rb'
+    util_path_to_classname 'BlahTest', 'test/views/blah_test.rb'
+    util_path_to_classname 'BlahTest', 'test/controllers/blah_test.rb'
+    util_path_to_classname 'BlahTest', 'test/helpers/blah_test.rb'
+
+    util_path_to_classname 'OuterTest::InnerTest', 'test/controllers/outer/inner_test.rb'
   end
 end
 

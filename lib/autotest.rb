@@ -137,21 +137,24 @@ class Autotest
     @files_to_test.empty?
   end
 
+  def path_to_classname(s)
+    sep = File::SEPARATOR
+    f = s.sub(/^test#{sep}/, '').sub(/\.rb$/, '').split(sep)
+    f = f.map { |path| path.split(/_/).map { |seg| seg.capitalize }.join }
+    f = f.map { |path| path =~ /^Test/ ? path : "Test#{path}"  }
+    f.join('::')
+  end
+
   def consolidate_failures(failed)
     filters = Hash.new { |h,k| h[k] = [] }
 
+    class_map = Hash[*@files.keys.grep(/^test/).map { |f| [path_to_classname(f), f] }.flatten]
+
     failed.each do |method, klass|
-      klass = klass.split(/::/).last
-      failed_file_name = klass.gsub(/(.)([A-Z])/, '\1_?\2')
-      failed_files = @files.keys.grep(/#{failed_file_name}/i)
-      case failed_files.size
-      when 0 then
-        @output.puts "Unable to map class #{klass} to a file" # FIX for testing
-      when 1 then
-        filters[failed_files.last] << method
+      if class_map.has_key? klass then
+        filters[class_map[klass]] << method
       else
-        @output.puts "multiple files matched class #{klass} #{failed_files.inspect}."
-        # nothing yet
+        @output.puts "Unable to map class #{klass} to a file"
       end
     end
 

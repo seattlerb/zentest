@@ -31,6 +31,10 @@ class TestAutotest < Test::Unit::TestCase
     @test_class = 'TestBlah'
     @test = 'test/test_blah.rb'
     @impl = 'lib/blah.rb'
+    @rails = self.class.name =~ /Rails/
+    @inner_test = 'test/outer/test_inner.rb'
+    @outer_test = 'test/test_outer.rb'
+    @inner_test_class = "TestOuter::TestInner"
 
     @a = Object.const_get(self.class.name[4..-1]).new
     @a.output = StringIO.new
@@ -42,12 +46,12 @@ class TestAutotest < Test::Unit::TestCase
 
   def test_consolidate_failures_experiment
     @a.files.clear
-    @a.files['lib/autotest.rb'] = Time.at(1)
-    @a.files['test/test_autotest.rb'] = Time.at(2)
+    @a.files[@impl] = Time.at(1)
+    @a.files[@test] = Time.at(2)
 
-    input = [['test_fail1', 'TestAutotest'], ['test_fail2', 'TestAutotest'], ['test_error1', 'TestAutotest'], ['test_error2', 'TestAutotest']]
+    input = [['test_fail1', @test_class], ['test_fail2', @test_class], ['test_error1', @test_class], ['test_error2', @test_class]]
     result = @a.consolidate_failures input
-    expected = { 'test/test_autotest.rb' => %w( test_fail1 test_fail2 test_error1 test_error2 ) }
+    expected = { @test => %w( test_fail1 test_fail2 test_error1 test_error2 ) }
     assert_equal expected, result
   end
 
@@ -57,12 +61,13 @@ class TestAutotest < Test::Unit::TestCase
     assert_equal expected, result
   end
 
-  def test_consolidate_failures_multiple_matches
-    @a.files['test/test_blah_again.rb'] = Time.at(42)
+  def test_consolidate_failures_multiple_possibilities
+    f = @rails ? 'test/other_blah_test.rb' : 'test/test_blah_other.rb'
+    @a.files[f] = Time.at(42)
     result = @a.consolidate_failures([['test_unmatched', @test_class]])
-    expected = {}
+    expected = { @test => ['test_unmatched']}
     assert_equal expected, result
-    expected = "multiple files matched class TestBlah [\"test/test_blah.rb\", \"test/test_blah_again.rb\"].\n"
+    expected = ""
     assert_equal expected, @a.output.string
   end
 
@@ -76,12 +81,12 @@ class TestAutotest < Test::Unit::TestCase
 
   def test_consolidate_failures_nested_classes
     @a.files.clear
-    @a.files['lib/outer/inner.rb'] = Time.at(5)
-    @a.files['test/outer/test_inner.rb'] = Time.at(5)
     @a.files['lib/outer.rb'] = Time.at(5)
-    @a.files['test/test_outer.rb'] = Time.at(5)
-    result = @a.consolidate_failures([['test_blah1', "TestOuter::TestInner"]])
-    expected = {'test/outer/test_inner.rb' => ['test_blah1']}
+    @a.files['lib/outer/inner.rb'] = Time.at(5)
+    @a.files[@inner_test] = Time.at(5)
+    @a.files[@outer_test] = Time.at(5)
+    result = @a.consolidate_failures([['test_blah1', @inner_test_class]])
+    expected = { @inner_test => ['test_blah1'] }
     assert_equal expected, result
     expected = ""
     assert_equal expected, @a.output.string
@@ -143,8 +148,8 @@ class TestAutotest < Test::Unit::TestCase
   def test_handle_results
     @a.files_to_test.clear
     @a.files.clear
-    @a.files['lib/autotest.rb'] = Time.at(1)
-    @a.files['test/test_autotest.rb'] = Time.at(2)
+    @a.files[@impl] = Time.at(1)
+    @a.files[@test] = Time.at(2)
     empty = {}
     assert_equal empty, @a.files_to_test, "must start empty"
 
@@ -161,17 +166,17 @@ Finished in 0.001655 seconds.
 
     s2 = "
   1) Failure:
-test_fail1(TestAutotest) [./test/test_autotest.rb:59]:
+test_fail1(#{@test_class}) [#{@test}:59]:
   2) Failure:
-test_fail2(TestAutotest) [./test/test_autotest.rb:59]:
+test_fail2(#{@test_class}) [#{@test}:60]:
   3) Error:
-test_error1(TestAutotest):
+test_error1(#{@test_class}):
   3) Error:
-test_error2(TestAutotest):
+test_error2(#{@test_class}):
 "
 
     @a.handle_results(s2)
-    expected = { "test/test_autotest.rb" => %w( test_fail1 test_fail2 test_error1 test_error2 ) }
+    expected = { @test => %w( test_fail1 test_fail2 test_error1 test_error2 ) }
     assert_equal expected, @a.files_to_test
 
     @a.handle_results(s1)
@@ -235,22 +240,24 @@ test_error2(TestAutotest):
     assert_equal expected, result
   end
 
+  def util_path_to_classname(e,i)
+    assert_equal e, @a.path_to_classname(i)
+  end
+
+  def test_path_to_classname
+    # non-rails
+    util_path_to_classname 'TestBlah', 'test/test_blah.rb'
+    util_path_to_classname 'TestOuter::TestInner', 'test/outer/test_inner.rb'
+  end
+
   def test_tests_for_file
     assert_equal [@test], @a.tests_for_file(@impl)
     assert_equal [@test], @a.tests_for_file(@test)
 
     assert_equal ['test/test_unknown.rb'], @a.tests_for_file('test/test_unknown.rb')
-#    assert_equal [], @a.tests_for_file('test/test_unknown.rb')
     assert_equal [], @a.tests_for_file('lib/unknown.rb')
     assert_equal [], @a.tests_for_file('unknown.rb')
     assert_equal [], @a.tests_for_file('test_unknown.rb')
-
-#     @a.files.clear
-#     @a.files["blah.rb"] = Time.at(1)
-#     @a.files["test_blah.rb"] = Time.at(2)
-#     @a.last_mtime = Time.at(2)
-#    assert_equal ["test_blah.rb"], @a.tests_for_file("test_blah.rb")
-#    assert_equal ["test_blah.rb"], @a.tests_for_file("blah.rb")
   end
 
   def util_find_files_to_test(f, expected)
