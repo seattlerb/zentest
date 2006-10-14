@@ -1,3 +1,18 @@
+*** 3.4.1 / 2006-10-13
+
++ 3 minor enhancements:
+	+ FUNDAMENTALLY changed the way failures map back to tests. This REQUIRES users of autotest to ensure that their tests and impls map 1:1 at every scoping level. I'll blog more details.
+	+ Hoe'd rakefile
+	+ Added support for render :collection to RenderTree.
++ 7 bug fixes:
+	+ Fixed autotest tests for custom ruby names.
+	+ Fixed some documentation errors in ControllerTestCase.
+	+ Fixed setup in FunctionalTestCase.
+	+ Allowed @assigns_ignored to contain either Symbols or Strings, bug 5233.
+	+ Using Object.path2class to look up classes in helper test cases, bug 5493.
+	+ Added assert_text_area, bug 5452.
+	+ Renamed assert_select to assert_select_tag. Stupid rails. We were here first.
+
 *** 3.4.0 / 2006-09-12
 
 + 13 minor enhancements:
