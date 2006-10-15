@@ -1,3 +1,5 @@
+$TESTING_RTC = defined? $TESTING_RTC
+
 ##
 # FunctionalTestCase is an abstract class that sets up a controller instance
 # for its subclasses.
@@ -17,7 +19,7 @@ class Test::Rails::FunctionalTestCase < Test::Rails::TestCase
   # actions.
 
   def setup
-    return if self.class.name =~ /TestCase$/
+    return if self.class.name =~ /TestCase$/ and not $TESTING_RTC
     super
 
     @controller_class = Object.path2class @controller_class_name

@@ -36,7 +36,7 @@ module Test::Unit::Assertions
   ##
   # Asserts that +obj+ responds to #include? and that obj includes +item+.
 
-  def assert_includes(obj, item, message = nil)
+  def assert_includes(item, obj, message = nil)
     assert_respond_to obj, :include?
     assert_equal true, obj.include?(item), message
   end
@@ -45,7 +45,7 @@ module Test::Unit::Assertions
   # Asserts that +obj+ responds to #include? and that obj does not include
   # +item+.
 
-  def deny_includes(obj, item, message = nil)
+  def deny_includes(item, obj, message = nil)
     assert_respond_to obj, :include?
     assert_equal false, obj.include?(item), message
   end

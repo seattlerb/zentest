@@ -228,7 +228,7 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
   def assert_assigned(ivar, value = NOTHING)
     ivar = ivar.to_s
     @assigns_asserted << ivar
-    assert_includes assigns, ivar, "#{ivar.inspect} missing from assigns"
+    assert_includes ivar, assigns, "#{ivar.inspect} missing from assigns"
     assert_equal value, assigns[ivar] unless value.equal? NOTHING
   end
 
@@ -267,7 +267,8 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
   # Asserts that the assigns variable +ivar+ is not set.
 
   def deny_assigned(ivar)
-    deny_includes assigns, ivar
+    ivar = ivar.to_s
+    deny_includes ivar, assigns
   end
 
   ##

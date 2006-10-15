@@ -1,3 +1,11 @@
+*** dev / 2006-?-?
+
++ 1 minor enhancement:
+	+ Switched argument order of assert_includes and deny_includes to match Test::Unit convention.
+
++ 1 bug fix:
+	+ Fixed deny_assigns to work with Symbols
+
 *** 3.4.1 / 2006-10-13
 
 + 3 minor enhancements:

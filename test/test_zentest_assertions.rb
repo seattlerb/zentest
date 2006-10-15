@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'test/zentest_assertions'
 
-class AssertionsTest < Test::Unit::TestCase
+class TestZenTestAssertions < Test::Unit::TestCase
 
   def test_assert_empty
     assert_empty []
@@ -37,18 +37,18 @@ class AssertionsTest < Test::Unit::TestCase
   end
 
   def test_assert_includes
-    assert_includes [true], true
+    assert_includes true, [true]
 
     assert_raise Test::Unit::AssertionFailedError do
-      assert_includes [true], false
+      assert_includes false, [true]
     end
   end
 
   def test_deny_includes
-    deny_includes [true], false
+    deny_includes false, [true]
 
     assert_raise Test::Unit::AssertionFailedError do
-      deny_includes [true], true
+      deny_includes true, [true]
     end
   end
 
