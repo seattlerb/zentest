@@ -321,6 +321,7 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
   #   .
 
   def util_audit_assert_assigned
+    return unless @test_passed
     return unless @controller.send :performed?
     all_assigns = assigns.keys.sort
 
