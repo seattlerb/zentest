@@ -9,6 +9,7 @@ class TestRailsAutotest < TestAutotest
 
     @test_class = 'RouteTest'
     @test = 'test/unit/route_test.rb'
+    @other_test = 'test/other_blah_test.rb'
     @impl = 'app/models/route.rb'
     @inner_test = 'test/outer/inner_test.rb'
     @outer_test = 'test/outer_test.rb'

@@ -30,8 +30,8 @@ class TestAutotest < Test::Unit::TestCase
   def setup
     @test_class = 'TestBlah'
     @test = 'test/test_blah.rb'
+    @other_test = 'test/test_blah_other.rb'
     @impl = 'lib/blah.rb'
-    @rails = self.class.name =~ /Rails/
     @inner_test = 'test/outer/test_inner.rb'
     @outer_test = 'test/test_outer.rb'
     @inner_test_class = "TestOuter::TestInner"
@@ -62,8 +62,7 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_consolidate_failures_multiple_possibilities
-    f = @rails ? 'test/other_blah_test.rb' : 'test/test_blah_other.rb'
-    @a.files[f] = Time.at(42)
+    @a.files[@other_test] = Time.at(42)
     result = @a.consolidate_failures([['test_unmatched', @test_class]])
     expected = { @test => ['test_unmatched']}
     assert_equal expected, result
