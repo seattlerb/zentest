@@ -1,6 +1,6 @@
 # ActionPack
 module ActionController; end
-class ActionController::Flash; end
+module ActionController::Flash; end
 class ActionController::Flash::FlashHash; end
 class ActionController::TestSession < Hash; end
 
