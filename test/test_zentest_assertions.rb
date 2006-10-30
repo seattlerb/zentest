@@ -52,6 +52,14 @@ class TestZenTestAssertions < Test::Unit::TestCase
     end
   end
 
+  def test_deny_nil
+    deny_nil false
+
+    assert_raise Test::Unit::AssertionFailedError do
+      deny_nil nil
+    end
+  end
+
   def test_util_capture
     out, err = util_capture do
       puts 'out'

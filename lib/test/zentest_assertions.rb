@@ -34,6 +34,11 @@ module Test::Unit::Assertions
   end
 
   ##
+  # Asserts that +obj+ is not nil.
+
+  alias deny_nil assert_not_nil
+
+  ##
   # Asserts that +obj+ responds to #include? and that obj includes +item+.
 
   def assert_includes(item, obj, message = nil)
