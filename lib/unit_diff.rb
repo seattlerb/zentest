@@ -185,7 +185,7 @@ class UnitDiff
         if result.empty? then
           output.push "[no difference--suspect ==]"
         else
-          output.push result.map {|line| line.strip}
+          output.push result.map { |line| line.chomp }
         end
 
         output.push ''

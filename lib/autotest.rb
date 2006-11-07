@@ -216,7 +216,7 @@ class Autotest
 
     unless full.empty? then
       classes = full.map {|k,v| k}.flatten.join(' ')
-      cmds << "#{ruby} -I#{@libs} -rtest/unit -e \"%w[#{classes}].each { |f| load f }\" | unit_diff -u"
+      cmds << "#{ruby} -I#{@libs} -rtest/unit -e \"%w[#{classes}].each { |f| require f }\" | unit_diff -u"
     end
 
     partial.each do |klass, methods|
