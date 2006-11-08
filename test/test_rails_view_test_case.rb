@@ -1,6 +1,13 @@
 require 'test/unit'
 require 'test/zentest_assertions'
-require 'test/rails'
+
+$TESTING_RTC = true
+
+begin
+  require 'test/rails'
+rescue LoadError, NameError
+  $TESTING_RTC = false
+end
 
 class View; end
 
@@ -16,13 +23,13 @@ class TestRailsViewTestCase < Test::Rails::ViewTestCase
   end
 
   def test_assert_text_area
-    @request.body = <<-EOF
+    @request.body = '
 <form action="/post/save">
 <textarea id="post_body" name="post[body]">
-OMG he like hates me and he's like going out with this total skank!~ oh noes!!~
+OMG he like hates me and he\'s like going out with this total skank!~ oh noes!!~
 </textarea>
 </form>
-    EOF
+'
 
     assert_text_area '/post/save', 'post[body]'
 
@@ -50,5 +57,5 @@ OMG he like hates me and he's like going out with this total skank!~ oh noes!!~
     @assert_tag << arg
   end
 
-end
+end if $TESTING_RTC
 

@@ -3,10 +3,14 @@ require 'test/zentest_assertions'
 
 $TESTING_RTC = true
 
-require 'test/rails'
+begin
+  require 'test/rails'
+rescue LoadError, NameError
+  $TESTING_RTC = false
+end
 
 class TRController < ApplicationController
-end
+end if $TESTING_RTC
 
 class TestRailsControllerTestCase < Test::Rails::ControllerTestCase
   
@@ -40,5 +44,5 @@ class TestRailsControllerTestCase < Test::Rails::ControllerTestCase
     end
   end
 
-end
+end if $TESTING_RTC
 

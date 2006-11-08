@@ -1,6 +1,13 @@
 require 'test/unit'
 require 'test/zentest_assertions'
-require 'test/rails'
+
+$TESTING_RTC = true
+
+begin
+  require 'test/rails'
+rescue LoadError, NameError
+  $TESTING_RTC = false
+end
 
 begin
   module TRHelper
@@ -8,7 +15,7 @@ begin
   end
   class TRHelperTest < Test::Rails::HelperTestCase; end
 rescue RuntimeError
-end
+end if $TESTING_RTC
 
 begin
   module Widgets; end
@@ -17,7 +24,7 @@ begin
   end
   class Widgets::SomeHelperTest < Test::Rails::HelperTestCase; end
 rescue RuntimeError
-end
+end if $TESTING_RTC
 
 class TestRailsHelperTestCase < Test::Unit::TestCase
 
@@ -35,5 +42,5 @@ class TestRailsHelperTestCase < Test::Unit::TestCase
                     Widgets::SomeHelperTest.instance_methods
   end
 
-end
+end if $TESTING_RTC
 

@@ -232,7 +232,7 @@ test_error2(#{@test_class}):
       'test/test_fooby.rb' => [ 'test_something1', 'test_something2' ]
     }
 
-    expected = [ "#{RUBY} -I.:lib:test -rtest/unit -e \"%w[#{@test}].each { |f| load f }\" | unit_diff -u",
+    expected = [ "#{RUBY} -I.:lib:test -rtest/unit -e \"%w[#{@test}].each { |f| require f }\" | unit_diff -u",
                  "#{RUBY} -I.:lib:test test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\" | unit_diff -u" ].join("; ")
 
     result = @a.make_test_cmd f
