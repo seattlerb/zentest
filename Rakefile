@@ -19,11 +19,6 @@ Hoe.new("ZenTest", ZenTest::VERSION) do |p|
   p.description = description.join("\n\n")
 end
 
-desc 'Update Manifest.txt'
-task :update_manifest => :clean do
-  sh "p4 open Manifest.txt; find . -type f | sed -e 's%./%%' | sort > Manifest.txt"
-end
-
 task :autotest do
   ruby "-Ilib ./bin/autotest"
 end
