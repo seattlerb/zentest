@@ -1,10 +1,16 @@
-*** dev / 2006-?-?
+*** 3.4.2 / 2006-11-09
 
-+ 1 minor enhancement:
++ 2 minor enhancements:
+	+ Add TextHelper for pluralize.
+	+ Add deny_nil to Test::Rails.
++ 7 bug fixes:
+	+ Fixed test_help's Flash. It's is a module. Oops...
+	+ Don't run util_audit_assert_assigned if tests didn't pass, results will be bogus.
+	+ Fixed AssertionsTest names to match what autotest expects.
+	+ Fixed bug where deny_includes failed for Symbol keys.
+	+ Switched autotest to use require instead of load... Why??? I don't know!!
+	+ Fixed a minor but annoying whitespace difference in unit_diff.
 	+ Switched argument order of assert_includes and deny_includes to match Test::Unit convention.
-
-+ 1 bug fix:
-	+ Fixed deny_assigns to work with Symbols
 
 *** 3.4.1 / 2006-10-13
 
