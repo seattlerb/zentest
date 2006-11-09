@@ -41,6 +41,7 @@ lib/zentest.rb
 test/test_autotest.rb
 test/test_help.rb
 test/test_rails_autotest.rb
+test/test_rails_controller_test_case.rb
 test/test_rails_helper_test_case.rb
 test/test_rails_view_test_case.rb
 test/test_ruby_fork.rb
