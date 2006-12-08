@@ -183,6 +183,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
     @controller.send :forget_variables_added_to_assigns rescue nil
 
     # Do the render
+    options[:TR_force] = true
     @controller.render options, deprecated_status
 
     # Rails 1.1
@@ -216,6 +217,19 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   def assert_field(form_action, type, model, column, value = nil)
     assert_input form_action, type, "#{model}[#{column}]", value
     assert_label form_action, "#{model}_#{column}", false
+  end
+
+  ##
+  # Asserts a h tag of level +level+ exists and contains +content+.
+  #
+  # view:
+  #   <h3>Recent Builds</h3>
+  #
+  # test:
+  #   assert_h 3, 'Recent Builds'
+
+  def assert_h(level, content)
+    assert_tag :tag => "h#{level}", :content => content
   end
 
   ##
@@ -412,6 +426,19 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
     assert_tag_in_form form_action, attribs
   end
 
+  ##
+  # Asserts that a title with +title+ exists.
+  #
+  # view:
+  #   <title>some content</title>
+  #
+  # test:
+  #   assert_title 'some content'
+  
+  def assert_title(title)
+    assert_tag :tag => 'title', :content => title
+  end
+  
   ##
   # Creates a new Paginator that uses the current controller. +item_count+,
   # +items_per_page+ and +page_number+ are passed straight through.
