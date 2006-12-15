@@ -466,8 +466,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
 
   def action_name(test)
     orig_name = test = test.sub(/.*in `test_(.*)'/, '\1')
-    controller = @controller.class.name.sub('Controller', '')
-    controller = controller.gsub(/([A-Z])/, '_\1'.downcase).sub('_', '')
+    controller = @controller.class.name.sub('Controller', '').underscore
     
     extensions = %w(rhtml rxml mab)
     
