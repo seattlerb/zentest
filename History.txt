@@ -1,3 +1,11 @@
+*** 3.4.3 / 2006-12-19
+
++ 2 minor enhancements:
+        + Add assert_title and assert_h (for header).
++ 2 bug fixes:
+        + Rereleased against latest version of hoe to fix load path problems.
+        + Fix case ViewTestCase for case-sensitive file systems.
+
 *** 3.4.2 / 2006-11-09
 
 + 2 minor enhancements:

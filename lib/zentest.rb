@@ -53,21 +53,21 @@ end
 #
 # Method names are mapped bidirectionally in the following way:
 #
-#   method	test_method
-#   method?	test_method_eh		(too much exposure to Canadians :)
-#   method!	test_method_bang
-#   method=	test_method_equals
-#   []		test_index
-#   *		test_times
-#   ==		test_equals2
-#   ===		test_equals3
+#   method      test_method
+#   method?     test_method_eh          (too much exposure to Canadians :)
+#   method!     test_method_bang
+#   method=     test_method_equals
+#   []          test_index
+#   *           test_times
+#   ==          test_equals2
+#   ===         test_equals3
 #
 # Further, any of the test methods should be able to have arbitrary
 # extensions put on the name to distinguish edge cases:
 #
-#   method	test_method
-#   method	test_method_simple
-#   method	test_method_no_network
+#   method      test_method
+#   method      test_method_simple
+#   method      test_method_no_network
 #
 # To allow for unmapped test methods (ie, non-unit tests), name them:
 #
@@ -75,7 +75,7 @@ end
 
 class ZenTest
 
-  VERSION = '3.4.2'
+  VERSION = '3.4.3'
 
   if $TESTING then
     attr_reader :missing_methods
@@ -101,9 +101,9 @@ class ZenTest
 
     unless file == $0 then
       begin
-	require file
+        require file
       rescue LoadError => err
-	puts "Could not load #{file}: #{err}"
+        puts "Could not load #{file}: #{err}"
       end
     else
       puts "# Skipping loading myself (#{file})" if $DEBUG
@@ -116,11 +116,11 @@ class ZenTest
       puts "# found class #{klass.name}" if $DEBUG
     rescue NameError
       ObjectSpace.each_object(Class) do |cls|
-	if cls.name =~ /(^|::)#{klassname}$/ then
-	  klass = cls
-	  klassname = cls.name
+        if cls.name =~ /(^|::)#{klassname}$/ then
+          klass = cls
+          klassname = cls.name
           break
-	end
+        end
       end
       puts "# searched and found #{klass.name}" if klass and $DEBUG
     end
@@ -162,13 +162,13 @@ class ZenTest
       superklass = klass.superclass
       if superklass then
         the_methods = superklass.instance_methods(true)
-        
+
         # generally we don't test Object's methods...
         unless full then
           the_methods -= Object.instance_methods(true)
           the_methods -= Kernel.methods # FIX (true) - check 1.6 vs 1.8
         end
-      
+
         the_methods.each do |meth|
           klassmethods[meth] = true
         end
@@ -208,13 +208,13 @@ class ZenTest
     klass = self.get_class(klassname)
     raise "Couldn't get class for #{klassname}" if klass.nil?
     klassname = klass.name # refetch to get full name
-    
+
     is_test_class = self.is_test_class(klassname)
     target = is_test_class ? @test_klasses : @klasses
 
     # record public instance methods JUST in this class
     target[klassname] = self.get_methods_for(klass, full)
-    
+
     # record ALL instance methods including superclasses (minus Object)
     @inherited_methods[klassname] = self.get_inherited_methods_for(klass, full)
     return klassname
@@ -242,27 +242,27 @@ class ZenTest
           end
         end
 
-	if line =~ /^\s*(?:class|module)\s+([\w:]+)/ then
-	  klassname = $1
+        if line =~ /^\s*(?:class|module)\s+([\w:]+)/ then
+          klassname = $1
 
-	  if line =~ /\#\s*ZenTest SKIP/ then
-	    klassname = nil
-	    next
-	  end
+          if line =~ /\#\s*ZenTest SKIP/ then
+            klassname = nil
+            next
+          end
 
           full = false
-	  if line =~ /\#\s*ZenTest FULL/ then
-	    full = true
-	  end
+          if line =~ /\#\s*ZenTest FULL/ then
+            full = true
+          end
 
-	  unless is_loaded then
+          unless is_loaded then
             unless path == "-" then
               self.load_file(path)
             else
               eval file, TOPLEVEL_BINDING
             end
             is_loaded = true
-	  end
+          end
 
           begin
             klassname = self.process_class(klassname, full)
@@ -277,7 +277,7 @@ class ZenTest
             self.process_class(klassname, false)
           end
 
-	end # if /class/
+        end # if /class/
       end # IO.foreach
     end # files
 
@@ -429,7 +429,7 @@ class ZenTest
 
           found = false
           until methodname == "" or methods[methodname] or @inherited_methods[klassname][methodname] do
-	      # try the name minus an option (ie mut_opt1 -> mut)
+              # try the name minus an option (ie mut_opt1 -> mut)
             if methodname.sub!(/_[^_]+$/, '') then
               if methods[methodname] or @inherited_methods[klassname][methodname] then
                 found = true
@@ -438,11 +438,11 @@ class ZenTest
               break # no more substitutions will take place
             end
           end # methodname == "" or ...
-          
+
           unless found or methods[methodname] or methodname == "initialize" then
             self.add_missing_method(klassname, orig_name)
           end
-          
+
         else # not a test_.* method
           unless testmethodname =~ /^util_/ then
             puts "# WARNING Skipping #{testklassname}\##{testmethodname}" if $DEBUG
@@ -505,8 +505,8 @@ class ZenTest
       klasspath.each do | modulename |
         m = self.get_class(modulename)
         type = m.nil? ? "module" : m.class.name.downcase
-	@result.push indentunit*indent + "#{type} #{modulename}"
-	indent += 1
+        @result.push indentunit*indent + "#{type} #{modulename}"
+        indent += 1
       end
       @result.push indentunit*indent + "class #{klassname}" + (is_test_class ? " < Test::Unit::TestCase" : '')
       indent += 1
@@ -514,26 +514,26 @@ class ZenTest
       meths = []
 
       cls_methods.sort.each do |method|
-	meth = []
-	meth.push indentunit*indent + "def #{method}"
+        meth = []
+        meth.push indentunit*indent + "def #{method}"
         meth.last << "(*args)" unless method =~ /^test/
-	indent += 1
-	meth.push indentunit*indent + "raise NotImplementedError, 'Need to write #{method}'"
-	indent -= 1
-	meth.push indentunit*indent + "end"
-	meths.push meth.join("\n")
+        indent += 1
+        meth.push indentunit*indent + "raise NotImplementedError, 'Need to write #{method}'"
+        indent -= 1
+        meth.push indentunit*indent + "end"
+        meths.push meth.join("\n")
       end
 
       methods.keys.sort.each do |method|
         next if method =~ /pretty_print/
-	meth = []
-	meth.push indentunit*indent + "def #{method}"
+        meth = []
+        meth.push indentunit*indent + "def #{method}"
         meth.last << "(*args)" unless method =~ /^test/
-	indent += 1
-	meth.push indentunit*indent + "raise NotImplementedError, 'Need to write #{method}'"
-	indent -= 1
-	meth.push indentunit*indent + "end"
-	meths.push meth.join("\n")
+        indent += 1
+        meth.push indentunit*indent + "raise NotImplementedError, 'Need to write #{method}'"
+        indent -= 1
+        meth.push indentunit*indent + "end"
+        meths.push meth.join("\n")
       end
 
       @result.push meths.join("\n\n")
@@ -541,8 +541,8 @@ class ZenTest
       indent -= 1
       @result.push indentunit*indent + "end"
       klasspath.each do | modulename |
-	indent -= 1
-	@result.push indentunit*indent + "end"
+        indent -= 1
+        @result.push indentunit*indent + "end"
       end
       @result.push ''
     end
@@ -584,4 +584,3 @@ class ZenTest
     Object.class_eval code
   end
 end
-
