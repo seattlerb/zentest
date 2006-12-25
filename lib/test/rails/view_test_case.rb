@@ -102,7 +102,6 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
     # these go here so that flash and session work as they should.
     @controller.send :initialize_template_class, @response
     @controller.send :assign_shortcuts, @request, @response
-    @controller.send :reset_session
 
     assigns[:session] = @controller.session
     @controller.class.send :public, :flash # make flash accessible to the test
