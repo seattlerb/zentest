@@ -265,3 +265,11 @@ require 'test/rails/helper_test_case'
 require 'test/rails/ivar_proxy'
 require 'test/rails/view_test_case'
 
+##
+# Use sensible defaults.
+
+class Test::Unit::TestCase # :nodoc:
+  self.use_transactional_fixtures = true
+  self.use_instantiated_fixtures  = false
+end
+
