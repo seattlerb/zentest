@@ -4,47 +4,42 @@ $h    ||= false
 $help ||= false
 
 if $h or $help then
-  help = []
-  help << "autotest [options]"
-  help << nil
-  help << "options:"
-  help << "\t-h"
-  help << "\t-help\t\tYou're looking at it."
-  help << nil
-  help << "\t-v\t\tBe verbose."
-  help << "\t\t\tPrints files that autotest doesn't know how to map to"
-  help << "\t\t\ttests."
-  help << nil
-  help << "\t-rails\t\tForce rails mode."
-  help << "\t\t\tRails will be automatically detected by the presence of"
-  help << "\t\t\tconfig/environment.rb. Use this if you don't have one."
-  help << nil
-  help << "\t\t\tYou may need to run 'rake db:test:prepare' before"
-  help << "\t\t\tstarting autotest on a rails project."
-  help << nil
-  help << "\t-vcs=NAME\tVersion control system to update."
-  help << "\t\t\tAutotest will automatically update every vcstime"
-  help << "\t\t\tseconds."
-  help << "\t\t\tAutotest understands Perforce (p4), CVS (cvs) and"
-  help <<  "\t\t\tSubversion (svn)."
-  help << nil
-  help << "\t-vcstime=N\tUpdate source control every N seconds."
-  help << "\t\t\tDefaults to every five minutes (300 seconds)."
+  help = [
+          "autotest [options]",
+          nil,
+          "options:",
+          "\t-h",
+          "\t-help\t\tYou're looking at it.",
+          nil,
+          "\t-v\t\tBe verbose.",
+          "\t\t\tPrints files that autotest doesn't know how to map to",
+          "\t\t\ttests.",
+          nil,
+          "\t-rails\t\tForce rails mode. TOTALLY NOT NEEDED!!!",
+          "\t\t\tRails will be automatically detected by the presence of",
+          "\t\t\tconfig/environment.rb. Use this if you don't have one.",
+          nil,
+          "\t\t\tYou may need to run 'rake db:test:prepare' before",
+          "\t\t\tstarting autotest on a rails project.",
+          nil,
+          "\t-spec\t\tR/Spec mode.",
+          "\t\t\tRails will be automatically detected by the presence of",
+          "\t\t\tconfig/environment.rb. Use this if you don't have one.",
+          nil,
+          "\t\t\tYou may need to run 'rake db:test:prepare' before",
+          "\t\t\tstarting autotest on a rails project.",
+         ]
   STDERR.puts help.join("\n")
   exit 1
 end
 
-$v       ||= false
+$rspec   ||= false
 $rails   ||= false
-$vcs     ||= nil
-$vcstime ||= 300
-$vcstime = $vcstime.to_i
 
-if $rails or File.exist? 'config/environment.rb' then
-  require 'rails_autotest'
-  RailsAutotest.run
-else
-  require 'autotest'
-  Autotest.run
-end
+style = []
+style << "rspec" if $rspec or File.directory?('spec')
+style << "rails" if $rails or File.exist? 'config/environment.rb'
+style << "autotest"
 
+requre style.join("_")
+Object.const_get(style.map {|s| s.capitalize}.join).run
