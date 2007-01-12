@@ -6,18 +6,22 @@ class TestZenTestAssertions < Test::Unit::TestCase
   def test_assert_empty
     assert_empty []
 
-    assert_raise Test::Unit::AssertionFailedError do
+    e = assert_raise Test::Unit::AssertionFailedError do
       assert_empty [true]
     end
+
+    assert_equal "[true] expected to be empty.", e.message
   end
 
   def test_deny
     deny false
     deny nil
 
-    assert_raise Test::Unit::AssertionFailedError do
+    e = assert_raise Test::Unit::AssertionFailedError do
       deny true
     end
+
+    assert_equal "<true> is not false or nil.", e.message
   end
 
   def test_deny_equal
@@ -31,25 +35,31 @@ class TestZenTestAssertions < Test::Unit::TestCase
   def test_deny_empty
     deny_empty [true]
 
-    assert_raise Test::Unit::AssertionFailedError do
+    e = assert_raise Test::Unit::AssertionFailedError do
       deny_empty []
     end
+
+    assert_equal "[] expected to have stuff.", e.message
   end
 
-  def test_assert_includes
-    assert_includes true, [true]
+  def test_assert_include
+    assert_include true, [true]
 
-    assert_raise Test::Unit::AssertionFailedError do
-      assert_includes false, [true]
+    e = assert_raise Test::Unit::AssertionFailedError do
+      assert_include false, [true]
     end
+
+    assert_equal "[true] does not include false.", e.message
   end
 
-  def test_deny_includes
-    deny_includes false, [true]
+  def test_deny_include
+    deny_include false, [true]
 
-    assert_raise Test::Unit::AssertionFailedError do
-      deny_includes true, [true]
+    e = assert_raise Test::Unit::AssertionFailedError do
+      deny_include true, [true]
     end
+
+    assert_equal "[true] includes true.", e.message
   end
 
   def test_deny_nil

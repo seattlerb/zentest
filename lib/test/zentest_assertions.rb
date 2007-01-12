@@ -22,7 +22,7 @@ module Test::Unit::Assertions
 
   def assert_empty(obj)
     assert_respond_to obj, :empty?
-    assert_equal true, obj.empty?
+    assert_block "#{obj.inspect} expected to be empty." do obj.empty? end
   end
 
   ##
@@ -30,7 +30,7 @@ module Test::Unit::Assertions
 
   def deny_empty(obj)
     assert_respond_to obj, :empty?
-    assert_equal false, obj.empty?
+    assert_block "#{obj.inspect} expected to have stuff." do !obj.empty? end
   end
 
   ##
@@ -41,19 +41,25 @@ module Test::Unit::Assertions
   ##
   # Asserts that +obj+ responds to #include? and that obj includes +item+.
 
-  def assert_includes(item, obj, message = nil)
+  def assert_include(item, obj, message = nil)
     assert_respond_to obj, :include?
-    assert_equal true, obj.include?(item), message
+    message ||= "#{obj.inspect} does not include #{item.inspect}."
+    assert_block message do obj.include? item end
   end
+
+  alias assert_includes assert_include
 
   ##
   # Asserts that +obj+ responds to #include? and that obj does not include
   # +item+.
 
-  def deny_includes(item, obj, message = nil)
+  def deny_include(item, obj, message = nil)
     assert_respond_to obj, :include?
-    assert_equal false, obj.include?(item), message
+    message ||= "#{obj.inspect} includes #{item.inspect}."
+    assert_block message do !obj.include? item end
   end
+
+  alias deny_includes deny_include
 
   ##
   # Captures $stdout and $stderr to StringIO objects and returns them.

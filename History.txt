@@ -1,8 +1,9 @@
 *** 3.4.4 / ??
 
-+ 2 minor enhancement:
++ 3 minor enhancement:
 	+ Allow session to work in view tests.
 	+ Made Rails unit tests faster with sensible defaults.
+	+ Better assertion messages for ZentestAssertions.
 
 *** 3.4.3 / 2006-12-19
 
