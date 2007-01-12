@@ -41,5 +41,7 @@ style << "rspec" if $rspec or File.directory?('spec')
 style << "rails" if $rails or File.exist? 'config/environment.rb'
 style << "autotest"
 
-requre style.join("_")
+mod = style.join("_")
+puts "loading #{mod}"
+require mod
 Object.const_get(style.map {|s| s.capitalize}.join).run

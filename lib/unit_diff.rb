@@ -18,7 +18,7 @@ class Tempfile
 end
 
 def temp_file(data)
-  temp = 
+  temp =
     if $k then
       File.new(Tempfile.make_temppath("diff"), "w")
     else
@@ -79,25 +79,34 @@ class UnitDiff
   ##
   # Handy wrapper for UnitDiff#unit_diff.
 
-  def self.unit_diff(input)
+  def self.unit_diff
     trap 'INT' do exit 1 end
-    ud = UnitDiff.new
-    ud.unit_diff(input)
+    puts UnitDiff.new.unit_diff
   end
 
-  def input(input)
+  def parse_input(input, output)
     current = []
     data = []
     data << current
+    print_lines = true
 
     # Collect
     input.each_line do |line|
-      if line =~ /^\s*$/ or line =~ /^\(?\s*\d+\) (Failure|Error):/ then
+      case line
+      when /^Loaded suite/ then
+        print_lines = true
+      when /^\s*$/, /^\(?\s*\d+\) (Failure|Error):/ then
+        print_lines = false if line =~ /Failure|Error/
         type = $1
         current = []
         data << current
       end
+      output.puts line if print_lines
       current << line
+      case line
+      when /^Finished in \d/ then
+        print_lines = false
+      end
     end
     data = data.reject { |o| o == ["\n"] }
     header = data.shift
@@ -115,7 +124,7 @@ class UnitDiff
     until result.empty? do
       case state
       when :header then
-        header << result.shift 
+        header << result.shift
         state = :expect if result.first =~ /^</
       when :expect then
         state = :butwas if result.first.sub!(/ expected but was/, '')
@@ -146,19 +155,16 @@ class UnitDiff
   # Scans Test::Unit output +input+ looking for comparison failures and makes
   # them easily readable by passing them through diff.
 
-  def unit_diff(input)
+  def unit_diff(input=ARGF, output=STDOUT)
     $b = false unless defined? $b
     $c = false unless defined? $c
     $k = false unless defined? $k
     $l = false unless defined? $l
     $u = false unless defined? $u
 
-    header, data, footer = self.input(input)
+    header, data, footer = self.parse_input(input, output)
 
-    header = header.map { |l| l.chomp }
-    header << nil unless header.empty?
-
-    output = [header]
+    output = []
 
     # Output
     data.each do |result|
@@ -201,6 +207,4 @@ class UnitDiff
 
     return output.flatten.join("\n")
   end
-
 end
-

@@ -35,4 +35,4 @@ if defined? $h then
   exit 0
 end
 
-puts UnitDiff.unit_diff(ARGF)
+UnitDiff.unit_diff

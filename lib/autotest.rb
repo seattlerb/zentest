@@ -62,7 +62,8 @@ class Autotest
     new.run
   end
 
-  attr_accessor :exceptions, :files, :files_to_test, :interrupted, :last_mtime, :libs, :output, :results, :tainted, :wants_to_quit
+  attr_accessor :autoflush, :exceptions, :files, :files_to_test, :interrupted, :last_mtime, :libs, :output, :results, :tainted, :wants_to_quit
+  alias :autoflush? :autoflush
 
   def initialize
     @files = Hash.new Time.at(0)
@@ -71,6 +72,7 @@ class Autotest
     @libs = %w[. lib test].join(File::PATH_SEPARATOR)
     @output = $stderr
     @sleep = 1
+    @autoflush = false
     hook :initialize
   end
 
@@ -108,9 +110,14 @@ class Autotest
 
     puts cmd
 
-    @results = `#{cmd}`
+    @results = []
+    IO.foreach("| #{cmd}") do |line|
+      puts line
+      @results << line
+    end
     hook :ran_command
-    puts @results
+    @results = @results.join
+    puts @results unless autoflush?
 
     handle_results(@results)
   end
@@ -165,7 +172,7 @@ class Autotest
     result = {}
     Find.find '.' do |f|
       Find.prune if @exceptions and f =~ @exceptions and test ?d, f
-      Find.prune if f =~ /(\.(svn|hg)|CVS|tmp|public|doc|pkg)$/ # prune dirs
+      Find.prune if f =~ /(\.(svn|hg)|CVS|te?mp|public|doc|pkg)$/ # prune dirs
 
       next if test ?d, f
       next if f =~ /(swp|~|rej|orig)$/        # temporary/patch files
