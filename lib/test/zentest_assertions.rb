@@ -4,25 +4,31 @@
 module Test::Unit::Assertions
 
   ##
+  # Asserts that +obj+ responds to #empty? and #empty? returns true.
+
+  def assert_empty(obj)
+    assert_respond_to obj, :empty?
+    assert_block "#{obj.inspect} expected to be empty." do obj.empty? end
+  end
+
+  ##
+  # Asserts that +obj+ responds to #include? and that obj includes +item+.
+
+  def assert_include(item, obj, message = nil)
+    assert_respond_to obj, :include?
+    message ||= "#{obj.inspect} does not include #{item.inspect}."
+    assert_block message do obj.include? item end
+  end
+
+  alias assert_includes assert_include
+
+  ##
   # Asserts that +boolean+ is not false or nil.
 
   def deny(boolean, message = nil)
     _wrap_assertion do
       assert_block(build_message(message, "<?> is not false or nil.", boolean)) { not boolean }
     end
-  end
-
-  ##
-  # Alias for assert_not_equal
-
-  alias deny_equal assert_not_equal
-
-  ##
-  # Asserts that +obj+ responds to #empty? and #empty? returns true.
-
-  def assert_empty(obj)
-    assert_respond_to obj, :empty?
-    assert_block "#{obj.inspect} expected to be empty." do obj.empty? end
   end
 
   ##
@@ -44,20 +50,9 @@ module Test::Unit::Assertions
   end
 
   ##
-  # Asserts that +obj+ is not nil.
+  # Alias for assert_not_equal
 
-  alias deny_nil assert_not_nil
-
-  ##
-  # Asserts that +obj+ responds to #include? and that obj includes +item+.
-
-  def assert_include(item, obj, message = nil)
-    assert_respond_to obj, :include?
-    message ||= "#{obj.inspect} does not include #{item.inspect}."
-    assert_block message do obj.include? item end
-  end
-
-  alias assert_includes assert_include
+  alias deny_equal assert_not_equal
 
   ##
   # Asserts that +obj+ responds to #include? and that obj does not include
@@ -70,6 +65,11 @@ module Test::Unit::Assertions
   end
 
   alias deny_includes deny_include
+
+  ##
+  # Asserts that +obj+ is not nil.
+
+  alias deny_nil assert_not_nil
 
   ##
   # Captures $stdout and $stderr to StringIO objects and returns them.
