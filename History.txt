@@ -1,6 +1,7 @@
-*** 3.4.4 / ??
+*** 3.5.0 / ??
 
-+ 3 minor enhancement:
++ N minor enhancements:
+        + Autotest and unit_diff are both unbuffered. Results are more live.
 	+ Allow session to work in view tests.
 	+ Made Rails unit tests faster with sensible defaults.
 	+ Better assertion messages for ZentestAssertions.

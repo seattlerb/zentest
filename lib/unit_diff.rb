@@ -90,28 +90,47 @@ class UnitDiff
     data << current
     print_lines = true
 
-    # Collect
-    input.each_line do |line|
+    term = "Finished".split(//).map { |c| c[0] }
+    term_length = term.size
+
+    old_sync = STDOUT.sync
+    STDOUT.sync = true
+    while line = input.gets
       case line
-      when /^Loaded suite/ then
+      when /^(Loaded suite|Started)/ then
         print_lines = true
-      when /^\s*$/, /^\(?\s*\d+\) (Failure|Error):/ then
-        print_lines = false if line =~ /Failure|Error/
+        output.puts line
+        chars = []
+        while c = input.getc do
+          output.putc c
+          chars << c
+          tail = chars[-term_length..-1]
+          break if chars.size >= term_length and tail == term
+        end
+        output.puts input.gets # the rest of "Finished in..."
+        output.puts
+       next
+      when /^\s*$/ then
+        print_lines = false
+        type = nil
+        current = []
+        data << current
+      when /^\(?\s*\d+\) (Failure|Error):/ then
+        print_lines = false # if line =~ /Failure|Error/
         type = $1
         current = []
         data << current
-      end
-      output.puts line if print_lines
-      current << line
-      case line
       when /^Finished in \d/ then
         print_lines = false
       end
+      output.puts line if print_lines
+      current << line
     end
-    data = data.reject { |o| o == ["\n"] }
-    header = data.shift
+    STDOUT.sync = old_sync
+    data = data.reject { |o| o == ["\n"] or o.empty? }
     footer = data.pop
-    return header, data, footer
+
+    return data, footer
   end
 
   def parse_diff(result)
@@ -162,7 +181,7 @@ class UnitDiff
     $l = false unless defined? $l
     $u = false unless defined? $u
 
-    header, data, footer = self.parse_input(input, output)
+    data, footer = self.parse_input(input, output)
 
     output = []
 
@@ -201,7 +220,7 @@ class UnitDiff
     end
 
     if footer then
-      footer.shift if footer.first.strip.empty?
+      footer.shift if footer.first.strip.empty?# unless footer.first.nil?
       output.push footer.compact.map {|line| line.strip}.join("\n")
     end
 

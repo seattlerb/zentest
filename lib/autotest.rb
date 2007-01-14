@@ -62,8 +62,7 @@ class Autotest
     new.run
   end
 
-  attr_accessor :autoflush, :exceptions, :files, :files_to_test, :interrupted, :last_mtime, :libs, :output, :results, :tainted, :wants_to_quit
-  alias :autoflush? :autoflush
+  attr_accessor :exceptions, :files, :files_to_test, :interrupted, :last_mtime, :libs, :output, :results, :tainted, :wants_to_quit
 
   def initialize
     @files = Hash.new Time.at(0)
@@ -72,7 +71,6 @@ class Autotest
     @libs = %w[. lib test].join(File::PATH_SEPARATOR)
     @output = $stderr
     @sleep = 1
-    @autoflush = false
     hook :initialize
   end
 
@@ -117,7 +115,6 @@ class Autotest
     end
     hook :ran_command
     @results = @results.join
-    puts @results unless autoflush?
 
     handle_results(@results)
   end
@@ -223,14 +220,18 @@ class Autotest
 
     unless full.empty? then
       classes = full.map {|k,v| k}.flatten.join(' ')
-      cmds << "#{ruby} -I#{@libs} -rtest/unit -e \"%w[#{classes}].each { |f| require f }\" | unit_diff -u"
+      cmds << "#{ruby} -I#{@libs} -rtest/unit -e \"%w[#{classes}].each { |f| require f }\" | #{unit_diff}"
     end
 
     partial.each do |klass, methods|
-      cmds << "#{ruby} -I#{@libs} #{klass} -n \"/^(#{Regexp.union(*methods).source})$/\" | unit_diff -u" 
+      cmds << "#{ruby} -I#{@libs} #{klass} -n \"/^(#{Regexp.union(*methods).source})$/\" | #{unit_diff}"
     end
 
     return cmds.join('; ')
+  end
+
+  def unit_diff
+    "unit_diff -u"
   end
 
   def rerun_all_tests
