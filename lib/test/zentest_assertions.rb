@@ -12,6 +12,19 @@ module Test::Unit::Assertions
   end
 
   ##
+  # Like assert_in_delta but better dealing with errors proportional
+  # to the sizes of +a+ and +b+.
+
+  def assert_in_epsilon(a, b, epsilon, message = nil)
+    return assert true if a == b # count assertion
+
+    error = ((a - b).to_f / ((b.abs > a.abs) ? b : a)).abs
+    message ||= "<#{a}> expected to be within <#{epsilon}> of <#{b}>, was\n<#{error}>"
+
+    assert_block message do error <= epsilon end
+  end
+
+  ##
   # Asserts that +obj+ responds to #include? and that obj includes +item+.
 
   def assert_include(item, obj, message = nil)
@@ -37,16 +50,6 @@ module Test::Unit::Assertions
   def deny_empty(obj)
     assert_respond_to obj, :empty?
     assert_block "#{obj.inspect} expected to have stuff." do !obj.empty? end
-  end
-
-  ##
-  # Like assert_in_delta but better dealing with errors proportional
-  # to the sizes of +a+ and +b+.
-
-  def assert_in_epsilon(a, b, epsilon, message="")
-    return true if a == b
-    error = ((a - b) / (b.abs > a.abs) ? b : a).abs
-    error <= epsilon
   end
 
   ##
