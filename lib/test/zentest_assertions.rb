@@ -34,6 +34,16 @@ module Test::Unit::Assertions
   end
 
   ##
+  # Like assert_in_delta but better dealing with errors proportional
+  # to the sizes of +a+ and +b+.
+
+  def assert_in_epsilon(a, b, epsilon, message="")
+    return true if a == b
+    error = ((a - b) / (b.abs > a.abs) ? b : a).abs
+    error <= epsilon
+  end
+
+  ##
   # Asserts that +obj+ is not nil.
 
   alias deny_nil assert_not_nil
