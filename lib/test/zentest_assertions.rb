@@ -16,10 +16,10 @@ module Test::Unit::Assertions
   # to the sizes of +a+ and +b+.
 
   def assert_in_epsilon(a, b, epsilon, message = nil)
-    return assert true if a == b # count assertion
+    return assert(true) if a == b # count assertion
 
     error = ((a - b).to_f / ((b.abs > a.abs) ? b : a)).abs
-    message ||= "<#{a}> expected to be within <#{epsilon}> of <#{b}>, was\n<#{error}>"
+    message ||= "#{a} expected to be within #{epsilon * 100}% of #{b}, was #{error}"
 
     assert_block message do error <= epsilon end
   end

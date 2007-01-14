@@ -30,8 +30,7 @@ class TestZenTestAssertions < Test::Unit::TestCase
       assert_in_epsilon 1.235, 1.234, 0.0001
     end
 
-    assert_equal "<1.235> expected to be within <0.0001> of <1.234>, was
-<0.000809716599190374>", e.message
+    assert_equal "1.235 expected to be within 0.01% of 1.234, was 0.000809716599190374", e.message
   end
 
   def test_deny
