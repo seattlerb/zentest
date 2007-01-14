@@ -93,8 +93,8 @@ class UnitDiff
     term = "Finished".split(//).map { |c| c[0] }
     term_length = term.size
 
-    old_sync = STDOUT.sync
-    STDOUT.sync = true
+    old_sync = output.sync
+    output.sync = true
     while line = input.gets
       case line
       when /^(Loaded suite|Started)/ then
@@ -126,7 +126,7 @@ class UnitDiff
       output.puts line if print_lines
       current << line
     end
-    STDOUT.sync = old_sync
+    output.sync = old_sync
     data = data.reject { |o| o == ["\n"] or o.empty? }
     footer = data.pop
 
@@ -174,7 +174,7 @@ class UnitDiff
   # Scans Test::Unit output +input+ looking for comparison failures and makes
   # them easily readable by passing them through diff.
 
-  def unit_diff(input=ARGF, output=STDOUT)
+  def unit_diff(input=ARGF, output=$stdout)
     $b = false unless defined? $b
     $c = false unless defined? $c
     $k = false unless defined? $k
