@@ -13,7 +13,7 @@ class TRController < ApplicationController
 end if $TESTING_RTC
 
 class TestRailsControllerTestCase < Test::Rails::ControllerTestCase
-  
+
   def setup
     @controller_class_name = 'TRController'
     super
@@ -31,9 +31,17 @@ class TestRailsControllerTestCase < Test::Rails::ControllerTestCase
       assert_assigned :no_ivar
     end
 
-    assert_raise Test::Unit::AssertionFailedError do
+    e = assert_raise Test::Unit::AssertionFailedError do
       assert_assigned :ivar, 'bad_value'
     end
+
+    expected = <<-EOF.strip
+assert_assigned :ivar.
+<\"bad_value\"> expected but was
+<\"value\">.
+    EOF
+
+    assert_equal expected, e.message
   end
 
   def test_deny_assigned

@@ -229,7 +229,10 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
     ivar = ivar.to_s
     @assigns_asserted << ivar
     assert_includes ivar, assigns, "#{ivar.inspect} missing from assigns"
-    assert_equal value, assigns[ivar] unless value.equal? NOTHING
+    unless value.equal? NOTHING then
+      assert_equal value, assigns[ivar],
+                   "assert_assigned #{ivar.intern.inspect}"
+    end
   end
 
   ##
