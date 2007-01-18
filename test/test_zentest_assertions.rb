@@ -20,7 +20,7 @@ class TestZenTestAssertions < Test::Unit::TestCase
       assert_include false, [true]
     end
 
-    assert_equal "[true] does not include false.", e.message
+    assert_equal "[true]\ndoes not include\nfalse.", e.message
   end
 
   def test_assert_in_epsilon

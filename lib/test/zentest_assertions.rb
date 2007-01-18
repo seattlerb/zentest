@@ -29,7 +29,7 @@ module Test::Unit::Assertions
 
   def assert_include(item, obj, message = nil)
     assert_respond_to obj, :include?
-    message ||= "#{obj.inspect} does not include #{item.inspect}."
+    message ||= "#{obj.inspect}\ndoes not include\n#{item.inspect}."
     assert_block message do obj.include? item end
   end
 
