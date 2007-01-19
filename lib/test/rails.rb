@@ -1,4 +1,5 @@
 require 'test/unit'
+require 'rubygems/version'
 require 'test_help' # hopefully temporary, required for Test::Rails to work
                     # until we get rid of test_help so Test::Unit::TestCase
                     # is kept virgin.
@@ -249,7 +250,23 @@ $TESTING = true
 #
 # The stats target is updated to account for controller and view tests.
 
-module Test::Rails; end
+module Test::Rails
+
+  @v1_2 = Gem::Version.new '1.2'
+
+  ##
+  # The currently loaded rails version.  Better than Rails::VERSION::STRING
+  # since this on is comparable.
+
+  def self.rails_version
+    Gem.loaded_specs['rails'].version
+  end
+
+  def self.v1_2
+    @v1_2
+  end
+
+end
 
 class Object # :nodoc:
   def self.path2class(klassname)

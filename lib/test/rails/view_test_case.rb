@@ -171,7 +171,11 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
     defaults = { :layout => false }
     options = defaults.merge options
 
-    @controller.instance_variable_set :@params, @request.parameters
+    if Test::Rails.rails_version >= Test::Rails.v1_2 then
+      @controller.send :params=, @request.parameters
+    else
+      @controller.instance_variable_set :@params, @request.parameters
+    end
     @controller.send :initialize_current_url
 
     # Rails 1.0
