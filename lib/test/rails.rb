@@ -252,17 +252,18 @@ $TESTING = true
 
 module Test::Rails
 
+  @rails_version = Gem::Version.new Rails::VERSION::STRING
   @v1_2 = Gem::Version.new '1.2'
 
   ##
   # The currently loaded rails version.  Better than Rails::VERSION::STRING
-  # since this on is comparable.
+  # since this one is comparable.
 
   def self.rails_version
-    Gem.loaded_specs['rails'].version
+    @rails_version
   end
 
-  def self.v1_2
+  def self.v1_2 # :nodoc:
     @v1_2
   end
 
