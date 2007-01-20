@@ -177,6 +177,8 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
       @controller.instance_variable_set :@params, @request.parameters
     end
     @controller.send :initialize_current_url
+    current_url = URI.parse @controller.url_for
+    @request.request_uri = current_url.request_uri
 
     # Rails 1.0
     @controller.send :assign_names rescue nil
