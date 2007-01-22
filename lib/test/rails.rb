@@ -1,4 +1,5 @@
 require 'test/unit'
+require 'rails/version' # Need Rails::VERSION
 require 'rubygems/version'
 require 'test_help' # hopefully temporary, required for Test::Rails to work
                     # until we get rid of test_help so Test::Unit::TestCase
