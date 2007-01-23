@@ -82,7 +82,11 @@ class Autotest
     loop do # ^c handler
       begin
         get_to_green
-        rerun_all_tests if @tainted
+        if @tainted then
+          rerun_all_tests
+        else
+          hook :all_good
+        end
         wait_for_changes
       rescue Interrupt
         if @wants_to_quit then

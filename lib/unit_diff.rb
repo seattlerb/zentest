@@ -90,7 +90,7 @@ class UnitDiff
     data << current
     print_lines = true
 
-    term = "Finished".split(//).map { |c| c[0] }
+    term = "\nFinished".split(//).map { |c| c[0] }
     term_length = term.size
 
     old_sync = output.sync
