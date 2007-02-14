@@ -10,25 +10,25 @@ require 'zentest' unless defined? $ZENTEST
 # These are just classes set up for quick testing.
 # TODO: need to test a compound class name Mod::Cls
 
-class Cls1				# ZenTest SKIP
+class Cls1              # ZenTest SKIP
   def meth1; end
   def self.meth2; end
 end
 
-class TestCls1				# ZenTest SKIP
+class TestCls1              # ZenTest SKIP
   def setup; end
   def teardown; end
   def test_meth1; end
   def test_meth2; assert(true, "something"); end
 end
 
-class SuperDuper			# ZenTest SKIP
+class SuperDuper            # ZenTest SKIP
   def self.cls_inherited; end
   def inherited; end
   def overridden; end
 end
 
-class LowlyOne < SuperDuper		# ZenTest SKIP
+class LowlyOne < SuperDuper     # ZenTest SKIP
   def self.cls_extended; end
   def overridden; end
   def extended; end
@@ -235,20 +235,20 @@ end
   def test_is_test_class
     # classes
     assert(@tester.is_test_class(TestCls1),
-	   "All test classes must start with Test")
+       "All test classes must start with Test")
     assert(!@tester.is_test_class(Cls1),
-	   "Classes not starting with Test must not be test classes")
+       "Classes not starting with Test must not be test classes")
     # strings
     assert(@tester.is_test_class("TestCls1"),
-	   "All test classes must start with Test")
+       "All test classes must start with Test")
     assert(@tester.is_test_class("TestMod::TestCls1"),
-	   "All test modules must start with test as well")
+       "All test modules must start with test as well")
     assert(!@tester.is_test_class("Cls1"),
-	   "Classes not starting with Test must not be test classes")
+       "Classes not starting with Test must not be test classes")
     assert(!@tester.is_test_class("NotTestMod::TestCls1"),
-	   "Modules not starting with Test must not be test classes")
+       "Modules not starting with Test must not be test classes")
     assert(!@tester.is_test_class("NotTestMod::NotTestCls1"),
-	   "All names must start with Test to be test classes")
+       "All names must start with Test to be test classes")
   end
 
   def test_is_test_class_reversed
@@ -272,9 +272,9 @@ end
     assert_equal('TestCls1', @tester.convert_class_name('Cls1'))
 
     assert_equal('TestModule::TestCls1',
-		 @tester.convert_class_name('Module::Cls1'))
+         @tester.convert_class_name('Module::Cls1'))
     assert_equal('Module::Cls1',
-		 @tester.convert_class_name('TestModule::TestCls1'))
+         @tester.convert_class_name('TestModule::TestCls1'))
   end
 
   def test_convert_class_name_reversed
@@ -288,9 +288,9 @@ end
     assert_equal('Cls1Test', @tester.convert_class_name('Cls1'))
 
     assert_equal('ModuleTest::Cls1Test',
-		 @tester.convert_class_name('Module::Cls1'))
+         @tester.convert_class_name('Module::Cls1'))
     assert_equal('Module::Cls1',
-		 @tester.convert_class_name('ModuleTest::Cls1Test'))
+         @tester.convert_class_name('ModuleTest::Cls1Test'))
     $r = old
   end
 
@@ -452,130 +452,6 @@ end
     assert_equal({}, @tester.inherited_methods["SuperDuper"])
   end
 
-  def test_normal_to_test
-    self.util_simple_setup
-    assert_equal("test_method1",        @tester.normal_to_test("method1"))
-    assert_equal("test_method1_bang",   @tester.normal_to_test("method1!"))
-    assert_equal("test_method1_eh",     @tester.normal_to_test("method1?"))
-    assert_equal("test_method1_equals", @tester.normal_to_test("method1="))
-  end
-
-  def test_normal_to_test_cls
-    self.util_simple_setup
-    assert_equal("test_class_method1",        @tester.normal_to_test("self.method1"))
-    assert_equal("test_class_method1_bang",   @tester.normal_to_test("self.method1!"))
-    assert_equal("test_class_method1_eh",     @tester.normal_to_test("self.method1?"))
-    assert_equal("test_class_method1_equals", @tester.normal_to_test("self.method1="))
-  end
-
-  def test_normal_to_test_operators
-    self.util_simple_setup
-    assert_equal("test_and",     @tester.normal_to_test("&"))
-    assert_equal("test_bang",    @tester.normal_to_test("!"))
-    assert_equal("test_carat",   @tester.normal_to_test("^"))
-    assert_equal("test_div",     @tester.normal_to_test("/"))
-    assert_equal("test_equalstilde", @tester.normal_to_test("=~"))
-    assert_equal("test_minus",   @tester.normal_to_test("-"))
-    assert_equal("test_or",      @tester.normal_to_test("|"))
-    assert_equal("test_percent", @tester.normal_to_test("%"))
-    assert_equal("test_plus",    @tester.normal_to_test("+"))
-    assert_equal("test_tilde",   @tester.normal_to_test("~"))
-  end
-
-  def test_normal_to_test_overlap
-    self.util_simple_setup
-    assert_equal("test_equals2",       @tester.normal_to_test("=="))
-    assert_equal("test_equals3",       @tester.normal_to_test("==="))
-    assert_equal("test_ge",            @tester.normal_to_test(">="))
-    assert_equal("test_gt",            @tester.normal_to_test(">"))
-    assert_equal("test_gt2",           @tester.normal_to_test(">>"))
-    assert_equal("test_index",         @tester.normal_to_test("[]"))
-    assert_equal("test_index_equals",  @tester.normal_to_test("[]="))
-    assert_equal("test_lt",            @tester.normal_to_test("<"))
-    assert_equal("test_lt2",           @tester.normal_to_test("<\<"))
-    assert_equal("test_lte",           @tester.normal_to_test("<="))
-    assert_equal("test_method",        @tester.normal_to_test("method"))
-    assert_equal("test_method_equals", @tester.normal_to_test("method="))
-    assert_equal("test_spaceship",     @tester.normal_to_test("<=>"))
-    assert_equal("test_times",         @tester.normal_to_test("*"))
-    assert_equal("test_times2",        @tester.normal_to_test("**"))
-    assert_equal("test_unary_minus",   @tester.normal_to_test("-@"))
-    assert_equal("test_unary_plus",    @tester.normal_to_test("+@"))
-    assert_equal("test_class_index",   @tester.normal_to_test("self.[]"))
-  end
-
-  def test_test_to_normal
-    self.util_simple_setup
-    assert_equal("method1!", @tester.test_to_normal("test_method1_bang", "Something"))
-    assert_equal("method1",  @tester.test_to_normal("test_method1", "Something"))
-    assert_equal("method1=", @tester.test_to_normal("test_method1_equals", "Something"))
-    assert_equal("method1?", @tester.test_to_normal("test_method1_eh", "Something"))
-  end
-
-  def test_test_to_normal_cls
-    self.util_simple_setup
-    assert_equal("self.method1",  @tester.test_to_normal("test_class_method1"))
-    assert_equal("self.method1!", @tester.test_to_normal("test_class_method1_bang"))
-    assert_equal("self.method1?", @tester.test_to_normal("test_class_method1_eh"))
-    assert_equal("self.method1=", @tester.test_to_normal("test_class_method1_equals"))
-    assert_equal("self.[]", @tester.test_to_normal("test_class_index"))
-  end
-
-  def test_test_to_normal_extended
-    self.util_simple_setup
-    assert_equal("equal?",  @tester.test_to_normal("test_equal_eh_extension", "Something"))
-    assert_equal("equal?",  @tester.test_to_normal("test_equal_eh_extension_again", "Something"))
-    assert_equal("method1", @tester.test_to_normal("test_method1_extension", "Something"))
-    assert_equal("method1", @tester.test_to_normal("test_method1_extension_again", "Something"))
-  end
-
-  def test_test_to_normal_mapped
-    self.util_simple_setup
-    assert_equal("*",   @tester.test_to_normal("test_times"))
-    assert_equal("*",   @tester.test_to_normal("test_times_ext"))
-    assert_equal("==",  @tester.test_to_normal("test_equals2"))
-    assert_equal("==",  @tester.test_to_normal("test_equals2_ext"))
-    assert_equal("===", @tester.test_to_normal("test_equals3"))
-    assert_equal("===", @tester.test_to_normal("test_equals3_ext"))
-    assert_equal("[]",  @tester.test_to_normal("test_index"))
-    assert_equal("[]",  @tester.test_to_normal("test_index_ext"))
-    assert_equal("[]=", @tester.test_to_normal("test_index_equals"))
-    assert_equal("[]=", @tester.test_to_normal("test_index_equals_ext"))
-  end
-
-  def test_test_to_normal_operators
-    self.util_simple_setup
-    assert_equal("&",  @tester.test_to_normal("test_and"))
-    assert_equal("!",  @tester.test_to_normal("test_bang"))
-    assert_equal("^",  @tester.test_to_normal("test_carat"))
-    assert_equal("/",  @tester.test_to_normal("test_div"))
-    assert_equal("=~", @tester.test_to_normal("test_equalstilde"))
-    assert_equal("-",  @tester.test_to_normal("test_minus"))
-    assert_equal("|",  @tester.test_to_normal("test_or"))
-    assert_equal("%",  @tester.test_to_normal("test_percent"))
-    assert_equal("+",  @tester.test_to_normal("test_plus"))
-    assert_equal("~",  @tester.test_to_normal("test_tilde"))
-  end
-
-  def test_test_to_normal_overlap
-    self.util_simple_setup
-    assert_equal("==",  @tester.test_to_normal("test_equals2"))
-    assert_equal("===", @tester.test_to_normal("test_equals3"))
-    assert_equal(">=",  @tester.test_to_normal("test_ge"))
-    assert_equal(">",   @tester.test_to_normal("test_gt"))
-    assert_equal(">>",  @tester.test_to_normal("test_gt2"))
-    assert_equal("[]",  @tester.test_to_normal("test_index"))
-    assert_equal("[]=", @tester.test_to_normal("test_index_equals"))
-    assert_equal("<",   @tester.test_to_normal("test_lt"))
-    assert_equal("<\<", @tester.test_to_normal("test_lt2"))
-    assert_equal("<=",  @tester.test_to_normal("test_lte"))
-    assert_equal("<=>", @tester.test_to_normal("test_spaceship"))
-    assert_equal("*",   @tester.test_to_normal("test_times"))
-    assert_equal("**",  @tester.test_to_normal("test_times2"))
-    assert_equal("-@",  @tester.test_to_normal("test_unary_minus"))
-    assert_equal("+@",  @tester.test_to_normal("test_unary_plus"))
-  end
-
   def test_klasses_equals
     self.util_simple_setup
     assert_equal({"Something"=> {
@@ -662,6 +538,4 @@ assert_equal expected, util_testcase("Something2::Blah2", "TestSomething2::TestB
 
     assert_equal expected, util_testcase("TestTrueClass")
   end
-
 end
-

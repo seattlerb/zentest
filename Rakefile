@@ -1,6 +1,6 @@
 # -*- ruby -*-
 
-ENV["RUBY_FLAGS"]="-Ilib:bin:test" # FIX
+$: << 'lib'
 
 require 'rubygems'
 require 'hoe'

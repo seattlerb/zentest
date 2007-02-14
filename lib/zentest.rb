@@ -1,3 +1,6 @@
+
+require 'zentest_mapping'
+
 $stdlib = {}
 ObjectSpace.each_object(Module) { |m| $stdlib[m.name] = true }
 
@@ -49,33 +52,13 @@ end
 #     * TestA::TestB#test_blah_missing_file
 # * All naming conventions are bidirectional with the exception of test extensions.
 #
-# == METHOD MAPPING
-#
-# Method names are mapped bidirectionally in the following way:
-#
-#   method      test_method
-#   method?     test_method_eh          (too much exposure to Canadians :)
-#   method!     test_method_bang
-#   method=     test_method_equals
-#   []          test_index
-#   *           test_times
-#   ==          test_equals2
-#   ===         test_equals3
-#
-# Further, any of the test methods should be able to have arbitrary
-# extensions put on the name to distinguish edge cases:
-#
-#   method      test_method
-#   method      test_method_simple
-#   method      test_method_no_network
-#
-# To allow for unmapped test methods (ie, non-unit tests), name them:
-#
-#   test_integration_.*
+# See ZenTestMapping for documentation on method naming.
 
 class ZenTest
 
   VERSION = '3.4.3'
+
+  include ZenTestMapping
 
   if $TESTING then
     attr_reader :missing_methods
@@ -312,69 +295,6 @@ class ZenTest
     @result.push "# ERROR method #{klassname}\##{methodname} does not exist (1)" if $DEBUG and not $TESTING
     @error_count += 1
     @missing_methods[klassname][methodname] = true
-  end
-
-  @@orig_method_map = {
-    '!'   => 'bang',
-    '%'   => 'percent',
-    '&'   => 'and',
-    '*'   => 'times',
-    '**'  => 'times2',
-    '+'   => 'plus',
-    '-'   => 'minus',
-    '/'   => 'div',
-    '<'   => 'lt',
-    '<='  => 'lte',
-    '<=>' => 'spaceship',
-    "<\<" => 'lt2',
-    '=='  => 'equals2',
-    '===' => 'equals3',
-    '=~'  => 'equalstilde',
-    '>'   => 'gt',
-    '>='  => 'ge',
-    '>>'  => 'gt2',
-    '+@'  => 'unary_plus',
-    '-@'  => 'unary_minus',
-    '[]'  => 'index',
-    '[]=' => 'index_equals',
-    '^'   => 'carat',
-    '|'   => 'or',
-    '~'   => 'tilde',
-  }
-
-  @@method_map = @@orig_method_map.merge(@@orig_method_map.invert)
-
-  def normal_to_test(name)
-    name = name.dup # wtf?
-    is_cls_method = name.sub!(/^self\./, '')
-    name = @@method_map[name] if @@method_map.has_key? name
-    name = name.sub(/=$/, '_equals')
-    name = name.sub(/\?$/, '_eh')
-    name = name.sub(/\!$/, '_bang')
-    name = "class_" + name if is_cls_method
-    "test_#{name}"
-  end
-
-  def test_to_normal(name, klassname=nil)
-    known_methods = (@inherited_methods[klassname] || {}).keys.sort.reverse
-
-    mapped_re = @@orig_method_map.values.sort_by { |k| k.length }.map {|s| Regexp.escape(s)}.reverse.join("|")
-    known_methods_re = known_methods.map {|s| Regexp.escape(s)}.join("|")
-
-    name = name.sub(/^test_/, '')
-    name = name.sub(/_equals/, '=') unless name =~ /index/
-    name = name.sub(/_bang.*$/, '!') # FIX: deal w/ extensions separately
-    name = name.sub(/_eh/, '?')
-    is_cls_method = name.sub!(/^class_/, '')
-    name = name.sub(/^(#{mapped_re})(.*)$/) {$1}
-    name = name.sub(/^(#{known_methods_re})(.*)$/) {$1} unless known_methods_re.empty?
-
-    # look up in method map
-    name = @@method_map[name] if @@method_map.has_key? name
-
-    name = 'self.' + name if is_cls_method
-
-    name
   end
 
   def analyze_impl(klassname)

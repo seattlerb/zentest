@@ -38,6 +38,7 @@ lib/test/rails/view_test_case.rb
 lib/test/zentest_assertions.rb
 lib/unit_diff.rb
 lib/zentest.rb
+lib/zentest_mapping.rb
 test/test_autotest.rb
 test/test_help.rb
 test/test_rails_autotest.rb
