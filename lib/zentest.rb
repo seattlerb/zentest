@@ -79,6 +79,7 @@ class ZenTest
     @missing_methods = Hash.new { |h,k| h[k] = {} }
   end
 
+  # load_file wraps require, skipping the loading of $0.
   def load_file(file)
     puts "# loading #{file} // #{$0}" if $DEBUG
 
@@ -93,6 +94,8 @@ class ZenTest
     end
   end
 
+  # obtain the class klassname, either from Module or
+  # using ObjectSpace to search for it.
   def get_class(klassname)
     begin
       klass = Module.const_get(klassname.intern)
@@ -116,6 +119,11 @@ class ZenTest
     return klass
   end
 
+  # Get the public instance, class and singleton methods for
+  # class klass. If full is true, include the methods from 
+  # Kernel and other modules that get included.  The methods
+  # suite, new, pretty_print, pretty_print_cycle will not
+  # be included in the resuting array.
   def get_methods_for(klass, full=false)
     klass = self.get_class(klass) if klass.kind_of? String
 
@@ -137,6 +145,10 @@ class ZenTest
     return klassmethods
   end
 
+  # Return the methods for class klass, as a hash with the
+  # method nemas as keys, and true as the value for all keys.
+  # Unless full is true, leave out the methods for Object which
+  # all classes get.
   def get_inherited_methods_for(klass, full)
     klass = self.get_class(klass) if klass.kind_of? String
 
@@ -160,6 +172,8 @@ class ZenTest
     return klassmethods
   end
 
+  # Check the class klass is a testing class
+  # (by inspecting its name).
   def is_test_class(klass)
     klass = klass.to_s
     klasspath = klass.split(/::/)
@@ -167,6 +181,9 @@ class ZenTest
     return a_bad_classpath.nil?
   end
 
+  # Generate the name of a testclass from non-test class
+  # so that  Foo::Blah => TestFoo::TestBlah, etc. It the
+  # name is already a test class, convert it the other way.
   def convert_class_name(name)
     name = name.to_s
 
@@ -187,6 +204,11 @@ class ZenTest
     return name
   end
 
+  # Does all the work of finding a class by name, 
+  # obtaining its methods and those of its superclass.
+  # The full parameter determines if all the methods
+  # including those of Object and mixed in modules
+  # are obtained (true if they are, false by default).
   def process_class(klassname, full=false)
     klass = self.get_class(klassname)
     raise "Couldn't get class for #{klassname}" if klass.nil?
@@ -199,10 +221,16 @@ class ZenTest
     target[klassname] = self.get_methods_for(klass, full)
 
     # record ALL instance methods including superclasses (minus Object)
+    # Only minus Object if full is true.
     @inherited_methods[klassname] = self.get_inherited_methods_for(klass, full)
     return klassname
   end
 
+  # Work through files, collecting class names, method names
+  # and assertions. Detects ZenTest (SKIP|FULL) comments
+  # in the bodies of classes.
+  # For each class a count of methods and test methods is
+  # kept, and the ratio noted.
   def scan_files(*files)
     assert_count = Hash.new(0)
     method_count = Hash.new(0)
@@ -291,12 +319,16 @@ class ZenTest
     end
   end
 
+  # Adds a missing method to the collected results.
   def add_missing_method(klassname, methodname)
     @result.push "# ERROR method #{klassname}\##{methodname} does not exist (1)" if $DEBUG and not $TESTING
     @error_count += 1
     @missing_methods[klassname][methodname] = true
   end
 
+  # Checks, for the given class klassname, that each method
+  # has a corrsponding test method. If it doesn't this is
+  # added to the information for that class
   def analyze_impl(klassname)
     testklassname = self.convert_class_name(klassname)
     if @test_klasses[testklassname] then
@@ -326,6 +358,9 @@ class ZenTest
     end # @test_klasses[testklassname]
   end
 
+  # For the given test class testklassname, ensure that all
+  # the test methods have corresponding (normal) methods.
+  # If not, add them to the information about that class.
   def analyze_test(testklassname)
     klassname = self.convert_class_name(testklassname)
 
@@ -379,6 +414,10 @@ class ZenTest
     end # @klasses[klassname]
   end
 
+   
+  # Walk each known class and test that each method has
+  # a test method
+  # Then do it in the other direction...
   def analyze
     # walk each known class and test that each method has a test method
     @klasses.each_key do |klassname|
@@ -391,6 +430,10 @@ class ZenTest
     end
   end
 
+  # Using the results gathered during analysis
+  # generate skeletal code with methods raising
+  # NotImplementedError, so that they can be filled
+  # in later, and so the tests will fail to start with.
   def generate_code
 
 #    @result.unshift "# run against: #{files.join(', ')}" if $DEBUG
@@ -471,10 +514,14 @@ class ZenTest
     @result.push ''
   end
 
+  # presents results in a readable manner.
   def result
     return @result.join("\n")
   end
 
+  # Runs ZenTest over all the supplied files so that
+  # they are analysed and the missing methods have
+  # skeleton code written.
   def self.fix(*files)
     zentest = ZenTest.new
     zentest.scan_files(*files)
@@ -483,6 +530,10 @@ class ZenTest
     return zentest.result
   end
 
+  # Process all the supplied classes for methods etc,
+  # and analyse the results. Generate the skeletal code
+  # and eval it to put the methods into the runtime
+  # environment.
   def self.autotest(*klasses)
     zentest = ZenTest.new
     klasses.each do |klass|

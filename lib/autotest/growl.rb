@@ -1,12 +1,16 @@
 # -*- mode -*-
 
 module Autotest::Growl
+  require 'fileutils'
+
   def self.growl title, msg, pri=0
+    title = title + " in #{FileUtils.pwd}"
+      msg = msg + " at #{Time.now}"
     system "growlnotify -n autotest --image /Applications/Mail.app/Contents/Resources/Caution.tiff -p #{pri} -m #{msg.inspect} #{title}"
   end
 
   Autotest.add_hook :run do  |at|
-    growl "Run", "Run" unless $TESTING
+    growl "autotest running", "Started" unless $TESTING
   end
 
   Autotest.add_hook :red do |at|

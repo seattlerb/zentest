@@ -49,3 +49,4 @@ test/test_ruby_fork.rb
 test/test_unit_diff.rb
 test/test_zentest.rb
 test/test_zentest_assertions.rb
+test/test_zentest_mapping.rb
