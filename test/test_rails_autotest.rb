@@ -77,8 +77,9 @@ class TestRailsAutotest < TestAutotest
                         'test/functional/admin/themes_controller_test.rb')
 
     util_tests_for_file('app/controllers/application.rb',
-                        'test/controllers/dummy_controller_test.rb',
-                        'test/functional/dummy_controller_test.rb')
+                        @rails_controller_tests,
+                        @rails_view_tests,
+                        @rails_functional_tests)
 
     util_tests_for_file('app/controllers/route_controller.rb',
                         'test/controllers/route_controller_test.rb',
@@ -88,7 +89,8 @@ class TestRailsAutotest < TestAutotest
 
     # helpers
     util_tests_for_file('app/helpers/application_helper.rb',
-                        @rails_view_tests + @rails_functional_tests)
+                        @rails_view_tests,
+                        @rails_functional_tests)
 
     util_tests_for_file('app/helpers/route_helper.rb',
                         'test/views/route_view_test.rb',

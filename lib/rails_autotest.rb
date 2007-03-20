@@ -4,49 +4,58 @@ class RailsAutotest < Autotest
 
   def initialize # :nodoc:
     super
-    @exceptions = %r%^\./(?:db|doc|log|public|script|vendor/rails)%
+    @exceptions = /^\.\/(?:db|doc|log|public|script|vendor\/rails)/
+
+    @test_mappings = {
+      %r%^test/fixtures/(.*)s.yml% => proc { |_, m|
+        ["test/unit/#{m[1]}_test.rb",
+         "test/controllers/#{m[1]}_controller_test.rb",
+         "test/views/#{m[1]}_view_test.rb",
+         "test/functional/#{m[1]}_controller_test.rb"]
+      },
+      %r%^test/(unit|integration|controllers|views|functional)/.*rb$% => proc { |filename, _|
+        filename
+      },
+      %r%^app/models/(.*)\.rb$% => proc { |_, m|
+        ["test/unit/#{m[1]}_test.rb"]
+      },
+      %r%^app/helpers/application_helper.rb% => proc {
+        files_matching %r%^test/(views|functional)/.*_test\.rb$%
+      },
+      %r%^app/helpers/(.*)_helper.rb% => proc { |_, m|
+        if m[1] == "application" then
+          files_matching %r%^test/(views|functional)/.*_test\.rb$%
+        else
+          ["test/views/#{m[1]}_view_test.rb",
+           "test/functional/#{m[1]}_controller_test.rb"]
+        end
+      },
+      %r%^app/views/(.*)/% => proc { |_, m|
+        ["test/views/#{m[1]}_view_test.rb",
+         "test/functional/#{m[1]}_controller_test.rb"]
+      },
+      %r%^app/controllers/(.*)\.rb$% => proc { |_, m|
+        if m[1] == "application" then
+          files_matching %r%^test/(controllers|views|functional)/.*_test\.rb$%
+        else
+          ["test/controllers/#{m[1]}_test.rb",
+           "test/functional/#{m[1]}_test.rb"]
+        end
+      },
+      %r%^app/views/layouts/% => proc {
+        "test/views/layouts_view_test.rb"
+      },
+      %r%^config/routes.rb$% => proc { # FIX:
+        files_matching %r%^test/(controllers|views|functional)/.*_test\.rb$%
+      },
+      %r%^test/test_helper.rb|config/((boot|environment(s/test)?).rb|database.yml)% => proc {
+        files_matching %r%^test/(unit|controllers|views|functional)/.*_test\.rb$%
+      },
+    }
   end
 
   def tests_for_file(filename)
-
-    case filename
-    when %r%^test/fixtures/(.*)s.yml% then
-      ["test/unit/#{$1}_test.rb",
-       "test/controllers/#{$1}_controller_test.rb",
-       "test/views/#{$1}_view_test.rb",
-       "test/functional/#{$1}_controller_test.rb"]
-    when %r%^test/(unit|integration|controllers|views|functional)/.*rb$% then
-      [filename]
-    when %r%^app/models/(.*)\.rb$% then
-      ["test/unit/#{$1}_test.rb"]
-    when %r%^app/helpers/application_helper.rb% then
-      @files.keys.select { |f|
-        f =~ %r%^test/(views|functional)/.*_test\.rb$%
-      }
-    when %r%^app/helpers/(.*)_helper.rb%, %r%^app/views/(.*)/% then
-      ["test/views/#{$1}_view_test.rb",
-       "test/functional/#{$1}_controller_test.rb"]
-    when %r%^app/controllers/application.rb$% then # FIX: wtf?
-      ["test/controllers/dummy_controller_test.rb",
-       "test/functional/dummy_controller_test.rb"]
-    when %r%^app/controllers/(.*)\.rb$% then
-      ["test/controllers/#{$1}_test.rb",
-       "test/functional/#{$1}_test.rb"]
-    when %r%^app/views/layouts/% then
-      ["test/views/layouts_view_test.rb"]
-    when %r%^config/routes.rb$% then
-      @files.keys.select do |f|
-        f =~ %r%^test/(controllers|views|functional)/.*_test\.rb$%
-      end
-    when %r%^test/test_helper.rb%,
-         %r%^config/((boot|environment(s/test)?).rb|database.yml)% then
-      @files.keys.select do |f|
-        f =~ %r%^test/(unit|controllers|views|functional)/.*_test\.rb$%
-      end
-    else
-      @output.puts "Dunno! #{filename}" if $TESTING
-      []
-    end.uniq.select { |f| @files.has_key? f }
+    super.select { |f| @files.has_key? f }
   end
 
   def path_to_classname(s)
@@ -57,4 +66,3 @@ class RailsAutotest < Autotest
     f.join('::')
   end
 end
-

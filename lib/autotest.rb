@@ -62,7 +62,17 @@ class Autotest
     new.run
   end
 
-  attr_accessor :exceptions, :files, :files_to_test, :interrupted, :last_mtime, :libs, :output, :results, :tainted, :wants_to_quit
+  attr_accessor(:exceptions,
+                :files,
+                :files_to_test,
+                :interrupted,
+                :last_mtime,
+                :libs,
+                :output,
+                :results,
+                :tainted,
+                :test_mappings,
+                :wants_to_quit)
 
   def initialize
     @files = Hash.new Time.at(0)
@@ -71,6 +81,16 @@ class Autotest
     @libs = %w[. lib test].join(File::PATH_SEPARATOR)
     @output = $stderr
     @sleep = 1
+
+    @test_mappings = {
+      /^lib\/.*\.rb$/ => proc { |filename, _|
+        files_matching %r%^test/.*#{File.basename(filename).gsub '_', '_?'}$%
+      },
+      /^test\/test_.*rb$/ => proc { |filename, _|
+        filename
+      }
+    }
+
     hook :initialize
   end
 
@@ -173,7 +193,6 @@ class Autotest
     result = {}
     Find.find '.' do |f|
       Find.prune if @exceptions and f =~ @exceptions and test ?d, f
-      Find.prune if f =~ /(\.(svn|hg)|CVS|te?mp|public|doc|pkg)$/ # prune dirs
 
       next if test ?d, f
       next if f =~ /(swp|~|rej|orig)$/        # temporary/patch files
@@ -223,7 +242,7 @@ class Autotest
     full, partial = files_to_test.partition { |k,v| v.empty? }
 
     unless full.empty? then
-      classes = full.map {|k,v| k}.flatten.join(' ')
+      classes = full.map {|k,v| k}.flatten.uniq.sort.join(' ')
       cmds << "#{ruby} -I#{@libs} -rtest/unit -e \"%w[#{classes}].each { |f| require f }\" | #{unit_diff}"
     end
 
@@ -253,7 +272,7 @@ class Autotest
     @tainted = false
     hook :reset
   end
-  
+
   def ruby
     ruby = File.join(Config::CONFIG['bindir'],
                      Config::CONFIG['ruby_install_name'])
@@ -266,18 +285,12 @@ class Autotest
   end
 
   def tests_for_file(filename)
-    case filename
-    when /^lib\/.*\.rb$/ then
-      impl = File.basename(filename).gsub '_', '_?'
-      @files.keys.select do |k|
-        k =~ %r%^test/.*#{impl}$%
-      end
-    when /^test\/test_.*rb$/ then
-      [filename]
-    else
-      @output.puts "Dunno! #{filename}" if $TESTING
-      []
-    end
+    result = @test_mappings.find { |file_re, ignored| filename =~ file_re }
+    result = result.nil? ? [] : Array(result.last.call(filename, $~))
+
+    @output.puts "Dunno! #{filename}" if $TESTING and result.empty?
+
+    result.sort.uniq
   end
 
   def wait_for_changes
@@ -285,6 +298,12 @@ class Autotest
     begin
       sleep @sleep
     end until find_files_to_test
+  end
+
+  def files_matching regexp
+    @files.keys.select { |k|
+      k =~ regexp
+    }
   end
 
   ############################################################
