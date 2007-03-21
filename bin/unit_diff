@@ -14,7 +14,6 @@
 #    -u unified diff
 #    -v display version
 
-$: << 'lib'
 require 'unit_diff'
 require 'zentest'
 
