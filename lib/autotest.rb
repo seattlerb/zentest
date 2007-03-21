@@ -27,8 +27,8 @@ $TESTING = false unless defined? $TESTING
 #
 #   Autotest.add_hook hook_name { |autotest| ... }
 #
-# The available hooks are: run, interrupt, quit, ran_command, red,
-#   green, all_good, and reset.
+# The available hooks are: run, interrupt, quit, run_command,
+#   ran_command, red, green, all_good, and reset.
 #
 # See example_dot_autotest.rb for more details.
 #
@@ -132,6 +132,7 @@ class Autotest
     find_files_to_test # failed + changed/affected
     cmd = make_test_cmd @files_to_test
 
+    hook :run_command
     puts cmd
 
     old_sync = $stdout.sync
