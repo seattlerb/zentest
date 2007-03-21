@@ -1,5 +1,5 @@
 module Autotest::AutoUpdate
-  @@sleep_time, @@updater = 60, "svn up"
+  @@sleep_time, @@update_cmd, @@updater = 60, "svn up", nil
 
   def self.sleep_time= o
     @@sleep_time = o

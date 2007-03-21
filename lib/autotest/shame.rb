@@ -2,6 +2,7 @@ require 'code_statistics'
 require 'rbosa'
 
 module Autotest::Shame
+  @@chat_app = :adium
 
   def self.chat_app= o
     @@chat_app = o

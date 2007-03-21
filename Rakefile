@@ -32,6 +32,11 @@ task :update do
         f.puts "# require '#{s[0..-4]}'"
       end
     end
+
+    f.puts
+    f.puts "# Autotest::AutoUpdate.sleep_time = 60"
+    f.puts "# Autotest::AutoUpdate.update_cmd = 'svn up'"
+    f.puts "# Autotest::Shame.chat_app = :adium"
   end
 end
 
