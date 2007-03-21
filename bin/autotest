@@ -14,20 +14,6 @@ if $h or $help then
           "\t-v\t\tBe verbose.",
           "\t\t\tPrints files that autotest doesn't know how to map to",
           "\t\t\ttests.",
-          nil,
-          "\t-rails\t\tForce rails mode. TOTALLY NOT NEEDED!!!",
-          "\t\t\tRails will be automatically detected by the presence of",
-          "\t\t\tconfig/environment.rb. Use this if you don't have one.",
-          nil,
-          "\t\t\tYou may need to run 'rake db:test:prepare' before",
-          "\t\t\tstarting autotest on a rails project.",
-          nil,
-          "\t-spec\t\tR/Spec mode.",
-          "\t\t\tRails will be automatically detected by the presence of",
-          "\t\t\tconfig/environment.rb. Use this if you don't have one.",
-          nil,
-          "\t\t\tYou may need to run 'rake db:test:prepare' before",
-          "\t\t\tstarting autotest on a rails project.",
          ]
   STDERR.puts help.join("\n")
   exit 1
@@ -35,10 +21,12 @@ end
 
 $rspec   ||= false
 $rails   ||= false
+$camping ||= false
 
 style = []
 style << "rspec" if $rspec or File.directory?('spec')
 style << "rails" if $rails or File.exist? 'config/environment.rb'
+style << "camping" if $camping or File.exist? 'test/camping_test_case.rb'
 style << "autotest"
 
 mod = style.join("_")
