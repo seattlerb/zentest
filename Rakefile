@@ -23,6 +23,18 @@ task :autotest do
   ruby "-Ilib ./bin/autotest"
 end
 
+task :update do
+  File.open "example_dot_autotest.rb", "w" do |f|
+    f.puts "# -*- ruby -*-"
+    f.puts
+    Dir.chdir "lib" do
+      Dir["autotest/*.rb"].sort.each do |s|
+        f.puts "# require '#{s[0..-4]}'"
+      end
+    end
+  end
+end
+
 task :sort do
   begin
     sh 'for f in lib/*.rb; do echo $f; grep "^ *def " $f | grep -v sort=skip > x; sort x > y; echo $f; echo; diff x y; done'
