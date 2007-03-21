@@ -1,21 +1,38 @@
 *** 3.5.0 / ??
 
-+ N major enhancements:
-	+ Now requires RubyGems 0.9.1 or newer.
-+ N minor enhancements:
-        + Autotest and unit_diff are both unbuffered. Results are more live.
-	+ Allow session to work in view tests.
-	+ Made Rails unit tests faster with sensible defaults.
-	+ Better assertion messages for ZentestAssertions.
-	+ Works with Rails 1.2.
++ 4 major enhancements:
+    + Now requires RubyGems 0.9.1 or newer.
+    + Autotest and unit_diff are both unbuffered. Results are more live.
+    + Refactored and redesigned how files map to test from Sean Carley. See fixtures plugin as an example.
+    + Generalize how autotest handler is instantiated and invoked, allowing for many more autotest types, including combos.
++ 16 minor enhancements:
+    + Added "stolen" rspec_autotest from caldersphere.net
+    + Added :all_good hook if initial run was all_good as well.
+    + Added assert_in_epsilon to ZentestAssertions.
+    + Added autotest plugin to update ichat/adium IM status with code stats.
+    + Added autotest plugin to update the GNU screen statusbar from Yuichi Tateno.
+    + Added autotest syntax error handling from Ryan Platte.
+    + Added autotest/migrate.rb.
+    + Added camping support from Geoffrey Grossenbach.
+    + Added libnotify support from Kazuo Saito.
+    + Added lots of rdoc patches from Hugh Sasse.
+    + Added unit_diff command variable to autotest for customizing flags and such.
+    + Added zentest_mapping.rb and test.
+    + Allow session to work in Test::Rails view tests.
+    + Improved autotest/growl.rb output from imajes.
+    + Improved autotest/timestamp output from Josh Susser.
+    + Test::Rails works with Rails 1.2.
++ 2 bug fixes:
+    + Accelerated Test::Rails unit tests via sensible defaults.
+    + Better assertion messages for ZentestAssertions.
 
 *** 3.4.3 / 2006-12-19
 
 + 2 minor enhancements:
-        + Add assert_title and assert_h (for header).
+    + Add assert_title and assert_h (for header).
 + 2 bug fixes:
-        + Rereleased against latest version of hoe to fix load path problems.
-        + Fix case ViewTestCase for case-sensitive file systems.
+    + Rereleased against latest version of hoe to fix load path problems.
+    + Fix case ViewTestCase for case-sensitive file systems.
 
 *** 3.4.2 / 2006-11-09
 

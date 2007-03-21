@@ -72,6 +72,7 @@ class Autotest
                 :results,
                 :tainted,
                 :test_mappings,
+                :unit_diff,
                 :wants_to_quit)
 
   def initialize
@@ -81,6 +82,7 @@ class Autotest
     @libs = %w[. lib test].join(File::PATH_SEPARATOR)
     @output = $stderr
     @sleep = 1
+    @unit_diff = "unit_diff -u"
 
     @test_mappings = {
       /^lib\/.*\.rb$/ => proc { |filename, _|
@@ -132,10 +134,24 @@ class Autotest
 
     puts cmd
 
+    old_sync = $stdout.sync
+    $stdout.sync = true
     @results = []
-    IO.foreach("| #{cmd}") do |line|
-      puts line
-      @results << line
+    line = []
+    begin
+      open("| #{cmd}", "r") do |f|
+        until f.eof? do
+          c = f.getc
+          putc c
+          line << c
+          if c == ?\n then
+            @results << line.pack("c*")
+            line.clear
+          end
+        end
+      end
+    ensure
+      $stdout.sync = old_sync
     end
     hook :ran_command
     @results = @results.join
@@ -232,7 +248,7 @@ class Autotest
 
     @files_to_test = consolidate_failures failed if completed
 
-    hook completed && @files_to_test.empty? ? :green : :red
+    hook completed && @files_to_test.empty? ? :green : :red unless $TESTING
 
     @tainted = true unless @files_to_test.empty?
   end
@@ -251,10 +267,6 @@ class Autotest
     end
 
     return cmds.join('; ')
-  end
-
-  def unit_diff
-    "unit_diff -u"
   end
 
   def rerun_all_tests
