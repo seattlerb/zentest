@@ -1,41 +1,5 @@
 require 'tempfile'
 
-class Tempfile
-  # blatently stolen. Design was poor in Tempfile.
-  def self.make_tempname(basename, n=10)
-    sprintf('%s%d.%d', basename, $$, n)
-  end
-
-  def self.make_temppath(basename)
-    tempname = ""
-    n = 1
-    begin
-      tmpname = File.join('/tmp', make_tempname(basename, n))
-      n += 1
-    end while File.exist?(tmpname) and n < 100
-    tmpname
-  end
-end
-
-def temp_file(data)
-  temp =
-    if $k then
-      File.new(Tempfile.make_temppath("diff"), "w")
-    else
-      Tempfile.new("diff")
-    end
-  count = 0
-  data = data.map { |l| '%3d) %s' % [count+=1, l] } if $l
-  data = data.join('')
-  # unescape newlines, strip <> from entire string
-  data = data.gsub(/\\n/, "\n").gsub(/0x[a-f0-9]+/m, '0xXXXXXX') + "\n"
-  temp.print data
-  temp.puts unless data =~ /\n\Z/m
-  temp.flush
-  temp.rewind
-  temp
-end
-
 ##
 # UnitDiff makes reading Test::Unit output easy and fun.  Instead of a
 # confusing jumble of text with nearly unnoticable changes like this:
@@ -73,8 +37,16 @@ end
 
 class UnitDiff
 
-  WINDOZE  = /win32/ =~ RUBY_PLATFORM unless defined? WINDOZE
-  DIFF = (WINDOZE ? 'diff.exe' : 'diff') unless defined? DIFF
+  WINDOZE = /win32/ =~ RUBY_PLATFORM unless defined? WINDOZE
+  DIFF = if WINDOZE
+           'diff.exe'
+         else
+           if system("gdiff", __FILE__, __FILE__)
+             'gdiff' # solaris and kin suck
+           else
+             'diff'
+           end
+         end unless defined? DIFF
 
   ##
   # Handy wrapper for UnitDiff#unit_diff.
@@ -200,17 +172,30 @@ class UnitDiff
       output.push prefix.compact.map {|line| line.strip}.join("\n")
 
       if butwas then
-        a = temp_file(expect)
-        b = temp_file(butwas)
+        Tempfile.open("expect") do |a|
+          a.write(massage(expect))
+          a.rewind
+          Tempfile.open("butwas") do |b|
+            b.write(massage(butwas))
+            b.rewind
 
-        diff_flags = $u ? "-u" : $c ? "-c" : ""
-        diff_flags += " -b" if $b
+            diff_flags = $u ? "-u" : $c ? "-c" : ""
+            diff_flags += " -b" if $b
 
-        result = `#{DIFF} #{diff_flags} #{a.path} #{b.path}`
-        if result.empty? then
-          output.push "[no difference--suspect ==]"
-        else
-          output.push result.map { |line| line.chomp }
+            result = `#{DIFF} #{diff_flags} #{a.path} #{b.path}`
+            if result.empty? then
+              output.push "[no difference--suspect ==]"
+            else
+              output.push result.map { |line| line.chomp }
+            end
+
+            if $k then
+              warn "moving #{a.path} to #{a.path}.keep"
+              File.rename a.path, a.path + ".keep"
+              warn "moving #{b.path} to #{b.path}.keep"
+              File.rename b.path, b.path + ".keep"
+            end
+          end
         end
 
         output.push ''
@@ -225,5 +210,14 @@ class UnitDiff
     end
 
     return output.flatten.join("\n")
+  end
+
+  def massage(data)
+    data = data.map { |l| '%3d) %s' % [count+=1, l] } if $l
+    # unescape newlines, strip <> from entire string
+    data = data.join
+    data = data.gsub(/\\n/, "\n").gsub(/0x[a-f0-9]+/m, '0xXXXXXX') + "\n"
+    data += "\n" unless data[-1] == ?\n
+    data
   end
 end
