@@ -228,12 +228,12 @@ class Autotest
 
   def handle_results(results)
     failed = results.scan(/^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/)
-    @files_to_test = consolidate_failures failed
-    unless @files_to_test.empty? then
-      hook :red
-    else
-      hook :green
-    end unless $TESTING
+    completed = results =~ /\d+ tests, \d+ assertions, \d+ failures, \d+ errors/
+
+    @files_to_test = consolidate_failures failed if completed
+
+    hook completed && @files_to_test.empty? ? :green : :red
+
     @tainted = true unless @files_to_test.empty?
   end
 

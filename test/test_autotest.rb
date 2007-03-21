@@ -172,19 +172,39 @@ test_fail2(#{@test_class}) [#{@test}:60]:
 test_error1(#{@test_class}):
   3) Error:
 test_error2(#{@test_class}):
+
+12 tests, 18 assertions, 2 failures, 2 errors
 "
 
     @a.handle_results(s2)
     expected = { @test => %w( test_fail1 test_fail2 test_error1 test_error2 ) }
     assert_equal expected, @a.files_to_test
+    assert @a.tainted
 
     @a.handle_results(s1)
     assert_equal empty, @a.files_to_test
+
+    s3 = '
+/opt/bin/ruby -I.:lib:test -rtest/unit -e "%w[#{@test}].each { |f| require f }" | unit_diff -u
+-e:1:in `require\': ./#{@test}:23: parse error, unexpected tIDENTIFIER, expecting \'}\' (SyntaxError)
+    settings_fields.each {|e| assert_equal e, version.send e.intern}
+                                                            ^   from -e:1
+        from -e:1:in `each\'
+        from -e:1
+'
+    @a.files_to_test[@test] = Time.at(42)
+    @a.files[@test] = []
+    expected = { @test => Time.at(42) }
+    assert_equal expected, @a.files_to_test
+    @a.handle_results(s3)
+    assert_equal expected, @a.files_to_test
+    assert @a.tainted
+    @a.tainted = false
+
+    @a.handle_results(s1)
+    assert_equal empty, @a.files_to_test
+    assert ! @a.tainted
   end
-
-  # TODO BUG /usr/local/bin/ruby -I.:lib:test test/test_rails_autotest.rb -n "/^(test_hooks)$/" | unit_diff -u; /usr/local/bin/ruby -I.:lib:test test/test_autotest.rb -n "/^(test_hooks|test_hooks)$/" | unit_diff -u
-
-  # TODO BUG /usr/local/bin/ruby -I.:lib:test test/test_rails_autotest.rb -n "/^(test_hook|test_hooks)$/" | unit_diff -u; /usr/local/bin/ruby -I.:lib:test test/test_autotest.rb -n "/^(test_hooks|test_hooks)$/" | unit_diff -u
 
   def test_hook_overlap
     Autotest.clear_hooks
