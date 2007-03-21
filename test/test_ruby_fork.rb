@@ -50,18 +50,6 @@ class TestRubyFork < Test::Unit::TestCase
     assert_equal expected, settings
   end
 
-  def test_parse_server_args_execute
-    expected = util_make_settings [], ['foo']
-
-    settings = RubyFork.parse_server_args ['-e', 'foo']
-    assert_equal expected, settings
-
-    expected = util_make_settings [], ['foo', 'bar']
-
-    settings = RubyFork.parse_server_args ['-e', 'foo', '-e', 'bar']
-    assert_equal expected, settings
-  end
-
   def test_parse_server_args_include
     expected = util_make_settings nil, nil, ['lib'], nil, false
 
@@ -102,6 +90,18 @@ class TestRubyFork < Test::Unit::TestCase
   end
 
   def test_parse_server_args_execute
+    expected = util_make_settings [], ['foo'], nil, nil, false
+
+    settings = RubyFork.parse_server_args ['-e', 'foo']
+    assert_equal expected, settings
+
+    expected = util_make_settings [], ['foo', 'bar'], nil, nil, false
+
+    settings = RubyFork.parse_server_args ['-e', 'foo', '-e', 'bar']
+    assert_equal expected, settings
+  end
+
+  def test_parse_server_args_execute_duplicate_test? # FIX
     expected = util_make_settings ['zentest'], nil, nil, nil, false
 
     settings = RubyFork.parse_server_args ['-r', 'zentest']

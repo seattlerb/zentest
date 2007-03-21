@@ -28,9 +28,9 @@ class << Test::Unit::TestCase
 end
 
 # ActionMailer
-
 module ActionMailer; end
 class ActionMailer::Base
-  def self.deliveries=(arg); end
+  def self.deliveries=(arg); end unless defined? @@defined
+  @@defined = true
 end
 
