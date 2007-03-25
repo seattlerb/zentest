@@ -18,12 +18,12 @@ Dir.chdir root_dir do
   %w(build install versions).each do |dir|
     unless test ?d, dir then
       puts "creating #{dir}"
-      Dir.mkdir dir 
+      Dir.mkdir dir
       if dir == "versions" then
         file = "ruby-#{RUBY_VERSION}.tar.gz"
         puts "  downloading #{file} via HTTP... this might take a while."
         puts "  Put other ruby tarballs in versions to use them."
-        
+
         Dir.chdir dir do
           require 'open-uri'
           open("http://ftp.ruby-lang.org/pub/ruby/#{file}") do |f|
@@ -77,7 +77,10 @@ Dir.chdir root_dir do
   end
 end
 
-results = versions.map do |version|
+versions = ENV['VERSIONS'].split(/:/) if ENV.has_key? 'VERSIONS'
+
+results = {}
+versions.each do |version|
   ruby = "#{root_dir}/install/#{version}/bin/ruby"
   puts
   puts "VERSION = #{version}"
@@ -85,12 +88,15 @@ results = versions.map do |version|
   system ruby, *ARGV
   puts
   puts "RESULT = #{$?}"
-  $?
+  results[version] = $?
 end
 
-result = results.select { |n| n != 0 }.size
+passed, failed = results.keys.partition { |v| results[v] == 0 }
 
 puts
-puts "TOTAL RESULT = #{result} failures"
+puts "TOTAL RESULT = #{failed.size} failures out of #{results.size}"
+puts
+puts "Passed: #{passed.join(", ")}"
+puts "Failed: #{failed.join(", ")}"
 
-exit result
+exit failed.size
