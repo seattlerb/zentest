@@ -1,5 +1,6 @@
 #!/usr/local/bin/ruby -ws
 
+$v    ||= false
 $h    ||= false
 $help ||= false
 

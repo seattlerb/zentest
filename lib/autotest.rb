@@ -227,6 +227,8 @@ class Autotest
       @files[filename] < mtime
     }
 
+    p updated if $v unless updated.empty? or @last_mtime.to_i == 0
+
     # TODO: keep an mtime at app level and drop the files hash
     updated.each do |filename, mtime|
       @files[filename] = mtime
@@ -239,7 +241,7 @@ class Autotest
     end
 
     previous = @last_mtime
-    @last_mtime = @files.values.sort.last
+    @last_mtime = @files.values.max
     @last_mtime > previous
   end
 

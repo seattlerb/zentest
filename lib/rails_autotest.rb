@@ -4,7 +4,7 @@ class RailsAutotest < Autotest
 
   def initialize # :nodoc:
     super
-    @exceptions = /^\.\/(?:db|doc|log|public|script|vendor\/rails)/
+    @exceptions = /^\.\/(?:db|doc|log|public|script|tmp|vendor\/rails)/
 
     @test_mappings = {
       %r%^test/fixtures/(.*)s.yml% => proc { |_, m|
