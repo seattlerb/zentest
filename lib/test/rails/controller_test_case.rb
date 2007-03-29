@@ -115,10 +115,13 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
   NOTHING = Object.new # :nodoc:
 
   DEFAULT_ASSIGNS = %w[
-    action_name before_filter_chain_aborted cookies flash headers
-    ignore_missing_templates loggedin_user logger params request
-    request_origin response session template template_class template_root url
-    user variables_added
+    _cookies _flash _headers _params _request _response _session
+
+    cookies flash headers params request response session
+
+    action_name before_filter_chain_aborted ignore_missing_templates
+    loggedin_user logger request_origin template template_class template_root
+    url user variables_added
   ]
 
   def setup
