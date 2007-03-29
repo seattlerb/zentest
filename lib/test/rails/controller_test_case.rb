@@ -119,9 +119,21 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
 
     cookies flash headers params request response session
 
-    action_name before_filter_chain_aborted ignore_missing_templates
-    loggedin_user logger request_origin template template_class template_root
-    url user variables_added
+    action_name
+    before_filter_chain_aborted
+    db_rt_after_render
+    db_rt_before_render
+    ignore_missing_templates
+    loggedin_user
+    logger
+    rendering_runtime
+    request_origin
+    template
+    template_class
+    template_root
+    url
+    user
+    variables_added
   ]
 
   def setup
