@@ -344,7 +344,7 @@ class Test::Rails::ControllerTestCase < Test::Rails::FunctionalTestCase
     message = []
     message << "You are missing these assert_assigned assertions:"
     assigns_missing.sort.each do |ivar|
-      message << "    assert_assigned #{ivar.intern.inspect} #, some_value"
+      message << "    assert_assigned #{ivar.intern.inspect} #, :some_value"
     end
     message << nil # stupid '.'
 
