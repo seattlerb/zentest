@@ -1,6 +1,7 @@
 # -*- ruby -*-
 
 # require 'autotest/autoupdate'
+# require 'autotest/emacs'
 # require 'autotest/fixtures'
 # require 'autotest/growl'
 # require 'autotest/html_report'

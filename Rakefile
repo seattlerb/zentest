@@ -7,8 +7,6 @@ require 'hoe'
 require './lib/zentest.rb'
 
 Hoe.new("ZenTest", ZenTest::VERSION) do |p|
-  paragraphs = File.read("README.txt").split(/\n\n+/)
-
   p.author = ['Ryan Davis', 'Eric Hodel']
 
   changes = p.paragraphs_of("History.txt", 0..1).join("\n\n")
