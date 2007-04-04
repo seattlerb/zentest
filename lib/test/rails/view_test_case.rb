@@ -472,9 +472,9 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   def action_name(test)
     orig_name = test = test.sub(/.*in `test_(.*)'/, '\1')
     controller = @controller.class.name.sub('Controller', '').underscore
-    
-    extensions = %w(rhtml rxml mab)
-    
+
+    extensions = %w[rhtml rxml rjs mab]
+
     while test =~ /_/ do
       return test if extensions.any? { |ext| File.file? "app/views/#{controller}/#{test}.#{ext}" }
 
