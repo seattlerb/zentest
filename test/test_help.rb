@@ -1,8 +1,8 @@
 # ActionPack
 module ActionController; end
 module ActionController::Flash; end
-class ActionController::Flash::FlashHash; end
-class ActionController::TestSession < Hash; end
+class ActionController::Flash::FlashHash < Hash; end
+class ActionController::TestSession; end
 
 class ActionController::TestRequest
   attr_accessor :session
