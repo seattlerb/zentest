@@ -1,4 +1,4 @@
-# -*- mode -*-
+# -*- ruby -*-
 
 module Autotest::Growl
   def self.growl title, msg, pri=0
