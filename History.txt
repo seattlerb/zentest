@@ -6,18 +6,23 @@
     + Refactored and redesigned how files map to test from Sean Carley. See fixtures plugin as an example.
     + Generalize how autotest handler is instantiated and invoked, allowing for many more autotest types, including combos.
 + 18 minor enhancements:
-    + Added "stolen" rspec_autotest from caldersphere.net
-    + Added :all_good hook if initial run was all_good as well.
-    + Added :run_command hook to trigger the start of a test run.
+    + Added all_good hook if initial run was all_good as well.
     + Added assert_in_epsilon to ZentestAssertions.
     + Added autotest plugin to auto-update source ala tinderbox/cruisecontrol.
     + Added autotest plugin to update ichat/adium IM status with code stats.
     + Added autotest plugin to update the GNU screen statusbar from Yuichi Tateno.
     + Added autotest syntax error handling from Ryan Platte.
+    + Added autotest/emacs emacs integration plugin!!! YAY!
     + Added autotest/migrate.rb.
     + Added camping support from Geoffrey Grossenbach.
+    + Added changed file reporting to autotest via -v flag.
+    + Added informative summary and filtering via ENV['VERSIONS'] to multiruby.
     + Added libnotify support from Kazuo Saito.
     + Added lots of rdoc patches from Hugh Sasse.
+    + Added rjs files to view_test_case.
+    + Added rspec_autotest "stolen" from caldersphere.net
+    + Added run_command hook to trigger the start of a test run.
+    + Added tmp to rails' exceptions list.
     + Added unit_diff command variable to autotest for customizing flags and such.
     + Added zentest_mapping.rb and test.
     + Allow session to work in Test::Rails view tests.

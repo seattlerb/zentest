@@ -1,3 +1,7 @@
+#
+# Get autotest.el from http://www.emacswiki.org/cgi-bin/wiki/RyanDavis
+#
+
 module Autotest::Emacs
   def self.emacs_autotest status
     `emacsclient -e \"(autotest-update '#{status})\"`

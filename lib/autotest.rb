@@ -1,6 +1,7 @@
 require 'find'
 require 'rbconfig'
 
+$v ||= false
 $TESTING = false unless defined? $TESTING
 
 ##

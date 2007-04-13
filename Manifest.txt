@@ -1,3 +1,4 @@
+#History.txt#
 History.txt
 LinuxJournalArticle.txt
 Manifest.txt
@@ -19,6 +20,7 @@ lib/autotest/autoupdate.rb
 lib/autotest/emacs.rb
 lib/autotest/fixtures.rb
 lib/autotest/growl.rb
+lib/autotest/heckle.rb
 lib/autotest/html_report.rb
 lib/autotest/kdenotify.rb
 lib/autotest/menu.rb
@@ -31,6 +33,7 @@ lib/autotest/shame.rb
 lib/autotest/snarl.rb
 lib/autotest/timestamp.rb
 lib/camping_autotest.rb
+lib/functional_test_matrix.rb
 lib/rails_autotest.rb
 lib/rspec_rails_autotest.rb
 lib/ruby_fork.rb

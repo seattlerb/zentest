@@ -4,6 +4,7 @@
 # require 'autotest/emacs'
 # require 'autotest/fixtures'
 # require 'autotest/growl'
+# require 'autotest/heckle'
 # require 'autotest/html_report'
 # require 'autotest/kdenotify'
 # require 'autotest/menu'
@@ -18,4 +19,6 @@
 
 # Autotest::AutoUpdate.sleep_time = 60
 # Autotest::AutoUpdate.update_cmd = 'svn up'
+# Autotest::Heckle.flags << '-t test/**/*.rb'
+# Autotest::Heckle.klasses << 'MyClass'
 # Autotest::Shame.chat_app = :adium
