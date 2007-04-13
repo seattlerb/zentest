@@ -7,6 +7,7 @@ require 'hoe'
 require './lib/zentest.rb'
 
 Hoe.new("ZenTest", ZenTest::VERSION) do |p|
+  p.rubyforge_name = "zentest"
   p.author = ['Ryan Davis', 'Eric Hodel']
 
   changes = p.paragraphs_of("History.txt", 0..1).join("\n\n")
