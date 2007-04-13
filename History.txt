@@ -1,11 +1,11 @@
-*** 3.5.0 / ??
+*** 3.5.0 / 2007-04-12
 
 + 4 major enhancements:
     + Now requires RubyGems 0.9.1 or newer.
     + Autotest and unit_diff are both unbuffered. Results are more live.
     + Refactored and redesigned how files map to test from Sean Carley. See fixtures plugin as an example.
     + Generalize how autotest handler is instantiated and invoked, allowing for many more autotest types, including combos.
-+ 18 minor enhancements:
++ 23 minor enhancements:
     + Added all_good hook if initial run was all_good as well.
     + Added assert_in_epsilon to ZentestAssertions.
     + Added autotest plugin to auto-update source ala tinderbox/cruisecontrol.
