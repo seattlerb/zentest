@@ -28,8 +28,8 @@ $TESTING = false unless defined? $TESTING
 #
 #   Autotest.add_hook hook_name { |autotest| ... }
 #
-# The available hooks are: run, interrupt, quit, run_command,
-#   ran_command, red, green, all_good, and reset.
+# The available hooks are: initialize, run, run_command, ran_command,
+#   red, green, all_good, reset, interrupt, and quit.
 #
 # See example_dot_autotest.rb for more details.
 #
