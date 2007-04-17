@@ -1,3 +1,11 @@
+*** 3.5.1 / 2007-04-17
+
++ 4 bug fixes:
+    + Fixed gem name to be camel-case again. Fixed on rubyforge too.
+	+ Fixed rdoc for hooks.
+	+ Fixed redgreen, results changed to an array.
+    + Patch up Rails fixture defaults, since they're not inheriting properly.
+
 *** 3.5.0 / 2007-04-12
 
 + 4 major enhancements:
