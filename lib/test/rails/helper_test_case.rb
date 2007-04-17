@@ -23,6 +23,9 @@ end
 
 class Test::Rails::HelperTestCase < Test::Rails::FunctionalTestCase
 
+  self.use_transactional_fixtures = true
+  self.use_instantiated_fixtures = false
+
   # Are other helpers needed?
 
   include ActionView::Helpers::ActiveRecordHelper

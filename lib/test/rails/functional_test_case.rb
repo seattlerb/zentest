@@ -6,6 +6,9 @@ $TESTING_RTC = defined? $TESTING_RTC
 
 class Test::Rails::FunctionalTestCase < Test::Rails::TestCase
 
+  self.use_transactional_fixtures = true
+  self.use_instantiated_fixtures = false
+
   ##
   # Sets up instance variables to allow tests depending on a controller work.
   #
