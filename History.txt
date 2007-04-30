@@ -1,8 +1,10 @@
 *** 3.5.2
 
-+ 2 bug fixes:
++ 4 bug fixes:
     + Patch up Rails fixture defaults for Test::Rails::TestCase.
     + Session now properly hooked up to controllers.
+    + ruby 1.8.6 has a bug on 'raise Interrupt' with no args. Fixed on both sides.
+    + Fixed redgreen to work with new getc/putc-based output. (from Finn Smith)
 
 *** 3.5.1 / 2007-04-17
 

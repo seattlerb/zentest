@@ -174,7 +174,7 @@ class Autotest
           @interrupted = true
           sleep 1.5
         end
-        raise Interrupt                 # let the run loop catch it
+        raise Interrupt, nil # let the run loop catch it
       end
     end
   end
