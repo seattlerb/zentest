@@ -38,6 +38,9 @@ class Test::Rails::FunctionalTestCase < Test::Rails::TestCase
     @request = ActionController::TestRequest.new
     @request.session = @session
 
+    # HACK There's probably an official way to do this
+    @controller.instance_variable_set :@_session, @request.session
+
     @response = ActionController::TestResponse.new
 
     setup_extra if respond_to? :setup_extra
