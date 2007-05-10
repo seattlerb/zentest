@@ -34,6 +34,7 @@ task :update do
     f.puts
     f.puts "# Autotest::AutoUpdate.sleep_time = 60"
     f.puts "# Autotest::AutoUpdate.update_cmd = 'svn up'"
+    f.puts "# Autotest::Emacs.client_cmd = 'emacsclient -e'"
     f.puts "# Autotest::Heckle.flags << '-t test/**/*.rb'"
     f.puts "# Autotest::Heckle.klasses << 'MyClass'"
     f.puts "# Autotest::Shame.chat_app = :adium"

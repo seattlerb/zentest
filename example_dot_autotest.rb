@@ -19,6 +19,7 @@
 
 # Autotest::AutoUpdate.sleep_time = 60
 # Autotest::AutoUpdate.update_cmd = 'svn up'
+# Autotest::Emacs.client_cmd = 'emacsclient -e'
 # Autotest::Heckle.flags << '-t test/**/*.rb'
 # Autotest::Heckle.klasses << 'MyClass'
 # Autotest::Shame.chat_app = :adium

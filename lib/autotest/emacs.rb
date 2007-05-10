@@ -3,8 +3,14 @@
 #
 
 module Autotest::Emacs
+  @@client_cmd = 'emacsclient -e'
+
+  def self.command = o
+    @@client_cmd = o
+  end
+
   def self.emacs_autotest status
-    `emacsclient -e \"(autotest-update '#{status})\"`
+    `#{@@client_cmd} \"(autotest-update '#{status})\"`
   end
 
   Autotest.add_hook :run_command do  |at|
