@@ -13,9 +13,9 @@
 ########################################################################
 # Example Test Matrix Specification:
 #
-# matrix :example, :edge1, edge2, :edge3, ...
-# action :action1,   :new,  :err,   :err, ...
-# action :action2,   :del,  :err,    :na, ...
+# matrix :example, :edge1, :edge2, :edge3, ...
+# action :action1, :OK,    :e_NF,  :mod,   ...
+# action :action2, :OK,    :e_RO,  :na,    ...
 # action ...
 #
 ########################################################################
@@ -39,6 +39,11 @@
 # attached to them.
 #
 # Use :na to specify an inapplicable edge case for that action.
+#
+# Use :OK to specify the standard positive state. It is equivalent to
+# a result with the same name as the action. (eg
+# matrix_test_index). This cleans up the matrix a lot and allows for
+# narrower and more readable columns.
 #
 # Edge cases specific to an action that fall outside the matrix are
 # regular tests.
@@ -72,6 +77,7 @@ module FunctionalTestMatrix
     matrix = @@matrix # bind to local scope for define_method closure
 
     testcases.each do |setup, expected|
+      expected = action if expected == :OK
       define_method "test_#{action}_#{setup}" do
         @action = action
         send "matrix_init_#{matrix}", *setup.to_s.split(/_/).map {|c| c.intern }
