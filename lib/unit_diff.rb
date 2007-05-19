@@ -105,6 +105,8 @@ class UnitDiff
     return data, footer
   end
 
+  # Parses a single diff recording the header and what
+  # was expected, and what was actually obtained.
   def parse_diff(result)
     header = []
     expect = []

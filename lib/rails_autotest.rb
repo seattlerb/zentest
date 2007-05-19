@@ -54,10 +54,13 @@ class RailsAutotest < Autotest
     }
   end
 
+  # Given the string filename as the path, determine
+  # the corresponding tests for it, in an array.
   def tests_for_file(filename)
     super.select { |f| @files.has_key? f }
   end
 
+  # Convert the pathname s to the name of class.
   def path_to_classname(s)
     sep = File::SEPARATOR
     f = s.sub(/^test#{sep}((unit|functional|integration|views|controllers|helpers)#{sep})?/, '').sub(/\.rb$/, '').split(sep)

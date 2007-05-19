@@ -97,6 +97,8 @@ class Autotest
     hook :initialize
   end
 
+  # Repeatedly run failed tests, then all tests, then
+  # wait for changes and carry on until killed.
   def run
     hook :run
     reset
@@ -122,6 +124,7 @@ class Autotest
     hook :quit
   end
 
+  # Keep running the tests after a change, until all pass.
   def get_to_green
     until all_good do
       run_tests
@@ -129,6 +132,8 @@ class Autotest
     end
   end
 
+  # Look for files to test then run the tests and
+  # handle the results.
   def run_tests
     find_files_to_test # failed + changed/affected
     cmd = make_test_cmd @files_to_test
@@ -179,10 +184,16 @@ class Autotest
     end
   end
 
+  # If there are no files left to test
+  # (because they've all passed),
+  # then all is good.
   def all_good
     @files_to_test.empty?
   end
 
+  # Convert a path in a string, s, into a
+  # class name, changing underscores to CamelCase,
+  # etc
   def path_to_classname(s)
     sep = File::SEPARATOR
     f = s.sub(/^test#{sep}/, '').sub(/\.rb$/, '').split(sep)
@@ -190,6 +201,7 @@ class Autotest
     f = f.map { |path| path =~ /^Test/ ? path : "Test#{path}"  }
     f.join('::')
   end
+
 
   def consolidate_failures(failed)
     filters = Hash.new { |h,k| h[k] = [] }
@@ -207,6 +219,9 @@ class Autotest
     return filters
   end
 
+  # Find the files to process, ignoring temporary files,
+  # source configuration management files, etc., and return
+  # a Hash mapping filename to modification time.
   def find_files
     result = {}
     Find.find '.' do |f|
@@ -223,6 +238,11 @@ class Autotest
     return result
   end
 
+  # Find the files which have been modified, update
+  # the recorded timestamps, and use this to update
+  # the files to test. Returns true if any file is
+  # newer than the previously recorded most recent
+  # file.
   def find_files_to_test(files=find_files)
     updated = files.select { |filename, mtime|
       @files[filename] < mtime
@@ -246,6 +266,8 @@ class Autotest
     @last_mtime > previous
   end
 
+  # Check results for failures, set the "bar" to red or
+  # green, and if there are failures record this.
   def handle_results(results)
     failed = results.scan(/^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/)
     completed = results =~ /\d+ tests, \d+ assertions, \d+ failures, \d+ errors/
@@ -257,6 +279,7 @@ class Autotest
     @tainted = true unless @files_to_test.empty?
   end
 
+  # Generate the commands to test the supplied files
   def make_test_cmd files_to_test
     cmds = []
     full, partial = files_to_test.partition { |k,v| v.empty? }
@@ -273,12 +296,15 @@ class Autotest
     return cmds.join('; ')
   end
 
+  # Rerun the tests from cold (reset state)
   def rerun_all_tests
     reset
     run_tests
     hook :all_good if all_good
   end
 
+  # Clear all state information about test failures
+  # and whether interrupts will kill autotest.
   def reset
     @interrupted = @wants_to_quit = false
     @files.clear
@@ -289,6 +315,7 @@ class Autotest
     hook :reset
   end
 
+  # determine and return the path of the ruby executable.
   def ruby
     ruby = File.join(Config::CONFIG['bindir'],
                      Config::CONFIG['ruby_install_name'])
@@ -300,6 +327,9 @@ class Autotest
     return ruby
   end
 
+
+  # Return the name of the file with the tests for
+  # filename.
   def tests_for_file(filename)
     result = @test_mappings.find { |file_re, ignored| filename =~ file_re }
     result = result.nil? ? [] : Array(result.last.call(filename, $~))
@@ -309,6 +339,8 @@ class Autotest
     result.sort.uniq
   end
 
+  # Sleep then look for files to test, until there
+  # are some.
   def wait_for_changes
     hook :waiting
     begin
@@ -331,6 +363,8 @@ class Autotest
     end
   end
 
+  # Add the supplied block to the available hooks, with
+  # the given name.
   def self.add_hook(name, &block)
     HOOKS[name] << block
   end
