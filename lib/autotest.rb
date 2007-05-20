@@ -59,6 +59,33 @@ class Autotest
 
   HOOKS = Hash.new { |h,k| h[k] = [] }
 
+  @@discoveries = []
+  def self.add_discovery &proc
+    @@discoveries << proc
+  end
+
+  def self.autodiscover
+    style = []
+
+    paths = $:
+
+    begin
+      require 'rubygems'
+      require 'rubygems/loadpath_manager'
+      Gem::LoadPathManager.build_paths
+      paths.push(*Gem::LoadPathManager.paths)
+    rescue LoadError
+      # do nothing
+    end
+
+    hits = paths.map { |d| Dir[File.join(d, 'autotest', 'discover.rb')] }.flatten
+    hits.each do |hit|
+      load hit
+    end
+
+    @@discoveries.map { |proc| proc.call }.flatten.compact.sort
+  end
+
   def self.run
     new.run
   end

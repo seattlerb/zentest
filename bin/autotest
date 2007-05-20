@@ -20,16 +20,8 @@ if $h or $help then
   exit 1
 end
 
-$rspec   ||= false
-$rails   ||= false
-$camping ||= false
-
-style = []
-style << "rspec" if $rspec or File.directory?('spec')
-style << "rails" if $rails or File.exist? 'config/environment.rb'
-style << "camping" if $camping or File.exist? 'test/camping_test_case.rb'
-style << "autotest"
-
+require 'autotest'
+style = Autotest.autodiscover << "autotest"
 mod = style.join("_")
 puts "loading #{mod}"
 require mod
