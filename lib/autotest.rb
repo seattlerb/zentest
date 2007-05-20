@@ -67,7 +67,7 @@ class Autotest
   def self.autodiscover
     style = []
 
-    paths = $:
+    paths = $:.dup + Dir["vendor/plugin/*/lib"]
 
     begin
       require 'rubygems'

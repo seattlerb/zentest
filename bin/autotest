@@ -21,8 +21,12 @@ if $h or $help then
 end
 
 require 'autotest'
-style = Autotest.autodiscover << "autotest"
-mod = style.join("_")
-puts "loading #{mod}"
-require mod
-Object.const_get(style.map {|s| s.capitalize}.join).run
+style = Autotest.autodiscover
+target = Autotest
+unless style.empty? then
+  mod = "autotest/#{style.join("_")}"
+  puts "loading #{mod}"
+  require mod
+  target = Autotest.const_get(style.map {|s| s.capitalize}.join)
+end
+target.run

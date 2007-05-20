@@ -7,7 +7,7 @@ require 'autotest'
 #
 # Contributed by Geoffrey Grosenbach http://nubyonrails.com
 
-class CampingAutotest < Autotest
+class Autotest::Camping < Autotest
 
   def initialize # :nodoc:
     super

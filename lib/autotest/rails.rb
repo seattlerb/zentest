@@ -1,6 +1,6 @@
 require 'autotest'
 
-class RailsAutotest < Autotest
+class Autotest::Rails < Autotest
 
   def initialize # :nodoc:
     super
