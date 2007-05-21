@@ -83,7 +83,7 @@ class Autotest
       load hit
     end
 
-    @@discoveries.map { |proc| proc.call }.flatten.compact.sort
+    @@discoveries.map { |proc| proc.call }.flatten.compact.sort.uniq
   end
 
   def self.run

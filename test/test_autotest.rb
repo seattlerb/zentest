@@ -36,7 +36,9 @@ class TestAutotest < Test::Unit::TestCase
     @outer_test = 'test/test_outer.rb'
     @inner_test_class = "TestOuter::TestInner"
 
-    @a = Object.const_get(self.class.name[4..-1]).new
+    klassname = self.class.name.sub(/^Test/, '')
+    klassname.sub!(/^(\w+)(Autotest)$/, '\2::\1') unless klassname == "Autotest"
+    @a = klassname.split(/::/).inject(Object) { |k,n| k.const_get(n) }.new
     @a.output = StringIO.new
     @a.files.clear
     @a.files[@impl] = Time.at(1)

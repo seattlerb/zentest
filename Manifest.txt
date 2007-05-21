@@ -16,6 +16,8 @@ example2.rb
 example_dot_autotest.rb
 lib/autotest.rb
 lib/autotest/autoupdate.rb
+lib/autotest/camping.rb
+lib/autotest/discover.rb
 lib/autotest/emacs.rb
 lib/autotest/fixtures.rb
 lib/autotest/growl.rb
@@ -26,15 +28,13 @@ lib/autotest/menu.rb
 lib/autotest/migrate.rb
 lib/autotest/notify.rb
 lib/autotest/pretty.rb
+lib/autotest/rails.rb
 lib/autotest/redgreen.rb
 lib/autotest/screen.rb
 lib/autotest/shame.rb
 lib/autotest/snarl.rb
 lib/autotest/timestamp.rb
-lib/camping_autotest.rb
 lib/functional_test_matrix.rb
-lib/rails_autotest.rb
-lib/rspec_rails_autotest.rb
 lib/ruby_fork.rb
 lib/test/rails.rb
 lib/test/rails/controller_test_case.rb

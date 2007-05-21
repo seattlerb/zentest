@@ -1,6 +1,6 @@
 require 'test/unit' if $0 == __FILE__
 require 'test/test_autotest'
-require 'rails_autotest'
+require 'autotest/rails'
 
 class TestRailsAutotest < TestAutotest
 
