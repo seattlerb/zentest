@@ -20,13 +20,29 @@ if $h or $help then
   exit 1
 end
 
+class Dir
+  class << self
+    alias :old_index :[]
+    def [](*args)
+      $-w, old_warn = false, $-w
+      old_index(*args)
+    ensure
+      $-w = old_warn
+    end
+  end
+end
+
 require 'autotest'
 style = Autotest.autodiscover
 target = Autotest
 unless style.empty? then
   mod = "autotest/#{style.join("_")}"
   puts "loading #{mod}"
-  require mod
+  begin
+    require mod
+  rescue LoadError
+    abort "Autotest style #{mod} doesn't seem to exist. Aborting."
+  end
   target = Autotest.const_get(style.map {|s| s.capitalize}.join)
 end
 target.run

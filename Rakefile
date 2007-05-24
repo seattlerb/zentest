@@ -18,7 +18,7 @@ Hoe.new("ZenTest", ZenTest::VERSION) do |p|
 end
 
 task :autotest do
-  ruby "-Ilib ./bin/autotest"
+  ruby "-Ilib -w ./bin/autotest"
 end
 
 task :update do

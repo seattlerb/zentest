@@ -58,6 +58,10 @@ $TESTING = false unless defined? $TESTING
 class Autotest
 
   HOOKS = Hash.new { |h,k| h[k] = [] }
+  unless defined? WINDOZE then
+    WINDOZE = /win32/ =~ RUBY_PLATFORM
+    SEP = WINDOZE ? '&' : ';'
+  end
 
   @@discoveries = []
 
@@ -97,7 +101,7 @@ class Autotest
   def self.autodiscover
     style = []
 
-    $:.push(*Dir["vendor/plugin/*/lib"])
+    $:.push(*Dir["vendor/plugins/*/lib"])
     paths = $:.dup
 
     begin
@@ -349,7 +353,7 @@ class Autotest
       cmds << "#{ruby} -I#{@libs} #{klass} -n \"/^(#{Regexp.union(*methods).source})$/\" | #{unit_diff}"
     end
 
-    return cmds.join('; ')
+    return cmds.join("#{SEP} ")
   end
 
   # Rerun the tests from cold (reset state)
