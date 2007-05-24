@@ -5,7 +5,7 @@
 module Autotest::Emacs
   @@client_cmd = 'emacsclient -e'
 
-  def self.command = o
+  def self.command= o
     @@client_cmd = o
   end
 

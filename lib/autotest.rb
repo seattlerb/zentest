@@ -60,27 +60,56 @@ class Autotest
   HOOKS = Hash.new { |h,k| h[k] = [] }
 
   @@discoveries = []
+
+  ##
+  # Add a proc to the collection of discovery procs. See
+  # +autodiscover+.
+
   def self.add_discovery &proc
     @@discoveries << proc
   end
 
+  ##
+  # Automatically find all potential autotest runner styles by
+  # searching your loadpath, vendor/plugins, and rubygems for
+  # "autotest/discover.rb". If found, that file is loaded and it
+  # should register discovery procs with autotest using
+  # +add_discovery+. That proc should return one or more strings
+  # describing the user's current environment. Those styles are then
+  # combined to dynamically invoke an autotest plugin to suite your
+  # environment. That plugin should define a subclass of Autotest with
+  # a corresponding name.
+  #
+  # === Process:
+  #
+  # + all autotest/discover.rb files loaded.
+  # + those procs determine your styles to be ["rails", "rspec"].
+  # + require 'autotest/rails_rspec'
+  # + Autotest::RailsRspec.run is invoked
+  #
+  # === Example autotest/discover.rb:
+  #
+  #   Autotest.add_discovery do
+  #     "rails" if File.exist? 'config/environment.rb'
+  #   end
+  #
+
   def self.autodiscover
     style = []
 
-    paths = $:.dup + Dir["vendor/plugin/*/lib"]
+    $:.push(*Dir["vendor/plugin/*/lib"])
+    paths = $:.dup
 
     begin
       require 'rubygems'
-      require 'rubygems/loadpath_manager'
-      Gem::LoadPathManager.build_paths
-      paths.push(*Gem::LoadPathManager.paths)
-    rescue LoadError
+      paths.push(*Gem.latest_load_paths)
+    rescue LoadError => e
       # do nothing
     end
 
-    hits = paths.map { |d| Dir[File.join(d, 'autotest', 'discover.rb')] }.flatten
-    hits.each do |hit|
-      load hit
+    paths.each do |d|
+      f = File.join(d, 'autotest', 'discover.rb')
+      load f if File.exist? f
     end
 
     @@discoveries.map { |proc| proc.call }.flatten.compact.sort.uniq

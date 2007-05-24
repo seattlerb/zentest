@@ -57,7 +57,8 @@
 # + There is one "setup" method per action: matrix_setup_#{action}(setup, expect)
 # + There is one "test" method per result: matrix_test_#{result}(setup)
 #
-# Thus, for the example above, the top left-most test will end up calling:
+# Thus, for the matrix "example" above, the top left-most test will
+# end up calling:
 #
 #     matrix_init_example(:edge1)
 #     matrix_setup_action1(:edge1, :new)
@@ -77,12 +78,12 @@ module FunctionalTestMatrix
     matrix = @@matrix # bind to local scope for define_method closure
 
     testcases.each do |setup, expected|
-      expected = action if expected == :OK
-      define_method "test_#{action}_#{setup}" do
+      expected_action = expected == :OK ? action : expected
+      define_method "test_#{matrix}_#{action}_#{setup}" do
         @action = action
         send "matrix_init_#{matrix}", *setup.to_s.split(/_/).map {|c| c.intern }
         send "matrix_setup_#{action}", setup, expected
-        send "matrix_test_#{expected}", setup
+        send "matrix_test_#{expected_action}", setup
       end
     end
   end
