@@ -86,10 +86,10 @@ class Autotest
   #
   # === Process:
   #
-  # + all autotest/discover.rb files loaded.
-  # + those procs determine your styles to be ["rails", "rspec"].
-  # + require 'autotest/rails_rspec'
-  # + Autotest::RailsRspec.run is invoked
+  # 1. All autotest/discover.rb files loaded.
+  # 2. Those procs determine your styles (eg ["rails", "rspec"]).
+  # 3. Require file by sorting styles and joining (eg 'autotest/rails_rspec').
+  # 4. Invoke run method on appropriate class (eg Autotest::RailsRspec.run).
   #
   # === Example autotest/discover.rb:
   #

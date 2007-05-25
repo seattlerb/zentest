@@ -1,7 +1,8 @@
 = ZenTest
 
 * http://www.zenspider.com/ZSS/Products/ZenTest/
-* support@zenspider.com
+* http://rubyforge.org/projects/zentest/
+* mailto:ryand-ruby@zenspider.com
 
 == DESCRIPTION
 
