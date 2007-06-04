@@ -145,16 +145,16 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   # By default, a view tests sets the controller and action of a test to the
   # controller name and action name for the test.  This may be overriden.
   #
-  # A test with URLs matching a route like:
+  # A test involving routes like:
   #
   #   map.workspace '/users/:owner/workspace/:action',
   #                 :controller => 'workspace', :action => 'workspace'
   #
-  # Can be invoked by setting @request.path_parameters like this:
+  # Can be invoked by setting @path_parameters like this:
   #
   #   def test__app_entry
-  #     @request.path_parameters[:owner] = 'bob'
-  #     @request.path_parameters[:action] = 'apps'
+  #     @path_parameters[:owner] = 'bob'
+  #     @path_parameters[:action] = 'apps'
   #   
   #     render :partial => 'apps/app_entry'
   #   
