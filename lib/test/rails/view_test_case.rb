@@ -95,6 +95,8 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   def setup
     return if self.class == Test::Rails::ViewTestCase
 
+    @path_parameters ||= {}
+
     klass_name = self.class.name.sub(/View/, 'Controller')
     @controller_class_name ||= klass_name.sub 'Test', ''
 
@@ -197,8 +199,14 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
     @action_name = action_name caller[0] if options.empty?
     assigns[:action_name] = @action_name
 
-    @request.path_parameters[:controller] ||= @controller.controller_name
-    @request.path_parameters[:action] ||= @action_name
+    default_path_parameters = {
+      :controller => @controller.controller_name,
+      :action => @action_name
+    }
+
+    path_parameters = default_path_parameters.merge(@path_parameters)
+
+    @request.path_parameters = path_parameters
 
     defaults = { :layout => false }
     options = defaults.merge options
