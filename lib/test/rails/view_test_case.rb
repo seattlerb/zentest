@@ -135,7 +135,37 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #
   #   render :template => 'profile/index'
   #
-  # For this test:
+  # A test's path parameters may be overridden, allowing routes with
+  # additional parameters to work.
+  #
+  # == Working with Routes
+  #
+  # By default, a view tests sets the controller and action of a test to the
+  # controller name and action name for the test.  This may be overriden.
+  #
+  # A test with URLs matching a route like:
+  #
+  #   map.workspace '/users/:owner/workspace/:action',
+  #                 :controller => 'workspace', :action => 'workspace'
+  #
+  # Can be invoked by setting @request.path_parameters like this:
+  #
+  #   def test__app_entry
+  #     @request.path_parameters[:owner] = 'bob'
+  #     @request.path_parameters[:action] = 'apps'
+  #   
+  #     render :partial => 'apps/app_entry'
+  #   
+  #     # ...
+  #   end
+  #
+  # == View Lookup
+  #
+  # render strips off words trailing an _ in the test name one at a time until
+  # it finds a matching action.  It tries the extensions 'rhtml', 'rxml',
+  # 'rjs', and 'mab' in order for each action until a view is found.
+  #
+  # With this test case:
   #
   #   class RouteViewTest < Test::Rails::ViewTestCase
   #     def test_show_photos
@@ -146,19 +176,20 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #     end
   #   end
   #
-  # For test_show_photos will look for:
+  # In test_show_photos, render will look for:
   # * app/views/route/show_photos.rhtml
   # * app/views/route/show_photos.rxml
-  # * app/views/route/show.rhtml
-  # * app/views/route/show.rxml
+  # * app/views/route/show_photos.rjs
+  # * app/views/route/show_photos.mab
+  # * app/views/route/show.[...]
   #
-  # And test_show_no_photos will look for:
+  # And in test_show_no_photos, render will look for:
   # * app/views/route/show_no_photos.rhtml
   # * app/views/route/show_no_photos.rxml
-  # * app/views/route/show_no.rhtml
-  # * app/views/route/show_no.rxml
-  # * app/views/route/show.rhtml
-  # * app/views/route/show.rxml
+  # * app/views/route/show_no_photos.rjs
+  # * app/views/route/show_no_photos.mab
+  # * app/views/route/show_no.[...]
+  # * app/views/route/show.[...]
   #
   # If a view cannot be found the test will flunk.
 
@@ -166,10 +197,8 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
     @action_name = action_name caller[0] if options.empty?
     assigns[:action_name] = @action_name
 
-    @request.path_parameters = {
-      :controller => @controller.controller_name,
-      :action => @action_name,
-    }
+    @request.path_parameters[:controller] ||= @controller.controller_name
+    @request.path_parameters[:action] ||= @action_name
 
     defaults = { :layout => false }
     options = defaults.merge options
