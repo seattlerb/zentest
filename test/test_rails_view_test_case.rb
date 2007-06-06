@@ -20,160 +20,184 @@ class TestRailsViewTestCase < Test::Rails::ViewTestCase
   def setup
     @assert_tag = []
     @assert_no_tag = []
+
+    @assert_select = []
   end
 
   def test_assert_field
+    assert_field :text, :game, :amount
+
+    assert_equal 2, @assert_select.length
+
+    expected = ["input[type='text'][name='game[amount]']"]
+
+    assert_equal expected, @assert_select.first
+
+    expected = ["label[for='game_amount']"]
+
+    assert_equal expected, @assert_select.last
+  end
+
+  def test_assert_field_form
     assert_field '/game/save', :text, :game, :amount
 
-    assert_equal 2, @assert_tag.length
+    assert_equal 4, @assert_select.length
 
-    expected = {
-      :tag => 'form',
-      :attributes => { :action => '/game/save' },
-      :descendant => {
-        :tag => 'input', :attributes => {
-          :type => 'text', :name => 'game[amount]'
-        }
-      }
-    }
+    assert_equal ["form[action='/game/save']"], @assert_select.shift
+    assert_equal ["input[type='text'][name='game[amount]']"],
+                 @assert_select.shift
 
-    assert_equal expected, @assert_tag.first
+    assert_equal ["form[action='/game/save']"], @assert_select.shift
+    assert_equal ["label[for='game_amount']"], @assert_select.shift
+  end
 
-    expected = {
-      :tag => 'form',
-      :attributes => { :action => '/game/save' },
-      :descendant => {
-        :tag => 'label', :attributes => {
-          :for => 'game_amount'
-        }
-      }
-    }
+  def test_assert_form
+    assert_form '/game/save'
 
-    assert_equal expected, @assert_tag.last
+    assert_equal 1, @assert_select.length
+    assert_equal ["form[action='/game/save']"], @assert_select.first
+  end
+
+  def test_assert_form_method
+    assert_form '/game/save', :post
+
+    assert_equal 1, @assert_select.length
+    assert_equal ["form[action='/game/save'][method='post']"],
+                 @assert_select.first
+  end
+
+  def test_assert_form_enctype
+    assert_form '/game/save', nil, 'multipart/form-data'
+
+    assert_equal 1, @assert_select.length
+    assert_equal ["form[action='/game/save'][enctype='multipart/form-data']"],
+                 @assert_select.first
+  end
+
+  def test_assert_h
+    assert_h 1, 'hi'
+
+    assert_equal [['h1', { :text => 'hi' }]], @assert_select
+  end
+
+  def test_assert_img
+    assert_image '/images/bucket.jpg'
+
+    assert_equal [["img[src='/images/bucket.jpg']"]], @assert_select
   end
 
   def test_assert_input
+    assert_input :text, 'game[amount]'
+
+    assert_equal 1, @assert_select.length
+    assert_equal ["input[type='text'][name='game[amount]']"],
+                 @assert_select.first
+  end
+
+  def test_assert_input_form
     assert_input '/game/save', :text, 'game[amount]'
 
-    expected = {
-      :tag => "form",
-      :attributes => { :action => "/game/save" },
-      :descendant => { :tag => "input",
-        :attributes => { :type => 'text', :name => 'game[amount]' }
-      },
-    }
-    
-    assert_equal 1, @assert_tag.length
-    assert_equal expected, @assert_tag.first
+    assert_equal 2, @assert_select.length
+    assert_equal ["form[action='/game/save']"], @assert_select.shift
+    assert_equal ["input[type='text'][name='game[amount]']"],
+                 @assert_select.shift
+  end
+
+  def test_assert_input_value
+    assert_input :text, 'game[amount]', 5
+
+    expected = ["input[type='text'][name='game[amount]'][value='5']"]
+
+    assert_equal 1, @assert_select.length
+    assert_equal expected, @assert_select.first
   end
 
   def test_assert_label
+    assert_label 'game_amount'
+
+    expected = ["label[for='game_amount']"]
+
+    assert_equal 1, @assert_select.length
+    assert_equal expected, @assert_select.first
+  end
+
+  def test_assert_label_form
     assert_label '/game/save', 'game_amount'
 
-    expected = {
-      :tag => "form",
-      :attributes => { :action => "/game/save" },
-      :descendant => { :tag => "label",
-        :attributes => { :for => 'game_amount' }
-      },
-    }
-    
-    assert_equal 1, @assert_tag.length
-    assert_equal expected, @assert_tag.first
+    assert_equal 2, @assert_select.length
+    assert_equal ["form[action='/game/save']"], @assert_select.shift
+    assert_equal ["label[for='game_amount']"], @assert_select.shift
   end
 
   def test_assert_links_to
     assert_links_to '/game/show/1', 'hi'
 
-    expected = {
-      :tag => 'a',
-      :attributes => { :href => '/game/show/1' },
-      :content => 'hi'
-    }
+    expected = ["a[href='/game/show/1']", { :text => 'hi' }]
 
-    assert_equal 1, @assert_tag.length
-    assert_equal expected, @assert_tag.first
+
+    assert_equal 1, @assert_select.length
+    assert_equal expected, @assert_select.first
   end
 
   def test_assert_multipart_form
     assert_multipart_form '/game/save'
 
-    expected = {
-      :tag => 'form',
-      :attributes => { 
-        :method => 'post', :action => '/game/save',
-        :enctype => 'multipart/form-data'
-      }
-    }
+    expected = [
+      "form[action='/game/save'][method='post'][enctype='multipart/form-data']"
+    ]
 
-    assert_equal 1, @assert_tag.length
-    assert_equal expected, @assert_tag.first
+    assert_equal 1, @assert_select.length
+    assert_equal expected, @assert_select.first
   end
 
   def test_assert_post_form
     assert_post_form '/game/save'
 
-    expected = {
-      :tag => 'form',
-      :attributes => { 
-        :method => 'post', :action => '/game/save'
-      }
-    }
+    expected = ["form[action='/game/save'][method='post']"]
 
-    assert_equal 1, @assert_tag.length
-    assert_equal expected, @assert_tag.first
+    assert_equal 1, @assert_select.length
+    assert_equal expected, @assert_select.first
   end
 
   def test_assert_select_tag
+    assert_select_tag :game, :location_id,
+                      'Ballet' => 1, 'Guaymas' => 2
+
+    assert_equal 2, @assert_select.length
+
+    assert_equal ["select[name='game[location_id]'] option[value='2']",
+                  { :text => 'Guaymas' }], @assert_select.shift
+    assert_equal ["select[name='game[location_id]'] option[value='1']",
+                  { :text => 'Ballet' }], @assert_select.shift
+  end
+
+  def test_assert_select_tag_form
     assert_select_tag '/game/save', :game, :location_id,
                       'Ballet' => 1, 'Guaymas' => 2
 
-    assert_equal 2, @assert_tag.length
+    assert_equal 4, @assert_select.length
 
-    expected = {
-      :tag => "form",
-      :attributes => { :action => "/game/save" },
-      :descendant => {
-        :child => {
-          :tag => "option", :content => "Guaymas",
-          :attributes => { :value => 2 }
-        },
-        :tag => "select",
-        :attributes => { :name => "game[location_id]" }
-      },
-    }
-
-    assert_equal expected, @assert_tag.shift
-
-    expected = {
-      :tag => "form",
-      :attributes => { :action => "/game/save" },
-      :descendant => {
-        :child => {
-          :tag => "option", :content => "Ballet",
-          :attributes => { :value => 1 }
-        },
-        :tag => "select",
-        :attributes => { :name => "game[location_id]" }
-      },
-    }
-
-    assert_equal expected, @assert_tag.shift
+    assert_equal ["form[action='/game/save']"], @assert_select.shift
+    assert_equal ["select[name='game[location_id]'] option[value='2']",
+                  { :text => 'Guaymas' }], @assert_select.shift
+    assert_equal ["form[action='/game/save']"], @assert_select.shift
+    assert_equal ["select[name='game[location_id]'] option[value='1']",
+                  { :text => 'Ballet' }], @assert_select.shift
   end
 
   def test_assert_submit
+    assert_submit 'Save!'
+
+    assert_equal 1, @assert_select.length
+    assert_equal ["input[type='submit'][value='Save!']"], @assert_select.first
+  end
+
+  def test_assert_submit_form
     assert_submit '/game/save', 'Save!'
 
-    expected = {
-      :tag => "form",
-      :attributes => { :action => "/game/save" },
-      :descendant => { :tag => "input",
-        :attributes => { :type => 'submit', :value => 'Save!' }
-      },
-    }
-    
-    assert_equal 1, @assert_tag.length
-    assert_equal expected, @assert_tag.first
+    assert_equal 2, @assert_select.length
+    assert_equal ["form[action='/game/save']"], @assert_select.shift
+    assert_equal ["input[type='submit'][value='Save!']"], @assert_select.shift
   end
 
   def test_assert_tag_in_form
@@ -184,58 +208,48 @@ class TestRailsViewTestCase < Test::Rails::ViewTestCase
       :attributes => { :action => "/game/save" },
       :descendant => { :tag => "input" },
     }
-    
+
     assert_equal 1, @assert_tag.length
     assert_equal expected, @assert_tag.first
   end
 
   def test_assert_text_area
+    assert_text_area 'post[body]'
+
+    assert_equal 1, @assert_select.length
+    assert_equal ["textarea[name='post[body]']"], @assert_select.shift
+  end
+
+  def test_assert_text_area_body
+    assert_text_area 'post[body]', 'OMG!1! that skank stole my BF!~1!'
+
+    assert_equal 1, @assert_select.length
+    assert_equal ["textarea[name='post[body]']",
+                  { :text => 'OMG!1! that skank stole my BF!~1!' }],
+                 @assert_select.shift
+  end
+
+  def test_assert_text_area_form
     assert_text_area '/post/save', 'post[body]'
 
-    expected = {
-      :tag => 'form', :attributes => { :action => '/post/save' },
-        :descendant => {
-          :tag => 'textarea', :attributes => { :name => 'post[body]' } } }
+    assert_equal 2, @assert_select.length
+    assert_equal ["form[action='/post/save']"], @assert_select.shift
+    assert_equal ["textarea[name='post[body]']"], @assert_select.shift
+  end
 
-    assert_equal 1, @assert_tag.length
-    assert_equal expected, @assert_tag.first
+  def test_assert_title
+    assert_title 'hi'
 
-    assert_text_area '/post/save', 'post[body]',
-                     "OMG he like hates me and he's like going out with this total skank!~ oh noes!!~"
-
-    assert_equal 2, @assert_tag.length
-
-    expected = {
-      :tag => 'form',
-      :attributes => { :action => '/post/save' },
-      :descendant => {
-        :tag => 'textarea', :attributes => { :name => 'post[body]' },
-      }
-    }
-
-    assert_equal expected, @assert_tag.first
-
-    expected = {
-      :tag => 'form', :attributes => { :action => '/post/save' },
-        :descendant => {
-          :tag => 'textarea', :attributes => { :name => 'post[body]' },
-            :content => 
-              "OMG he like hates me and he's like going out with this total skank!~ oh noes!!~" } }
-
-    assert_equal expected, @assert_tag.last
+    assert_equal [['title', { :text => 'hi' }]], @assert_select
   end
 
   def test_deny_links_to
     deny_links_to '/game/show/1', 'hi'
 
-    expected = {
-      :tag => 'a',
-      :attributes => { :href => '/game/show/1' },
-      :content => 'hi'
-    }
+    expected = ["a[href='/game/show/1']", { :text => 'hi', :count => 0 }]
 
-    assert_equal 1, @assert_no_tag.length
-    assert_equal expected, @assert_no_tag.first
+    assert_equal 1, @assert_select.length
+    assert_equal expected, @assert_select.first
   end
 
   def assert_tag(arg)
@@ -244,6 +258,11 @@ class TestRailsViewTestCase < Test::Rails::ViewTestCase
 
   def assert_no_tag(arg)
     @assert_no_tag << arg
+  end
+
+  def assert_select(*args)
+    @assert_select << args
+    yield if block_given?
   end
 
 end if $TESTING_RTC

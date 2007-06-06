@@ -65,7 +65,7 @@
 #   class LayoutsViewTest < Test::Rails::ViewTestCase
 #   
 #     fixtures :users, :routes, :points, :photos
-#     
+#   
 #     def test_default
 #       # Template set-up
 #       @request.request_uri = '/foo'
@@ -78,10 +78,10 @@
 #       assert_links_to '/', 'Home'
 #       assert_links_to '/user', 'Login'
 #       deny_links_to   '/user/logout', 'Logout'
-#       assert_tag :tag => 'title', :content => 'Hello &amp; Goodbye'
-#       assert_tag :tag => 'h1', :content => 'Hello &amp; Goodbye'
+#       assert_title 'Hello &amp; Goodbye'
+#       assert_h 1, 'Hello &amp; Goodbye'
 #     end
-#     
+#   
 #   end
 
 class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
@@ -259,9 +259,32 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   # test:
   #   assert_field '/game/save', :text, :game, :amount
 
-  def assert_field(form_action, type, model, column, value = nil)
-    assert_input form_action, type, "#{model}[#{column}]", value
-    assert_label form_action, "#{model}_#{column}"
+  def assert_field(*args)
+    form_action, type, model, column, value =
+      Symbol === args.first ? [nil, *args] : args
+
+    if form_action then # HACK deprecate
+      assert_input form_action, type, "#{model}[#{column}]", value
+      assert_label form_action, "#{model}_#{column}"
+    else
+      assert_input type, "#{model}[#{column}]", value
+      assert_label "#{model}_#{column}"
+    end
+  end
+
+  # Asserts that there is a form whose action is +form_action+.
+  #
+  # view:
+  #   <%= start_form_tag :action => 'create_file' %>
+  #
+  # test:
+  #   assert_form '/game/save'
+
+  def assert_form(form_action, method = nil, enctype = nil, &block)
+    selector = "form[action='#{form_action}']"
+    selector << "[method='#{method}']" if method
+    selector << "[enctype='#{enctype}']" if enctype
+    assert_select selector, &block
   end
 
   ##
@@ -274,7 +297,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #   assert_h 3, 'Recent Builds'
 
   def assert_h(level, content)
-    assert_tag :tag => "h#{level}", :content => content
+    assert_select "h#{level}", :text => content
   end
 
   ##
@@ -287,7 +310,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #   assert_image '/images/bucket.jpg'
 
   def assert_image(src)
-    assert_tag :tag => 'img', :attributes => { :src => src }
+    assert_select "img[src='#{src}']"
   end
 
   ##
@@ -301,15 +324,20 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   # test:
   #   assert_input '/game/save', :text, "game[amount]"
 
-  def assert_input(form_action, type, name, value = nil)
-    attrs = { :type => type.to_s, :name => name.to_s }
-    attrs[:value] = value unless value.nil?
-    assert_tag_in_form form_action, :tag => 'input', :attributes => attrs
+  def assert_input(*args)
+    action, type, name, value = Symbol === args.first ? [nil, *args] : args
+
+    raise ArgumentError, 'supply type and name' if type.nil? or name.nil?
+
+    input_selector = "input[type='#{type}'][name='#{name}']"
+    input_selector << "[value='#{value}']" if value
+
+    assert_select_in_form action do assert_select input_selector end
   end
 
   ##
-  # Asserts that a form with +form_action+ has a label with a for attribute of
-  # +for_attribute+.
+  # Asserts that a form submitting to +action+ has a label with a for
+  # attribute of +for_attribute+.
   #
   # view:
   #   <%= start_form_tag :controller => 'game', :action => 'save' %>
@@ -318,9 +346,14 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   # test:
   #   assert_label '/game/save', 'game_amount'
 
-  def assert_label(form_action, for_attribute)
-    assert_tag_in_form form_action, :tag => 'label',
-                       :attributes => { :for => for_attribute }
+  def assert_label(*args)
+    action, for_attribute = args.length == 1 ? [nil, *args] : args
+
+    raise ArgumentError, 'supply for_attribute' if for_attribute.nil?
+
+    label_selector = "label[for='#{for_attribute}']"
+
+    assert_select_in_form action do assert_select label_selector end
   end
 
   ##
@@ -334,7 +367,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #   assert_links_to '/players/show/1', 'drbrain'
 
   def assert_links_to(href, content = nil)
-    assert_tag links_to_options_for(href, content)
+    assert_select(*links_to_options_for(href, content))
   end
 
   ##
@@ -348,7 +381,10 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #   deny_links_to '/players/show/1'
 
   def deny_links_to(href, content = nil)
-    assert_no_tag links_to_options_for(href, content)
+    selector, options = links_to_options_for(href, content)
+    options[:count] = 0
+
+    assert_select selector, options
   end
 
   ##
@@ -362,8 +398,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #   assert_multipart_form '/game/save'
 
   def assert_multipart_form(form_action)
-    assert_tag :tag => 'form', :attributes => { :action => form_action,
-                 :method => 'post', :enctype => 'multipart/form-data' }
+    assert_form form_action, :post, 'multipart/form-data'
   end
 
   ##
@@ -377,13 +412,12 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #   assert_post_form '/game/save'
 
   def assert_post_form(form_action)
-    assert_tag :tag => 'form', :attributes => { :action => form_action,
-                 :method => 'post' }
+    assert_form form_action, :post
   end
 
   ##
-  # Asserts that a form with +form_action+ has a select element with a name of
-  # "+model+[+column+]" and options with specified names and values.
+  # Asserts that a form submitting to +action+ has a select element with a
+  # name of "+model+[+column+]" and options with specified names and values.
   #
   # view:
   #   <%= start_form_tag :action => 'save' %>
@@ -393,24 +427,27 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #   assert_select_tag '/games/save', :game, :location_id,
   #                     'Ballet' => 1, 'Guaymas' => 2
 
-  def assert_select_tag(form_action, model, column, options)
+  def assert_select_tag(*args)
+    action, model, column, options = Symbol === args.first ? [nil, *args] : args
+
     assert_kind_of Hash, options, "options needs to be a Hash"
     deny options.empty?, "options must not be empty"
-    options.each do |option_name, option_id|
-      assert_tag_in_form(form_action,
-                         :tag => 'select',
-                         :attributes => { :name => "#{model}[#{column}]" },
-                         :child => {
-                           :tag => 'option',
-                           :attributes => { :value => option_id },
-                           :content => option_name
-                         })
+
+    select_selector = "select[name='#{model}[#{column}]']"
+
+    options.each do |option_name, option_value|
+      option_selector = "option[value='#{option_value}']"
+      selector = "#{select_selector} #{option_selector}"
+
+      assert_select_in_form action do
+        assert_select selector, :text => option_name
+      end
     end
   end
 
   ##
-  # Asserts that a form with +form_action+ has a submit element with a value
-  # of +value+.
+  # Asserts that a form submitting to +action+ has a submit element with a
+  # value of +value+.
   #
   # view:
   #   <%= start_form_tag :action => 'save' %>
@@ -419,9 +456,12 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   # test:
   #   assert_submit '/route/save', 'Create!'
 
-  def assert_submit(form_action, value)
-    assert_tag_in_form form_action, :tag => 'input', :attributes => {
-                                      :type => "submit", :value => value }
+  def assert_submit(*args)
+    action, value = args.length == 1 ? [nil, *args] : args
+
+    submit_selector = "input[type='submit'][value='#{value}']"
+
+    assert_select_in_form action do assert_select submit_selector end
   end
 
   ##
@@ -444,8 +484,8 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   end
 
   ##
-  # Asserts that a form with +form_action+ has a textarea with name +name+ and
-  # optionally +value?.
+  # Asserts that a form submitting to +action+ has a textarea with name +name+
+  # and optionally +value?.
   #
   # view:
   #   <%= text_area 'post', 'body' %>
@@ -461,14 +501,18 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   # test:
   #   assert_text_area '/post/save', 'post[body]', posts(:post).body
 
-  def assert_text_area(form_action, name, value = nil)
-    attribs = {
-      :tag => 'textarea',
-      :attributes => { :name => name },
-    }
-    attribs[:content] = value if value
-    assert_tag_in_form form_action, attribs
+  def assert_text_area(*args)
+    action, name, value = args.first !~ /\A\// ? [nil, *args] : args
+
+    raise ArgumentError, 'supply name' if name.nil?
+
+    text_area_selector = ["textarea[name='#{name}']"]
+    text_area_selector << { :text => value } if value
+
+    assert_select_in_form action do assert_select(*text_area_selector) end
   end
+
+  alias assert_textarea assert_text_area
 
   ##
   # Asserts that a title with +title+ exists.
@@ -480,7 +524,11 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #   assert_title 'some content'
 
   def assert_title(title)
-    assert_tag :tag => 'title', :content => title
+    assert_select 'title', :text => title
+  end
+
+  def deny_select(selector)
+    assert_select selector, false
   end
 
   ##
@@ -492,18 +540,22 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
                                                 items_per_page, page_number)
   end
 
-  protected
+  def assert_select_in_form(action, &block)
+    if action then
+      assert_form(action, &block)
+    else
+      block.call
+    end
+  end
 
   ##
   # Creates an assertion options hash for +href+ and +content+.
 
   def links_to_options_for(href, content = nil)
-    options = { :tag => 'a', :attributes => { :href => href } }
-    options[:content] = content unless content.nil?
-    return options
+    selector = "a[href='#{href}']"
+    equality = content ? { :text => content } : {}
+    return selector, equality
   end
-
-  private
 
   ##
   # Returns the action_name based on a backtrace line passed in as +test+.
