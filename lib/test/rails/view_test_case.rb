@@ -261,7 +261,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
 
   def assert_field(form_action, type, model, column, value = nil)
     assert_input form_action, type, "#{model}[#{column}]", value
-    assert_label form_action, "#{model}_#{column}", false
+    assert_label form_action, "#{model}_#{column}"
   end
 
   ##
@@ -309,19 +309,18 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
 
   ##
   # Asserts that a form with +form_action+ has a label with a for attribute of
-  # "+model+_+column+".
+  # +for_attribute+.
   #
   # view:
   #   <%= start_form_tag :controller => 'game', :action => 'save' %>
   #   <label for="game_amount">Amount:</label>
   #
   # test:
-  #   assert_label '/game/save', :game, :amount
+  #   assert_label '/game/save', 'game_amount'
 
-  def assert_label(form_action, name, include_f = true)
-    for_attribute = (include_f ? 'f_' : '') << name
-    assert_tag_in_form form_action, :tag => 'label', :attributes => {
-                                      :for => for_attribute }
+  def assert_label(form_action, for_attribute)
+    assert_tag_in_form form_action, :tag => 'label',
+                       :attributes => { :for => for_attribute }
   end
 
   ##
@@ -479,11 +478,11 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #
   # test:
   #   assert_title 'some content'
-  
+
   def assert_title(title)
     assert_tag :tag => 'title', :content => title
   end
-  
+
   ##
   # Creates a new Paginator that uses the current controller. +item_count+,
   # +items_per_page+ and +page_number+ are passed straight through.

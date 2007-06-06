@@ -1,4 +1,4 @@
-$TESTING_RTC = defined? $TESTING_RTC
+$TESTING_RTC = defined?($TESTING_RTC) && $TESTING_RTC
 
 ##
 # FunctionalTestCase is an abstract class that sets up a controller instance

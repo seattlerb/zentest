@@ -247,7 +247,7 @@ $TESTING = true
 # The test target no longer runs all tests, it stops on the first
 # failure. This way a failure in a unit test doesn't fill your screen
 # with less important errors because the underlying failure also
-# affected your controllers and views. 
+# affected your controllers and views.
 #
 # The stats target is updated to account for controller and view tests.
 
