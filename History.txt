@@ -1,6 +1,10 @@
 === 3.6.1 / ?
 
-* 1 minor enhancements:
+* N major enhancements:
+  * Test::Rails::ViewTestCase now uses assert_select.
+    * assert_form and friends now work with blocks like assert_select
+      does.
+* N minor enhancements:
   * Allow path_parameters in view tests to be ammended, making working
     with routes easier.
 

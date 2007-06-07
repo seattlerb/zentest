@@ -5,24 +5,23 @@
 #
 # = Features
 #
-# * Allows testing of individual AJAX templates.
-# * Allows testing of individual partials.
-# * Large library of helful assertions.
+# * Allows testing of individual AJAX templates.  * Allows testing of
+# individual partials.  * Large library of helful assertions.
 #
 # = Naming
 #
-# The test class must be named after your controller class name, so if
-# you're testing views for the +RouteController+ you would name your
-# test case +RouteViewTest+. The test case will expect to find your
-# view files in <tt>app/views/route</tt>.
+# The test class must be named after your controller class name, so if you're
+# testing views for the +RouteController+ you would name your test case
+# +RouteViewTest+. The test case will expect to find your view files in
+# <tt>app/views/route</tt>.
 #
-# The test names should be in the form of +test_view_edgecase+ where
-# 'view' corresponds to the name of the view file, and 'edgecase'
-# describes the scenario you are testing.
+# The test names should be in the form of +test_view_edgecase+ where 'view'
+# corresponds to the name of the view file, and 'edgecase' describes the
+# scenario you are testing.
 #
-# If you are testing a view file named 'show.rhtml' your test should
-# be named +test_show+. If your view is behaves differently depending
-# upon its parameters then you can make the test name descriptive like
+# If you are testing a view file named 'show.rhtml' your test should be named
+# +test_show+. If your view is behaves differently depending upon its
+# parameters then you can make the test name descriptive like
 # +test_show_photos+ and +test_show_no_photos+.
 #
 # = Examples
@@ -33,24 +32,19 @@
 #   
 #     fixtures :users, :routes, :points, :photos
 #   
-#     def test_delete
-#       # Set up instance variables for template
-#       assigns[:loggedin_user] = users(:herbert)
-#       assigns[:route] = routes(:work)
+#     def test_delete # Set up instance variables for template
+#     assigns[:loggedin_user] = users(:herbert) assigns[:route] =
+#     routes(:work)
 #   
-#       # render template for the delete action in RouteController
-#       render
+#       # render template for the delete action in RouteController render
 #   
 #       # assert that there's a form with an action of "/route/destroy"
-#       form_url = '/route/destroy'
-#       assert_post_form form_url
-#       # with a hidden id field
-#       assert_input form_url, :hidden, :id
-#       # And a submit button that says 'Delete!'
-#       assert_submit form_url, 'Delete!'
-#       # And a link back to the route so you don't delete it
-#       assert_links_to "/route/show/#{routes(:work).id}", 'No, I do not!'
-#     end
+#       assert_form form_url, :post do # with a hidden id field assert_input
+#       :hidden, :id # And a submit button that says 'Delete!' assert_submit
+#       'Delete!' end
+#   
+#       # And a link back to the route so you don't delete it assert_links_to
+#       "/route/show/#{routes(:work).id}", 'No, I do not!' end
 #   
 #   end
 #
@@ -59,30 +53,33 @@
 #   require 'test/test_helper'
 #   
 #   # Create a dummy controller for layout views. This lets the setup use the
-#   # right path with minimum fuss.
-#   class LayoutsController < ApplicationController; end
+#   # right path with minimum fuss.  class LayoutsController <
+#   ApplicationController; end
 #   
 #   class LayoutsViewTest < Test::Rails::ViewTestCase
 #   
 #     fixtures :users, :routes, :points, :photos
 #   
-#     def test_default
-#       # Template set-up
-#       @request.request_uri = '/foo'
-#       assigns[:action_title] = 'Hello & Goodbye'
+#     def test_default # Template set-up @request.request_uri = '/foo'
+#     assigns[:action_title] = 'Hello & Goodbye'
 #   
-#       # Render an empty string with the 'application' layout.
-#       render :text => '', :layout => 'application'
+#       # Render an empty string with the 'application' layout.  render :text
+#       => '', :layout => 'application'
 #   
-#       # Assert content just like a regular view test.
-#       assert_links_to '/', 'Home'
-#       assert_links_to '/user', 'Login'
-#       deny_links_to   '/user/logout', 'Logout'
-#       assert_title 'Hello &amp; Goodbye'
-#       assert_h 1, 'Hello &amp; Goodbye'
-#     end
+#       # Assert content just like a regular view test.  assert_links_to '/',
+#       'Home' assert_links_to '/user', 'Login' deny_links_to
+#       '/user/logout', 'Logout' assert_title 'Hello &amp; Goodbye' assert_h
+#       1, 'Hello &amp; Goodbye' end
 #   
 #   end
+#
+# = Deprecated Features
+#
+# Form assertions are now using assert_select, so you don't need to pass URLs
+# around everywhere and can instead use a block.  (See above example).
+#
+# The form assertions will still work using the old syntax, but in a future
+# release they will give warnings, then will be removed.
 
 class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
 
@@ -240,16 +237,12 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
 
   def assert_error_on(field, type)
     error_message = ActiveRecord::Errors.default_error_messages[type]
-    assert_tag :tag => 'div', :attributes => { :class => 'errorExplanation' },
-                  :descendant => {
-                    :tag => 'li',
-                    :content => /^#{field} #{error_message}/i }
+    assert_select "div.errorExplanation li",
+                  :text => /^#{field} #{error_message}/i
   end
 
   ##
-  # Asserts that a form with +form_action+ has an input element of +type+ with
-  # a name of "+model+[+column+]" and has a label with a for attribute of
-  # "+model+_+column+".
+  # A wrapper assert that calls both assert_input and assert_label.
   #
   # view:
   #   <%= start_form_tag :controller => 'game', :action => 'save' %>
@@ -272,13 +265,23 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
     end
   end
 
-  # Asserts that there is a form whose action is +form_action+.
+  ##
+  # Asserts that there is a form whose action is +form_action+.  Optionally,
+  # +method+ and +enctype+ may be specified.  If a block is given, assert_form
+  # behaves like assert_select, so assert_input and friends may be scoped to
+  # the selected form.
   #
   # view:
   #   <%= start_form_tag :action => 'create_file' %>
+  #   # ...
   #
   # test:
   #   assert_form '/game/save'
+  #
+  # or:
+  #   assert_form '/game/save' do
+  #     # ...
+  #   end
 
   def assert_form(form_action, method = nil, enctype = nil, &block)
     selector = "form[action='#{form_action}']"
@@ -288,7 +291,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   end
 
   ##
-  # Asserts a h tag of level +level+ exists and contains +content+.
+  # Asserts a hN tag of level +level+ exists and contains +content+.
   #
   # view:
   #   <h3>Recent Builds</h3>
@@ -314,15 +317,14 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   end
 
   ##
-  # Asserts that a form with +form_action+ has an input element of +type+ with
-  # a name of +name+.
+  # Asserts that an input element of +type+ with a name of +name+, and
+  # optionally a value of +value+ exists.
   #
   # view:
-  #   <%= start_form_tag :controller => 'game', :action => 'save' %>
   #   <%= text_field 'game', 'amount' %>
   #
   # test:
-  #   assert_input '/game/save', :text, "game[amount]"
+  #   assert_input :text, "game[amount]"
 
   def assert_input(*args)
     action, type, name, value = Symbol === args.first ? [nil, *args] : args
@@ -336,15 +338,14 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   end
 
   ##
-  # Asserts that a form submitting to +action+ has a label with a for
-  # attribute of +for_attribute+.
+  # Asserts that a label with a for attribute of +for_attribute+ exists.
   #
   # view:
   #   <%= start_form_tag :controller => 'game', :action => 'save' %>
   #   <label for="game_amount">Amount:</label>
   #
   # test:
-  #   assert_label '/game/save', 'game_amount'
+  #   assert_label 'game_amount'
 
   def assert_label(*args)
     action, for_attribute = args.length == 1 ? [nil, *args] : args
@@ -357,7 +358,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   end
 
   ##
-  # Asserts that there is an anchor tag with an href of +href+ and optionally
+  # Asserts that there is an anchor tag with an href of +href+ that optionally
   # has +content+.
   #
   # view:
@@ -389,7 +390,8 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
 
   ##
   # Asserts that there is a form using the 'POST' method whose action is
-  # +form_action+ and uses the multipart content type.
+  # +form_action+ and uses the multipart content type.  If passed a block,
+  # works like assert_form.
   #
   # view:
   #   <%= start_form_tag({ :action => 'create_file' }, :multipart => true) %>
@@ -397,13 +399,13 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   # test:
   #   assert_multipart_form '/game/save'
 
-  def assert_multipart_form(form_action)
-    assert_form form_action, :post, 'multipart/form-data'
+  def assert_multipart_form(form_action, &block)
+    assert_form(form_action, :post, 'multipart/form-data', &block)
   end
 
   ##
   # Asserts that there is a form using the 'POST' method whose action is
-  # +form_action+.
+  # +form_action+.  If passed a block, works like assert_form.
   #
   # view:
   #   <%= start_form_tag :action => 'create_file' %>
@@ -411,21 +413,19 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   # test:
   #   assert_post_form '/game/save'
 
-  def assert_post_form(form_action)
-    assert_form form_action, :post
+  def assert_post_form(form_action, &block)
+    assert_form(form_action, :post, &block)
   end
 
   ##
-  # Asserts that a form submitting to +action+ has a select element with a
-  # name of "+model+[+column+]" and options with specified names and values.
+  # Asserts that a select element with a name of "+model+[+column+]" and
+  # +options+ with specified names and values exists.
   #
   # view:
-  #   <%= start_form_tag :action => 'save' %>
   #   <%= collection_select :game, :location_id, @locations, :id, :name %>
   #
   # test:
-  #   assert_select_tag '/games/save', :game, :location_id,
-  #                     'Ballet' => 1, 'Guaymas' => 2
+  #   assert_select_tag :game, :location_id, 'Ballet' => 1, 'Guaymas' => 2
 
   def assert_select_tag(*args)
     action, model, column, options = Symbol === args.first ? [nil, *args] : args
@@ -446,15 +446,13 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   end
 
   ##
-  # Asserts that a form submitting to +action+ has a submit element with a
-  # value of +value+.
+  # Asserts that a submit element with a value of +value+ exists.
   #
   # view:
-  #   <%= start_form_tag :action => 'save' %>
   #   <input type="submit" value="Create!" %>
   #
   # test:
-  #   assert_submit '/route/save', 'Create!'
+  #   assert_submit 'Create!'
 
   def assert_submit(*args)
     action, value = args.length == 1 ? [nil, *args] : args
@@ -466,7 +464,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
 
   ##
   # Asserts that a form with +form_action+ has a descendent that matches
-  # +options+.
+  # +options+ exists.
   #
   # Typically this is not used directly in tests. Instead use it to build
   # expressive tests that assert which fields are in what form.
@@ -484,14 +482,13 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   end
 
   ##
-  # Asserts that a form submitting to +action+ has a textarea with name +name+
-  # and optionally +value?.
+  # Asserts that a textarea with name +name+ and optionally +value+ exists.
   #
   # view:
   #   <%= text_area 'post', 'body' %>
   #
   # test:
-  #   assert_text_area '/post/save', 'post[body]'
+  #   assert_text_area 'post[body]'
   #
   # view:
   #   <textarea id="post_body" name="post[body]">
@@ -499,7 +496,7 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
   #   </textarea>
   #
   # test:
-  #   assert_text_area '/post/save', 'post[body]', posts(:post).body
+  #   assert_text_area 'post[body]', posts(:post).body
 
   def assert_text_area(*args)
     action, name, value = args.first !~ /\A\// ? [nil, *args] : args
@@ -527,6 +524,9 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
     assert_select 'title', :text => title
   end
 
+  ##
+  # Opposite of assert_select.
+
   def deny_select(selector)
     assert_select selector, false
   end
@@ -540,7 +540,11 @@ class Test::Rails::ViewTestCase < Test::Rails::FunctionalTestCase
                                                 items_per_page, page_number)
   end
 
-  def assert_select_in_form(action, &block)
+  ##
+  # Utility method for compatibility with old-style assert_tag form
+  # assertions.
+
+  def assert_select_in_form(action, &block) # :nodoc:
     if action then
       assert_form(action, &block)
     else
