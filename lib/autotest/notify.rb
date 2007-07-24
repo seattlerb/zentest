@@ -1,38 +1,34 @@
-# libnotify plugin for autotest
-
-begin require 'rubygems'; rescue LoadError; end
-require 'libnotify'
-
-module Autotest::LibNotify
-
-  LibNotify.init("autotest")
-
-  def self.notify title, msg, ico = :info
-    LibNotify::Notification.new(title, msg, "gtk-#{ico}", nil).show
+module Autotest::Notify
+  def self.notify(title, message, priority='critical')
+    icon = if priority == 'critical'
+      'dialog-error'
+    else
+      'dialog-information'
+    end
+    system "notify-send -u #{priority} -t 10000 -i #{icon} '#{title}' '#{message.inspect}'"
   end
 
   Autotest.add_hook :red do |at|
-    failed_tests = at.files_to_test.inject(0){ |s,a| k,v = a;  s + v.size}
-    notify "Tests Failed", "#{failed_tests} tests failed", :no
+    tests = 0
+    assertions = 0
+    failures = 0
+    errors = 0
+    at.results.scan(/(\d+) tests, (\d+) assertions, (\d+) failures, (\d+) errors/) do |t, a, f, e|
+      tests += t.to_i
+      assertions += a.to_i
+      failures += f.to_i
+      errors += e.to_i
+    end
+    message = "%d tests, %d assertions, %d failures, %d errors" % 
+      [tests, assertions, failures, errors]
+    notify("Tests Failed", message)
   end
 
   Autotest.add_hook :green do |at|
-    notify "Tests Passed", "All tests passed", :yes
-  end
-
-  Autotest.add_hook :run do |at|
-    notify "autotest", "autotest was started" unless $TESTING
-  end
-
-  Autotest.add_hook :interrupt do |at|
-    notify "autotest", "autotest was reset" unless $TESTING
-  end
-
-  Autotest.add_hook :quit do |at|
-    notify "autotest", "autotest is exiting" unless $TESTING
+    notify("Tests Passed", "Outstanding tests passed", 'low') if at.tainted
   end
 
   Autotest.add_hook :all do |at|_hook
-    notify "autotest", "Tests have fully passed", :yes unless $TESTING
+    notify("autotest", "Tests have fully passed", 'low')
   end
 end

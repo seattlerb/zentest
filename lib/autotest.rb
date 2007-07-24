@@ -48,12 +48,12 @@ $TESTING = false unless defined? $TESTING
 #
 # Strategy:
 #
-# 1) find all files and associate them from impl <-> test
-# 2) run all tests
-# 3) scan for failures
-# 4) detect changes in ANY (ruby?) file, rerun all failures + changed files
-# 5) until 0 defects, goto 3
-# 6) when 0 defects, goto 2
+# 1. Find all files and associate them from impl <-> test.
+# 2. Run all tests.
+# 3. Scan for failures.
+# 4. Detect changes in ANY (ruby?. file, rerun all failures + changed files.
+# 5. Until 0 defects, goto 3.
+# 6. When 0 defects, goto 2.
 
 class Autotest
 

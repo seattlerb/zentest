@@ -1,15 +1,16 @@
-class Autotest::Screen
-  # Autotest::Screen is test result notify GUN Screen's statusline.
-  #
-  # === screenshots
-  # * <img src="http://f.hatena.ne.jp/images/fotolife/s/secondlife/20061109/20061109015543.png" />
-  # * <img src="http://f.hatena.ne.jp/images/fotolife/s/secondlife/20061109/20061109015522.png" />
-  #
-  # == SYNOPSIS
-  #   require 'autotest/screen'
-  #   # Autotest::Screen.statusline = '%H %`%-w%{=b bw}%n %t%{-}%+w (your statusline)'
-  #
+##
+# Autotest::Screen is test result notify GUN Screen's statusline.
+#
+# === screenshots
+# * <img src="http://f.hatena.ne.jp/images/fotolife/s/secondlife/20061109/20061109015543.png" />
+# * <img src="http://f.hatena.ne.jp/images/fotolife/s/secondlife/20061109/20061109015522.png" />
+#
+# == SYNOPSIS
+#   require 'autotest/screen'
+#   # Autotest::Screen.statusline = '%H %`%-w%{=b bw}%n %t%{-}%+w (your statusline)'
+#
 
+class Autotest::Screen
   DEFAULT_STATUSLINE = '%H %`%-w%{=b bw}%n %t%{-}%+w'
   DEFAULT_SCREEN_CMD = 'screen'
 

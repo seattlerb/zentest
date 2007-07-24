@@ -1,12 +1,13 @@
-=== 3.6.1 / ?
+=== 3.6.1 / 2007-07-23
 
-* N major enhancements:
+* 4 minor enhancements:
   * Test::Rails::ViewTestCase now uses assert_select.
     * assert_form and friends now work with blocks like assert_select
       does.
-* N minor enhancements:
   * Allow path_parameters in view tests to be ammended, making working
     with routes easier.
+  * New version of autotest/notify.rb uses notify-send.
+  * Fixed rdoc formatting on autotest and a couple plugins.
 
 === 3.6.0 / 2007-05-25
 
