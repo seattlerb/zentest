@@ -5,8 +5,9 @@
 #
 # = Features
 #
-# * Allows testing of individual AJAX templates.  * Allows testing of
-# individual partials.  * Large library of helful assertions.
+# * Allows testing of individual AJAX templates.
+# * Allows testing of individual partials.
+# * Large library of helful assertions.
 #
 # = Naming
 #
@@ -32,19 +33,25 @@
 #   
 #     fixtures :users, :routes, :points, :photos
 #   
-#     def test_delete # Set up instance variables for template
-#     assigns[:loggedin_user] = users(:herbert) assigns[:route] =
-#     routes(:work)
+#     def test_delete
+#       # Set up instance variables for template
+#       assigns[:loggedin_user] = users(:herbert)
+#       assigns[:route] = routes(:work)
 #   
-#       # render template for the delete action in RouteController render
+#       # render template for the delete action in RouteController
+#       render
 #   
 #       # assert that there's a form with an action of "/route/destroy"
-#       assert_form form_url, :post do # with a hidden id field assert_input
-#       :hidden, :id # And a submit button that says 'Delete!' assert_submit
-#       'Delete!' end
+#       assert_form form_url, :post do
+#         # with a hidden id field
+#         assert_input :hidden, :id
+#         # And a submit button that says 'Delete!'
+#         assert_submit 'Delete!'
+#       end
 #   
-#       # And a link back to the route so you don't delete it assert_links_to
-#       "/route/show/#{routes(:work).id}", 'No, I do not!' end
+#       # And a link back to the route so you don't delete it
+#       assert_links_to "/route/show/#{routes(:work).id}", 'No, I do not!'
+#     end
 #   
 #   end
 #
@@ -53,23 +60,28 @@
 #   require 'test/test_helper'
 #   
 #   # Create a dummy controller for layout views. This lets the setup use the
-#   # right path with minimum fuss.  class LayoutsController <
-#   ApplicationController; end
+#   # right path with minimum fuss.
+#   class LayoutsController < ApplicationController; end
 #   
 #   class LayoutsViewTest < Test::Rails::ViewTestCase
 #   
 #     fixtures :users, :routes, :points, :photos
 #   
-#     def test_default # Template set-up @request.request_uri = '/foo'
-#     assigns[:action_title] = 'Hello & Goodbye'
+#     def test_default
+#       # Template set-up
+#       @request.request_uri = '/foo'
+#       assigns[:action_title] = 'Hello & Goodbye'
 #   
-#       # Render an empty string with the 'application' layout.  render :text
-#       => '', :layout => 'application'
+#       # Render an empty string with the 'application' layout.
+#       render :text => '', :layout => 'application'
 #   
-#       # Assert content just like a regular view test.  assert_links_to '/',
-#       'Home' assert_links_to '/user', 'Login' deny_links_to
-#       '/user/logout', 'Logout' assert_title 'Hello &amp; Goodbye' assert_h
-#       1, 'Hello &amp; Goodbye' end
+#       # Assert content just like a regular view test.
+#       assert_links_to '/', 'Home'
+#       assert_links_to '/user', 'Login'
+#       deny_links_to '/user/logout', 'Logout'
+#       assert_title 'Hello &amp; Goodbye'
+#       assert_h 1, 'Hello &amp; Goodbye'
+#     end
 #   
 #   end
 #
