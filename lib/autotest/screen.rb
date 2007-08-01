@@ -1,5 +1,5 @@
 ##
-# Autotest::Screen is test result notify GUN Screen's statusline.
+# Autotest::Screen is test result notify GNU Screen's statusline.
 #
 # === screenshots
 # * <img src="http://f.hatena.ne.jp/images/fotolife/s/secondlife/20061109/20061109015543.png" />
