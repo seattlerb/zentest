@@ -326,14 +326,20 @@ class ZenTest
     @missing_methods[klassname][methodname] = true
   end
 
+  # looks up the methods and the corresponding test methods
+  # in the collection already built.  To reduce duplication
+  # and hide implementation details.
+  def methods_and_tests(klassname, testklassname)
+    return @klasses[klassname], @test_klasses[testklassname]
+  end
+
   # Checks, for the given class klassname, that each method
   # has a corrsponding test method. If it doesn't this is
   # added to the information for that class
   def analyze_impl(klassname)
     testklassname = self.convert_class_name(klassname)
     if @test_klasses[testklassname] then
-      methods = @klasses[klassname]
-      testmethods = @test_klasses[testklassname]
+      methods, testmethods = methods_and_tests(klassname,testklassname)
 
       # check that each method has a test method
       @klasses[klassname].each_key do | methodname |
@@ -371,8 +377,7 @@ class ZenTest
     end
 
     if @klasses[klassname] then
-      methods = @klasses[klassname]
-      testmethods = @test_klasses[testklassname]
+      methods, testmethods = methods_and_tests(klassname,testklassname)
 
       # check that each test method has a method
       testmethods.each_key do | testmethodname |
@@ -414,6 +419,19 @@ class ZenTest
     end # @klasses[klassname]
   end
 
+  # create a given method at a given
+  # indentation. Returns an array containing
+  # the lines of the method.
+  def create_method(indentunit, indent, name)
+    meth = []
+    meth.push indentunit*indent + "def #{name}"
+    meth.last << "(*args)" unless name =~ /^test/
+    indent += 1
+    meth.push indentunit*indent + "raise NotImplementedError, 'Need to write #{name}'"
+    indent -= 1
+    meth.push indentunit*indent + "end"
+    return meth
+  end
    
   # Walk each known class and test that each method has
   # a test method
@@ -477,25 +495,13 @@ class ZenTest
       meths = []
 
       cls_methods.sort.each do |method|
-        meth = []
-        meth.push indentunit*indent + "def #{method}"
-        meth.last << "(*args)" unless method =~ /^test/
-        indent += 1
-        meth.push indentunit*indent + "raise NotImplementedError, 'Need to write #{method}'"
-        indent -= 1
-        meth.push indentunit*indent + "end"
+        meth = create_method(indentunit, indent, method)
         meths.push meth.join("\n")
       end
 
       methods.keys.sort.each do |method|
         next if method =~ /pretty_print/
-        meth = []
-        meth.push indentunit*indent + "def #{method}"
-        meth.last << "(*args)" unless method =~ /^test/
-        indent += 1
-        meth.push indentunit*indent + "raise NotImplementedError, 'Need to write #{method}'"
-        indent -= 1
-        meth.push indentunit*indent + "end"
+        meth = create_method(indentunit, indent, method)
         meths.push meth.join("\n")
       end
 

@@ -340,9 +340,24 @@ end
     assert_equal(expected, missing)
   end
 
+  def test_create_method
+    list = @tester.create_method("  ", 1, "wobble")
+    assert_equal(["  def wobble(*args)",
+                  "    raise NotImplementedError, 'Need to write wobble'",
+                  "  end"],list)
+  end
+
+  def test_methods_and_tests
+    @tester.process_class("ZenTest")
+    @tester.process_class("TestZenTest")
+    m,t = @tester.methods_and_tests("ZenTest", "TestZenTest")
+    assert(m.include?("methods_and_tests"))
+    assert(t.include?("test_methods_and_tests"))
+  end
+
   def test_generate_code_simple
     self.util_simple_setup
-    
+
     @tester.analyze
     str = @tester.generate_code[1..-1].join("\n")
     exp = @generated_code
