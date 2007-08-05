@@ -4,7 +4,8 @@
 What do we do to get people writing tests?
 What do we do to get people writing tests first?
 
-I didn't know it's name, but apparently it's the Lettuce Principal.
+I didn't know it's name, but apparently it's the Lettuce Principal,
+(see http://blog.toolshed.com/2003/03/the_lettuce_pri.html).
 
 	We NEED to make testing as easy as possible to get them testing.
 
