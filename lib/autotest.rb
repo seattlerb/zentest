@@ -212,7 +212,11 @@ class Autotest
           putc c
           line << c
           if c == ?\n then
-            @results << line.pack("c*")
+            @results << if RUBY_VERSION >= "1.9" then
+                          line.join
+                        else
+                          line.pack "c*"
+                        end
             line.clear
           end
         end
