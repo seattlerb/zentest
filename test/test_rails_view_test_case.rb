@@ -5,7 +5,7 @@ $TESTING_RTC = true
 
 module Rails
   module VERSION
-    STRING = '99.99.99'
+    STRING = '99.99.99' unless defined? STRING # HACK
   end
 end
 
