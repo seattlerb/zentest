@@ -5,9 +5,9 @@ $TESTING = true
 # I do this so I can still run ZenTest against the tests and itself...
 require 'zentest' unless defined? $ZENTEST
 
-class TestZenTestMapping < Test::Unit::TestCase
+class TestZentestMapping < Test::Unit::TestCase
   def setup
-    @tester = ZenTest.new # FIX: just inject the module
+    @tester = ZenTest.new
   end
 
   def util_simple_setup

@@ -7,7 +7,7 @@
 #
 # * Allows testing of individual AJAX templates.
 # * Allows testing of individual partials.
-# * Large library of helful assertions.
+# * Large library of helpful assertions.
 #
 # = Naming
 #

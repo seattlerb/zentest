@@ -261,7 +261,7 @@ class Autotest
   def path_to_classname(s)
     sep = File::SEPARATOR
     f = s.sub(/^test#{sep}/, '').sub(/\.rb$/, '').split(sep)
-    f = f.map { |path| path.split(/_/).map { |seg| seg.capitalize }.join }
+    f = f.map { |path| path.split(/_|(\d+)/).map { |seg| seg.capitalize }.join }
     f = f.map { |path| path =~ /^Test/ ? path : "Test#{path}"  }
     f.join('::')
   end

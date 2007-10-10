@@ -269,6 +269,7 @@ test_error2(#{@test_class}):
     # non-rails
     util_path_to_classname 'TestBlah', 'test/test_blah.rb'
     util_path_to_classname 'TestOuter::TestInner', 'test/outer/test_inner.rb'
+    util_path_to_classname 'TestRuby2Ruby', 'test/test_ruby2ruby.rb'
   end
 
   def test_tests_for_file
