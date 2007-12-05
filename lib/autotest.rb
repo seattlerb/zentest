@@ -139,7 +139,7 @@ class Autotest
   def initialize
     @files = Hash.new Time.at(0)
     @files_to_test = Hash.new { |h,k| h[k] = [] }
-    @exceptions = false
+    @exceptions = []
     @libs = %w[. lib test].join(File::PATH_SEPARATOR)
     @output = $stderr
     @sleep = 1
@@ -155,6 +155,12 @@ class Autotest
     }
 
     hook :initialize
+
+    if @exceptions.empty? then
+      @exceptions = nil
+    else
+      @exceptions = Regexp.union *@exceptions
+    end
   end
 
   # Repeatedly run failed tests, then all tests, then
@@ -195,10 +201,11 @@ class Autotest
   # Look for files to test then run the tests and
   # handle the results.
   def run_tests
+    hook :run_command
+
     find_files_to_test # failed + changed/affected
     cmd = make_test_cmd @files_to_test
 
-    hook :run_command
     puts cmd
 
     old_sync = $stdout.sync
@@ -232,6 +239,10 @@ class Autotest
 
   ############################################################
   # Utility Methods, not essential to reading of logic
+
+  def add_mapping(regexp, &proc)
+    self.test_mappings[regexp] = proc
+  end
 
   def add_sigint_handler
     trap 'INT' do
@@ -289,7 +300,7 @@ class Autotest
   def find_files
     result = {}
     Find.find '.' do |f|
-      Find.prune if @exceptions and f =~ @exceptions and test ?d, f
+      Find.prune if @exceptions and f =~ @exceptions
 
       next if test ?d, f
       next if f =~ /(swp|~|rej|orig)$/        # temporary/patch files
