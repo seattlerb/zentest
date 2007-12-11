@@ -124,6 +124,8 @@ class Autotest
   end
 
   attr_accessor(:exceptions,
+                :extra_class_map,
+                :extra_files,
                 :files,
                 :files_to_test,
                 :interrupted,
@@ -137,9 +139,11 @@ class Autotest
                 :wants_to_quit)
 
   def initialize
+    @exceptions = []
+    @extra_class_map = {}
+    @extra_files = []
     @files = Hash.new Time.at(0)
     @files_to_test = Hash.new { |h,k| h[k] = [] }
-    @exceptions = []
     @libs = %w[. lib test].join(File::PATH_SEPARATOR)
     @output = $stderr
     @sleep = 1
@@ -159,7 +163,7 @@ class Autotest
     if @exceptions.empty? then
       @exceptions = nil
     else
-      @exceptions = Regexp.union *@exceptions
+      @exceptions = Regexp.union(*@exceptions)
     end
   end
 
@@ -282,6 +286,7 @@ class Autotest
     filters = Hash.new { |h,k| h[k] = [] }
 
     class_map = Hash[*@files.keys.grep(/^test/).map { |f| [path_to_classname(f), f] }.flatten]
+    class_map.merge!(self.extra_class_map)
 
     failed.each do |method, klass|
       if class_map.has_key? klass then
@@ -299,7 +304,8 @@ class Autotest
   # a Hash mapping filename to modification time.
   def find_files
     result = {}
-    Find.find '.' do |f|
+    targets = ['.'] + self.extra_files
+    Find.find(*targets) do |f|
       Find.prune if @exceptions and f =~ @exceptions
 
       next if test ?d, f
