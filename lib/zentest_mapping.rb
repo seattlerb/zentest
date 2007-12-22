@@ -59,7 +59,7 @@ module ZenTestMapping
   # taking into account names composed of metacharacters
   # (used for arithmetic, etc
   def normal_to_test(name)
-    name = name.dup # wtf?
+    name = name.to_s.dup # wtf?
     is_cls_method = name.sub!(/^self\./, '')
     name = @@method_map[name] if @@method_map.has_key? name
     name = name.sub(/=$/, '_equals')
@@ -74,6 +74,8 @@ module ZenTestMapping
   # symbolic names which may have been anglicised by
   # #normal_to_test().
   def test_to_normal(name, klassname=nil)
+    name = name.to_s
+
     known_methods = (@inherited_methods[klassname] || {}).keys.sort.reverse
 
     mapped_re = @@orig_method_map.values.sort_by { |k| k.length }.map {|s| Regexp.escape(s)}.reverse.join("|")

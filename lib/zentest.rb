@@ -132,7 +132,7 @@ class ZenTest
     klass_methods = klass.singleton_methods(full)
     klass_methods -= Class.public_methods(true)
     klass_methods -= %w(suite new)
-    klass_methods = klass_methods.map { |m| "self." + m }
+    klass_methods = klass_methods.map { |m| "self.#{m}" }
     public_methods += klass_methods
     public_methods -= Kernel.methods unless full
     public_methods -= %w(pretty_print pretty_print_cycle)

@@ -8,7 +8,7 @@ $TESTING = true
 require 'zentest' unless defined? $ZENTEST
 
 class TrueClass # stupid YAML is breaking my tests. Enters via Test::Rails
-  remove_method :taguri, :taguri=, :to_yaml
+  remove_method :taguri, :taguri=, :to_yaml rescue nil
 end
 
 # These are just classes set up for quick testing.

@@ -165,10 +165,10 @@ class TestRailsViewTestCase < Test::Rails::ViewTestCase
 
     assert_equal 2, @assert_select.length
 
-    assert_equal ["select[name='game[location_id]'] option[value='2']",
-                  { :text => 'Guaymas' }], @assert_select.shift
-    assert_equal ["select[name='game[location_id]'] option[value='1']",
-                  { :text => 'Ballet' }], @assert_select.shift
+    assert_include ["select[name='game[location_id]'] option[value='2']",
+                   { :text => 'Guaymas' }], @assert_select
+    assert_include ["select[name='game[location_id]'] option[value='1']",
+                   { :text => 'Ballet' }], @assert_select
   end
 
   def test_assert_select_tag_form
@@ -177,12 +177,12 @@ class TestRailsViewTestCase < Test::Rails::ViewTestCase
 
     assert_equal 4, @assert_select.length
 
-    assert_equal ["form[action='/game/save']"], @assert_select.shift
-    assert_equal ["select[name='game[location_id]'] option[value='2']",
-                  { :text => 'Guaymas' }], @assert_select.shift
-    assert_equal ["form[action='/game/save']"], @assert_select.shift
-    assert_equal ["select[name='game[location_id]'] option[value='1']",
-                  { :text => 'Ballet' }], @assert_select.shift
+    assert_include ["form[action='/game/save']"], @assert_select
+    assert_include ["select[name='game[location_id]'] option[value='2']",
+                   { :text => 'Guaymas' }], @assert_select
+    assert_include ["form[action='/game/save']"], @assert_select
+    assert_include ["select[name='game[location_id]'] option[value='1']",
+                   { :text => 'Ballet' }], @assert_select
   end
 
   def test_assert_submit
