@@ -15,6 +15,7 @@ example_dot_autotest.rb
 lib/autotest.rb
 lib/autotest/autoupdate.rb
 lib/autotest/camping.rb
+lib/autotest/cctray.rb
 lib/autotest/discover.rb
 lib/autotest/emacs.rb
 lib/autotest/fixtures.rb
