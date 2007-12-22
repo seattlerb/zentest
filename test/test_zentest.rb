@@ -386,6 +386,7 @@ end
 
   def test_get_inherited_methods_for_subclass_full
     expect = Object.instance_methods + %w( inherited overridden )
+    expect.map! { |m| m.to_s }
     result = @tester.get_inherited_methods_for("LowlyOne", true)
 
     assert_equal(expect.sort, result.keys.sort)
@@ -399,7 +400,7 @@ end
   end
 
   def test_get_inherited_methods_for_superclass_full
-    expect = Object.instance_methods
+    expect = Object.instance_methods.map { |m| m.to_s }
     result = @tester.get_inherited_methods_for("SuperDuper", true)
 
     assert_equal(expect.sort, result.keys.sort)

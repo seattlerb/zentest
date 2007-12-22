@@ -56,7 +56,7 @@ end
 
 class ZenTest
 
-  VERSION = '3.6.2'
+  VERSION = '3.7.0'
 
   include ZenTestMapping
 
@@ -128,21 +128,24 @@ class ZenTest
     klass = self.get_class(klass) if klass.kind_of? String
 
     # WTF? public_instance_methods: default vs true vs false = 3 answers
+    # to_s on all results if ruby >= 1.9
     public_methods = klass.public_instance_methods(false)
+    public_methods -= Kernel.methods unless full
+    public_methods.map! { |m| m.to_s }
+    public_methods -= %w(pretty_print pretty_print_cycle)
+
     klass_methods = klass.singleton_methods(full)
     klass_methods -= Class.public_methods(true)
-    klass_methods -= %w(suite new)
     klass_methods = klass_methods.map { |m| "self.#{m}" }
-    public_methods += klass_methods
-    public_methods -= Kernel.methods unless full
-    public_methods -= %w(pretty_print pretty_print_cycle)
-    klassmethods = {}
-    public_methods.each do |meth|
+    klass_methods  -= %w(self.suite new)
+
+    result = {}
+    (public_methods + klass_methods).each do |meth|
       puts "# found method #{meth}" if $DEBUG
-      klassmethods[meth] = true
+      result[meth] = true
     end
 
-    return klassmethods
+    return result
   end
 
   # Return the methods for class klass, as a hash with the
@@ -165,7 +168,7 @@ class ZenTest
         end
 
         the_methods.each do |meth|
-          klassmethods[meth] = true
+          klassmethods[meth.to_s] = true
         end
       end
     end
