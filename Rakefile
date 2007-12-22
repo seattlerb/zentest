@@ -9,7 +9,7 @@ require './lib/zentest.rb'
 Hoe.new("ZenTest", ZenTest::VERSION) do |p|
   p.author = ['Ryan Davis', 'Eric Hodel']
 
-  changes = p.paragraphs_of("History.txt", 0..1).join("\n\n")
+  changes = p.paragraphs_of("History.txt", 0..4).join("\n\n")
   urls, summary, *description = p.paragraphs_of("README.txt", 1, 3, 3..8)
 
   p.url = urls.gsub(/^\* /, '').split(/\n/)
