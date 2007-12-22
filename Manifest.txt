@@ -6,8 +6,6 @@ Rakefile
 bin/autotest
 bin/multiruby
 bin/rails_test_audit
-bin/ruby_fork
-bin/ruby_fork_client
 bin/unit_diff
 bin/zentest
 example.txt
@@ -35,7 +33,6 @@ lib/autotest/shame.rb
 lib/autotest/snarl.rb
 lib/autotest/timestamp.rb
 lib/functional_test_matrix.rb
-lib/ruby_fork.rb
 lib/test/rails.rb
 lib/test/rails/controller_test_case.rb
 lib/test/rails/functional_test_case.rb
@@ -56,7 +53,6 @@ test/test_rails_autotest.rb
 test/test_rails_controller_test_case.rb
 test/test_rails_helper_test_case.rb
 test/test_rails_view_test_case.rb
-test/test_ruby_fork.rb
 test/test_unit_diff.rb
 test/test_zentest.rb
 test/test_zentest_assertions.rb
