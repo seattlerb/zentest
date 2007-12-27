@@ -7,7 +7,9 @@ def run(cmd)
   raise "ERROR: Command failed with exit code #{$?}" unless system cmd
 end
 
-root_dir = File.expand_path(ENV['MULTIRUBY'] || File.join(ENV['HOME'], ".multiruby"))
+root_dir = File.expand_path(ENV['MULTIRUBY'] ||
+                            File.join(ENV['HOME'], ".multiruby"))
+
 unless test ?d, root_dir then
   puts "creating #{root_dir}"
   Dir.mkdir root_dir, 0700
@@ -20,18 +22,22 @@ Dir.chdir root_dir do
       puts "creating #{dir}"
       Dir.mkdir dir
       if dir == "versions" then
-        file = "ruby-#{RUBY_VERSION}.tar.gz"
-        puts "  downloading #{file} via HTTP... this might take a while."
-        puts "  Put other ruby tarballs in versions to use them."
-
+        puts "  Downloading initial ruby tarballs to ~/.multiruby/versions:"
         Dir.chdir dir do
-          require 'open-uri'
-          open("http://ftp.ruby-lang.org/pub/ruby/#{file}") do |f|
-            File.open file, 'w' do |out|
-              out.write f.read
+          files = %w[ ruby-1.8.6-p111.tar.gz 1.9/ruby-1.9.0-0.tar.gz ]
+          files.each do |file|
+            require 'open-uri'
+            open("http://ftp.ruby-lang.org/pub/ruby/#{file}") do |f|
+              base = File.basename file
+              puts "    #{base} via HTTP... this might take a while."
+              File.open base, 'w' do |out|
+                out.write f.read
+              end
             end
           end
         end
+        puts "  ...done"
+        puts "  Put other ruby tarballs in ~/.multiruby/versions to use them."
       end
     end
   end
@@ -62,8 +68,7 @@ Dir.chdir root_dir do
           run "make install &> log.install"
           build_dir = Dir.pwd
 
-          if rubygem_tarball then
-            next if version.gsub(/\./, '') =~ /^19/ # doesn't seem to work w/ ruby 1.9, filed bug
+          if rubygem_tarball and version !~ /1[._-]9/ then
             rubygems = File.basename rubygem_tarball, ".tgz"
             run "tar zxf #{rubygem_tarball}" unless test ?d, rubygems
 

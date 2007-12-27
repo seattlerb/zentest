@@ -1,3 +1,10 @@
+=== 3.7.1 / 2007-12-27
+
+* 2 minor enhancements:
+
+  * multiruby now downloads 1.8.6 and 1.9 on virgin run.
+  * Improved output for the downloads.
+
 === 3.7.0 / 2007-12-21
 
 * 8 minor enhancements:
