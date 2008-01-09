@@ -153,7 +153,7 @@ class Autotest
       /^lib\/.*\.rb$/ => proc { |filename, _|
         files_matching %r%^test/.*#{File.basename(filename).gsub '_', '_?'}$%
       },
-      /^test\/test_.*rb$/ => proc { |filename, _|
+      /^test.*\/test_.*rb$/ => proc { |filename, _|
         filename
       }
     }
@@ -281,7 +281,6 @@ class Autotest
     f.join('::')
   end
 
-
   def consolidate_failures(failed)
     filters = Hash.new { |h,k| h[k] = [] }
 
@@ -305,6 +304,7 @@ class Autotest
   def find_files
     result = {}
     targets = ['.'] + self.extra_files
+
     Find.find(*targets) do |f|
       Find.prune if @exceptions and f =~ @exceptions
 
@@ -316,6 +316,7 @@ class Autotest
 
       result[filename] = File.stat(filename).mtime rescue next
     end
+
     return result
   end
 
@@ -415,7 +416,7 @@ class Autotest
     result = @test_mappings.find { |file_re, ignored| filename =~ file_re }
     result = result.nil? ? [] : Array(result.last.call(filename, $~))
 
-    @output.puts "Dunno! #{filename}" if $TESTING and result.empty?
+    @output.puts "Dunno! #{filename}" if ($VERBOSE or $TESTING) and result.empty?
 
     result.sort.uniq
   end
