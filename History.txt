@@ -1,3 +1,10 @@
+=== 3.7.2 / 2008-01-09
+
+* 2 minor enhancements:
+
+  * Extended file map for tests to include subdirs correctly.
+  * Added debugging output on bad maps if -v set.
+
 === 3.7.1 / 2007-12-27
 
 * 2 minor enhancements:
