@@ -1,3 +1,21 @@
+=== 3.8.0 / 2008-01-12
+
+* 9 minor enhancements:
+
+  * Changed Dunno! message to only output on -v
+  * Added Getting Started with Autotest by Philippe Hanrigou (with permission)
+  * Updated example_dot_autotest.rb for newer plugins.
+  * Cleaned up rdoc.
+  * Worked with David Chelimsky to make Autotest more uber for subclasses.
+  * Removed exceptions and test_mappings accessors and replaced with add/remove/clear methods. Updating .autotest should be very straightforward.
+  * Moved :initialize hook to beginning of run method
+  * Changed load/customization order to be:
+    * Autotest
+    * AutotestSubClass
+    * ~/.autotest
+    * ./.autotest (yes, both .autotest files).
+  * Moved away from using instance variables to encourage subclasses to use accessors.
+
 === 3.7.2 / 2008-01-09
 
 * 2 minor enhancements:

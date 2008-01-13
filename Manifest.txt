@@ -1,8 +1,10 @@
 History.txt
-LinuxJournalArticle.txt
 Manifest.txt
 README.txt
 Rakefile
+articles/Article.css
+articles/getting_started_with_autotest.html
+articles/how_to_use_zentest.txt
 bin/autotest
 bin/multiruby
 bin/rails_test_audit

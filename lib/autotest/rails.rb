@@ -4,54 +4,62 @@ class Autotest::Rails < Autotest
 
   def initialize # :nodoc:
     super
-    @exceptions = /^\.\/(?:db|doc|log|public|script|tmp|vendor\/rails)/
 
-    @test_mappings = {
-      %r%^test/fixtures/(.*)s.yml% => proc { |_, m|
-        ["test/unit/#{m[1]}_test.rb",
-         "test/controllers/#{m[1]}_controller_test.rb",
-         "test/views/#{m[1]}_view_test.rb",
-         "test/functional/#{m[1]}_controller_test.rb"]
-      },
-      %r%^test/(unit|integration|controllers|views|functional)/.*rb$% => proc { |filename, _|
-        filename
-      },
-      %r%^app/models/(.*)\.rb$% => proc { |_, m|
-        ["test/unit/#{m[1]}_test.rb"]
-      },
-      %r%^app/helpers/application_helper.rb% => proc {
+    add_exception %r%^\./(?:db|doc|log|public|script|tmp|vendor/rails)%
+
+    add_mapping %r%^test/fixtures/(.*)s.yml% do |_, m|
+      ["test/unit/#{m[1]}_test.rb",
+       "test/controllers/#{m[1]}_controller_test.rb",
+       "test/views/#{m[1]}_view_test.rb",
+       "test/functional/#{m[1]}_controller_test.rb"]
+    end
+
+    add_mapping %r%^test/(unit|integration|controllers|views|functional)/.*rb$% do |filename, _|
+      filename
+    end
+
+    add_mapping %r%^app/models/(.*)\.rb$% do |_, m|
+      "test/unit/#{m[1]}_test.rb"
+    end
+
+    add_mapping %r%^app/helpers/application_helper.rb% do
+      files_matching %r%^test/(views|functional)/.*_test\.rb$%
+    end
+
+    add_mapping %r%^app/helpers/(.*)_helper.rb% do |_, m|
+      if m[1] == "application" then
         files_matching %r%^test/(views|functional)/.*_test\.rb$%
-      },
-      %r%^app/helpers/(.*)_helper.rb% => proc { |_, m|
-        if m[1] == "application" then
-          files_matching %r%^test/(views|functional)/.*_test\.rb$%
-        else
-          ["test/views/#{m[1]}_view_test.rb",
-           "test/functional/#{m[1]}_controller_test.rb"]
-        end
-      },
-      %r%^app/views/(.*)/% => proc { |_, m|
+      else
         ["test/views/#{m[1]}_view_test.rb",
          "test/functional/#{m[1]}_controller_test.rb"]
-      },
-      %r%^app/controllers/(.*)\.rb$% => proc { |_, m|
-        if m[1] == "application" then
-          files_matching %r%^test/(controllers|views|functional)/.*_test\.rb$%
-        else
-          ["test/controllers/#{m[1]}_test.rb",
-           "test/functional/#{m[1]}_test.rb"]
-        end
-      },
-      %r%^app/views/layouts/% => proc {
-        "test/views/layouts_view_test.rb"
-      },
-      %r%^config/routes.rb$% => proc { # FIX:
+      end
+    end
+
+    add_mapping %r%^app/views/(.*)/% do |_, m|
+      ["test/views/#{m[1]}_view_test.rb",
+       "test/functional/#{m[1]}_controller_test.rb"]
+    end
+
+    add_mapping %r%^app/controllers/(.*)\.rb$% do |_, m|
+      if m[1] == "application" then
         files_matching %r%^test/(controllers|views|functional)/.*_test\.rb$%
-      },
-      %r%^test/test_helper.rb|config/((boot|environment(s/test)?).rb|database.yml)% => proc {
-        files_matching %r%^test/(unit|controllers|views|functional)/.*_test\.rb$%
-      },
-    }
+      else
+        ["test/controllers/#{m[1]}_test.rb",
+         "test/functional/#{m[1]}_test.rb"]
+      end
+    end
+
+    add_mapping %r%^app/views/layouts/% do
+      "test/views/layouts_view_test.rb"
+    end
+
+    add_mapping %r%^config/routes.rb$% do # FIX:
+      files_matching %r%^test/(controllers|views|functional)/.*_test\.rb$%
+    end
+
+    add_mapping %r%^test/test_helper.rb|config/((boot|environment(s/test)?).rb|database.yml)% do
+      files_matching %r%^test/(unit|controllers|views|functional)/.*_test\.rb$%
+    end
   end
 
   # Given the string filename as the path, determine

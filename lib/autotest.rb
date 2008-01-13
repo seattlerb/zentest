@@ -119,12 +119,14 @@ class Autotest
     @@discoveries.map { |proc| proc.call }.flatten.compact.sort.uniq
   end
 
+  ##
+  # Initialize and run the system.
+
   def self.run
     new.run
   end
 
-  attr_accessor(:exceptions,
-                :extra_class_map,
+  attr_accessor(:extra_class_map,
                 :extra_files,
                 :files,
                 :files_to_test,
@@ -134,12 +136,14 @@ class Autotest
                 :output,
                 :results,
                 :tainted,
-                :test_mappings,
                 :unit_diff,
                 :wants_to_quit)
 
+  ##
+  # Initialize the instance and then load the user's .autotest file, if any.
+
   def initialize
-    @exceptions = []
+    @exception_list = []
     @extra_class_map = {}
     @extra_files = []
     @files = Hash.new Time.at(0)
@@ -148,43 +152,43 @@ class Autotest
     @output = $stderr
     @sleep = 1
     @unit_diff = "unit_diff -u"
+    @test_mappings = {}
 
-    @test_mappings = {
-      /^lib\/.*\.rb$/ => proc { |filename, _|
-        files_matching %r%^test/.*#{File.basename(filename).gsub '_', '_?'}$%
-      },
-      /^test.*\/test_.*rb$/ => proc { |filename, _|
-        filename
-      }
-    }
+    self.add_mapping(/^lib\/.*\.rb$/) do |filename, _|
+      possible = File.basename(filename).gsub '_', '_?'
+      files_matching %r%^test/.*#{possible}$%
+    end
 
-    hook :initialize
+    self.add_mapping(/^test.*\/test_.*rb$/) do |filename, _|
+      filename
+    end
 
-    if @exceptions.empty? then
-      @exceptions = nil
-    else
-      @exceptions = Regexp.union(*@exceptions)
+    [File.expand_path('~/.autotest'), './.autotest'].each do |f|
+      load f if File.exist? f
     end
   end
 
-  # Repeatedly run failed tests, then all tests, then
-  # wait for changes and carry on until killed.
+  ##
+  # Repeatedly run failed tests, then all tests, then wait for changes
+  # and carry on until killed.
+
   def run
-    hook :run
+    hook :initialize
+    hook :run                           # TODO: phase out
     reset
     add_sigint_handler
 
     loop do # ^c handler
       begin
         get_to_green
-        if @tainted then
+        if self.tainted then
           rerun_all_tests
         else
           hook :all_good
         end
         wait_for_changes
       rescue Interrupt
-        if @wants_to_quit then
+        if self.wants_to_quit then
           break
         else
           reset
@@ -194,7 +198,9 @@ class Autotest
     hook :quit
   end
 
+  ##
   # Keep running the tests after a change, until all pass.
+
   def get_to_green
     until all_good do
       run_tests
@@ -202,19 +208,20 @@ class Autotest
     end
   end
 
-  # Look for files to test then run the tests and
-  # handle the results.
+  ##
+  # Look for files to test then run the tests and handle the results.
+
   def run_tests
     hook :run_command
 
-    find_files_to_test # failed + changed/affected
-    cmd = make_test_cmd @files_to_test
+    self.find_files_to_test # failed + changed/affected
+    cmd = self.make_test_cmd self.files_to_test
 
     puts cmd
 
     old_sync = $stdout.sync
     $stdout.sync = true
-    @results = []
+    self.results = []
     line = []
     begin
       open("| #{cmd}", "r") do |f|
@@ -223,11 +230,11 @@ class Autotest
           putc c
           line << c
           if c == ?\n then
-            @results << if RUBY_VERSION >= "1.9" then
-                          line.join
-                        else
-                          line.pack "c*"
-                        end
+            self.results << if RUBY_VERSION >= "1.9" then
+                              line.join
+                            else
+                              line.pack "c*"
+                            end
             line.clear
           end
         end
@@ -236,26 +243,25 @@ class Autotest
       $stdout.sync = old_sync
     end
     hook :ran_command
-    @results = @results.join
+    self.results = self.results.join
 
-    handle_results(@results)
+    handle_results(self.results)
   end
 
   ############################################################
   # Utility Methods, not essential to reading of logic
 
-  def add_mapping(regexp, &proc)
-    self.test_mappings[regexp] = proc
-  end
+  ##
+  # Installs a sigint handler.
 
   def add_sigint_handler
     trap 'INT' do
-      if @interrupted then
-        @wants_to_quit = true
+      if self.interrupted then
+        self.wants_to_quit = true
       else
         unless hook :interrupt then
           puts "Interrupt a second time to quit"
-          @interrupted = true
+          self.interrupted = true
           sleep 1.5
         end
         raise Interrupt, nil # let the run loop catch it
@@ -263,16 +269,18 @@ class Autotest
     end
   end
 
-  # If there are no files left to test
-  # (because they've all passed),
+  ##
+  # If there are no files left to test (because they've all passed),
   # then all is good.
+
   def all_good
-    @files_to_test.empty?
+    files_to_test.empty?
   end
 
-  # Convert a path in a string, s, into a
-  # class name, changing underscores to CamelCase,
-  # etc
+  ##
+  # Convert a path in a string, s, into a class name, changing
+  # underscores to CamelCase, etc.
+
   def path_to_classname(s)
     sep = File::SEPARATOR
     f = s.sub(/^test#{sep}/, '').sub(/\.rb$/, '').split(sep)
@@ -281,35 +289,43 @@ class Autotest
     f.join('::')
   end
 
+  ##
+  # Returns a hash mapping a file name to the known failures for that
+  # file.
+
   def consolidate_failures(failed)
     filters = Hash.new { |h,k| h[k] = [] }
 
-    class_map = Hash[*@files.keys.grep(/^test/).map { |f| [path_to_classname(f), f] }.flatten]
+    class_map = Hash[*self.files.keys.grep(/^test/).map { |f|
+                       [path_to_classname(f), f]
+                     }.flatten]
     class_map.merge!(self.extra_class_map)
 
     failed.each do |method, klass|
       if class_map.has_key? klass then
         filters[class_map[klass]] << method
       else
-        @output.puts "Unable to map class #{klass} to a file"
+        output.puts "Unable to map class #{klass} to a file"
       end
     end
 
     return filters
   end
 
-  # Find the files to process, ignoring temporary files,
-  # source configuration management files, etc., and return
-  # a Hash mapping filename to modification time.
+  ##
+  # Find the files to process, ignoring temporary files, source
+  # configuration management files, etc., and return a Hash mapping
+  # filename to modification time.
+
   def find_files
     result = {}
     targets = ['.'] + self.extra_files
 
     Find.find(*targets) do |f|
-      Find.prune if @exceptions and f =~ @exceptions
+      Find.prune if f =~ self.exceptions
 
       next if test ?d, f
-      next if f =~ /(swp|~|rej|orig)$/        # temporary/patch files
+      next if f =~ /(swp|~|rej|orig)$/          # temporary/patch files
       next if f =~ /\/\.?#/                     # Emacs autosave/cvs merge files
 
       filename = f.sub(/^\.\//, '')
@@ -320,73 +336,83 @@ class Autotest
     return result
   end
 
-  # Find the files which have been modified, update
-  # the recorded timestamps, and use this to update
-  # the files to test. Returns true if any file is
-  # newer than the previously recorded most recent
+  ##
+  # Find the files which have been modified, update the recorded
+  # timestamps, and use this to update the files to test. Returns true
+  # if any file is newer than the previously recorded most recent
   # file.
+
   def find_files_to_test(files=find_files)
     updated = files.select { |filename, mtime|
-      @files[filename] < mtime
+      self.files[filename] < mtime
     }
 
-    p updated if $v unless updated.empty? or @last_mtime.to_i == 0
+    p updated if $v unless updated.empty? or self.last_mtime.to_i == 0
 
     # TODO: keep an mtime at app level and drop the files hash
     updated.each do |filename, mtime|
-      @files[filename] = mtime
+      self.files[filename] = mtime
     end
 
     updated.each do |filename, mtime|
       tests_for_file(filename).each do |f|
-        @files_to_test[f] # creates key with default value
+        self.files_to_test[f] # creates key with default value
       end
     end
 
-    previous = @last_mtime
-    @last_mtime = @files.values.max
-    @last_mtime > previous
+    previous = self.last_mtime
+    self.last_mtime = self.files.values.max
+    self.last_mtime > previous
   end
 
-  # Check results for failures, set the "bar" to red or
-  # green, and if there are failures record this.
+  ##
+  # Check results for failures, set the "bar" to red or green, and if
+  # there are failures record this.
+
   def handle_results(results)
     failed = results.scan(/^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/)
     completed = results =~ /\d+ tests, \d+ assertions, \d+ failures, \d+ errors/
 
-    @files_to_test = consolidate_failures failed if completed
+    self.files_to_test = consolidate_failures failed if completed
 
-    hook completed && @files_to_test.empty? ? :green : :red unless $TESTING
+    hook completed && self.files_to_test.empty? ? :green : :red unless $TESTING
 
-    @tainted = true unless @files_to_test.empty?
+    self.tainted = true unless self.files_to_test.empty?
   end
 
+  ##
   # Generate the commands to test the supplied files
+
   def make_test_cmd files_to_test
     cmds = []
     full, partial = files_to_test.partition { |k,v| v.empty? }
 
     unless full.empty? then
       classes = full.map {|k,v| k}.flatten.uniq.sort.join(' ')
-      cmds << "#{ruby} -I#{@libs} -rtest/unit -e \"%w[#{classes}].each { |f| require f }\" | #{unit_diff}"
+      cmds << "#{ruby} -I#{libs} -rtest/unit -e \"%w[#{classes}].each { |f| require f }\" | #{unit_diff}"
     end
 
     partial.each do |klass, methods|
-      cmds << "#{ruby} -I#{@libs} #{klass} -n \"/^(#{Regexp.union(*methods).source})$/\" | #{unit_diff}"
+      regexp = Regexp.union(*methods).source
+      cmds << "#{ruby} -I#{libs} #{klass} -n \"/^(#{regexp})$/\" | #{unit_diff}"
     end
 
     return cmds.join("#{SEP} ")
   end
 
+  ##
   # Rerun the tests from cold (reset state)
+
   def rerun_all_tests
     reset
     run_tests
     hook :all_good if all_good
   end
 
-  # Clear all state information about test failures
-  # and whether interrupts will kill autotest.
+  ##
+  # Clear all state information about test failures and whether
+  # interrupts will kill autotest.
+
   def reset
     @interrupted = @wants_to_quit = false
     @files.clear
@@ -397,7 +423,9 @@ class Autotest
     hook :reset
   end
 
-  # determine and return the path of the ruby executable.
+  ##
+  # Determine and return the path of the ruby executable.
+
   def ruby
     ruby = File.join(Config::CONFIG['bindir'],
                      Config::CONFIG['ruby_install_name'])
@@ -409,20 +437,23 @@ class Autotest
     return ruby
   end
 
+  ##
+  # Return the name of the file with the tests for filename by finding
+  # a +test_mapping+ that matches the file and executing the mapping's
+  # proc.
 
-  # Return the name of the file with the tests for
-  # filename.
   def tests_for_file(filename)
     result = @test_mappings.find { |file_re, ignored| filename =~ file_re }
     result = result.nil? ? [] : Array(result.last.call(filename, $~))
 
-    @output.puts "Dunno! #{filename}" if ($VERBOSE or $TESTING) and result.empty?
+    output.puts "Dunno! #{filename}" if ($v or $TESTING) and result.empty?
 
     result.sort.uniq
   end
 
-  # Sleep then look for files to test, until there
-  # are some.
+  ##
+  # Sleep then look for files to test, until there are some.
+
   def wait_for_changes
     hook :waiting
     begin
@@ -430,14 +461,103 @@ class Autotest
     end until find_files_to_test
   end
 
+  ############################################################
+  # File Mappings:
+
+  ##
+  # Returns all known files in the codebase matching +regexp+.
+
   def files_matching regexp
     @files.keys.select { |k|
       k =~ regexp
     }
   end
 
+  ##
+  # Adds a file mapping. +regexp+ should match a file path in the
+  # codebase. +proc+ is passed a matched filename and
+  # Regexp.last_match. +proc+ should return an array of tests to run.
+  #
+  # For example, if test_helper.rb is modified, rerun all tests:
+  #
+  #   at.add_mapping(/test_helper.rb/) do |f, _|
+  #     at.files_matching(/^test.*rb$/)
+  #   end
+
+  def add_mapping(regexp, &proc)
+    @test_mappings[regexp] = proc
+  end
+
+  ##
+  # Removed a file mapping matching +regexp+.
+
+  def remove_mapping regexp
+    @test_mappings.delete regexp
+  end
+
+  ##
+  # Clears all file mappings. This is DANGEROUS as it entirely
+  # disables autotest. You must add at least one file mapping that
+  # does a good job of rerunning appropriate tests.
+
+  def clear_mappings
+    @test_mappings.clear
+  end
+
+  ############################################################
+  # Exceptions:
+
+  ##
+  # Adds +regexp+ to the list of exceptions for find_file. This must
+  # be called _before_ the exceptions are compiled.
+
+  def add_exception regexp
+    raise "exceptions already compiled" if defined? @exceptions
+    @exception_list << regexp
+  end
+
+  ##
+  # Removes +regexp+ to the list of exceptions for find_file. This
+  # must be called _before_ the exceptions are compiled.
+
+  def remove_exception regexp
+    raise "exceptions already compiled" if defined? @exceptions
+    @exception_list.delete regexp
+  end
+
+  ##
+  # Clears the list of exceptions for find_file. This must be called
+  # _before_ the exceptions are compiled.
+
+  def clear_exceptions
+    raise "exceptions already compiled" if defined? @exceptions
+    @exception_list.clear
+  end
+
+  ##
+  # Return a compiled regexp of exceptions for find_files or nil if no
+  # filtering should take place. This regexp is generated from
+  # @exception_list.
+
+  def exceptions
+    unless defined? @exceptions then
+      if @exception_list.empty? then
+        @exceptions = nil
+      else
+        @exceptions = Regexp.union(*@exception_list)
+      end
+    end
+
+    @exceptions
+  end
+
   ############################################################
   # Hooks:
+
+  ##
+  # Call the event hook named +name+, executing all registered hooks
+  # until one returns true. Returns false if no hook handled the
+  # event.
 
   def hook(name)
     HOOKS[name].inject(false) do |handled,plugin|
@@ -445,15 +565,11 @@ class Autotest
     end
   end
 
-  # Add the supplied block to the available hooks, with
-  # the given name.
+  ##
+  # Add the supplied block to the available hooks, with the given
+  # name.
+
   def self.add_hook(name, &block)
     HOOKS[name] << block
   end
-end
-
-if test ?f, './.autotest' then
-  load './.autotest'
-elsif test ?f, File.expand_path('~/.autotest') then
-  load File.expand_path('~/.autotest')
 end

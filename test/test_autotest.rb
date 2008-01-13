@@ -18,6 +18,8 @@ require 'autotest'
 #   run_tests
 
 class Autotest
+  attr_reader :test_mappings, :exception_list
+
   def self.clear_hooks
     HOOKS.clear
   end
@@ -46,6 +48,45 @@ class TestAutotest < Test::Unit::TestCase
     @a.last_mtime = Time.at(2)
   end
 
+  def test_add_exception
+    current = util_exceptions
+    @a.add_exception 'blah'
+
+    actual = util_exceptions
+    expect = current + ["blah"]
+
+    assert_equal expect, actual
+  end
+
+  def test_add_mapping
+    current = util_mappings
+    @a.add_mapping(/blah/) do 42 end
+
+    actual = util_mappings
+    expect = current + [/blah/]
+
+    assert_equal expect, actual
+  end
+
+  def test_clear_exceptions
+    test_add_exception
+    @a.clear_exceptions
+
+    actual = util_exceptions
+    expect = []
+
+    assert_equal expect, actual
+  end
+
+  def test_clear_mapping
+    @a.clear_mappings
+
+    actual = util_mappings
+    expect = []
+
+    assert_equal expect, actual
+  end
+
   def test_consolidate_failures_experiment
     @a.files.clear
     @a.files[@impl] = Time.at(1)
@@ -72,14 +113,6 @@ class TestAutotest < Test::Unit::TestCase
     assert_equal expected, @a.output.string
   end
 
-  def test_consolidate_failures_no_match
-    result = @a.consolidate_failures([['test_blah1', @test_class], ['test_blah2', @test_class], ['test_blah1', 'TestUnknown']])
-    expected = {@test => ['test_blah1', 'test_blah2']}
-    assert_equal expected, result
-    expected = "Unable to map class TestUnknown to a file\n"
-    assert_equal expected, @a.output.string
-  end
-
   def test_consolidate_failures_nested_classes
     @a.files.clear
     @a.files['lib/outer.rb'] = Time.at(5)
@@ -93,14 +126,32 @@ class TestAutotest < Test::Unit::TestCase
     assert_equal expected, @a.output.string
   end
 
+  def test_consolidate_failures_no_match
+    result = @a.consolidate_failures([['test_blah1', @test_class], ['test_blah2', @test_class], ['test_blah1', 'TestUnknown']])
+    expected = {@test => ['test_blah1', 'test_blah2']}
+    assert_equal expected, result
+    expected = "Unable to map class TestUnknown to a file\n"
+    assert_equal expected, @a.output.string
+  end
+
   def test_consolidate_failures_red
     result = @a.consolidate_failures([['test_blah1', @test_class], ['test_blah2', @test_class]])
     expected = {@test => ['test_blah1', 'test_blah2']}
     assert_equal expected, result
   end
 
-  # TODO: lots of filename edgecases for find_files_to_test
+  def test_exceptions
+    @a.clear_exceptions
+    test_add_exception
+    assert_equal(/blah/, @a.exceptions)
+  end
 
+  def test_exceptions_nil
+    @a.clear_exceptions
+    assert_nil @a.exceptions
+  end
+
+  # TODO: lots of filename edgecases for find_files_to_test
   def test_find_files_to_test
     @a.last_mtime = Time.at(0)
     assert @a.find_files_to_test(@a.files)
@@ -261,15 +312,32 @@ test_error2(#{@test_class}):
     assert_equal expected, result
   end
 
-  def util_path_to_classname(e,i)
-    assert_equal e, @a.path_to_classname(i)
-  end
-
   def test_path_to_classname
     # non-rails
     util_path_to_classname 'TestBlah', 'test/test_blah.rb'
     util_path_to_classname 'TestOuter::TestInner', 'test/outer/test_inner.rb'
     util_path_to_classname 'TestRuby2Ruby', 'test/test_ruby2ruby.rb'
+  end
+
+  def test_remove_exception
+    test_add_exception
+    current = util_exceptions
+    @a.remove_exception 'blah'
+
+    actual = util_exceptions
+    expect = current - ["blah"]
+
+    assert_equal expect, actual
+  end
+
+  def test_remove_mapping
+    current = util_mappings
+    @a.remove_mapping(/^lib\/.*\.rb$/)
+
+    actual = util_mappings
+    expect = current - [/^lib\/.*\.rb$/]
+
+    assert_equal expect, actual
   end
 
   def test_tests_for_file
@@ -282,6 +350,10 @@ test_error2(#{@test_class}):
     assert_equal [], @a.tests_for_file('test_unknown.rb')
   end
 
+  def util_exceptions
+    @a.exception_list.sort_by { |r| r.to_s }
+  end
+
   def util_find_files_to_test(f, expected)
     t = @a.last_mtime + 1
     files = { f => t }
@@ -290,5 +362,13 @@ test_error2(#{@test_class}):
     assert_equal expected, @a.files_to_test
     assert_equal t, @a.files[f]
     assert_equal "", @a.output.string
+  end
+
+  def util_mappings
+    @a.test_mappings.keys.sort_by { |x| x.to_s }
+  end
+
+  def util_path_to_classname(e,i)
+    assert_equal e, @a.path_to_classname(i)
   end
 end

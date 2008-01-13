@@ -1,6 +1,8 @@
 # -*- ruby -*-
 
 # require 'autotest/autoupdate'
+# require 'autotest/camping'
+# require 'autotest/cctray'
 # require 'autotest/emacs'
 # require 'autotest/fixtures'
 # require 'autotest/growl'
