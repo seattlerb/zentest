@@ -5,7 +5,7 @@ class Autotest::Rails < Autotest
   def initialize # :nodoc:
     super
 
-    add_exception %r%^\./(?:db|doc|log|public|script|tmp|vendor/rails)%
+    add_exception %r%^\./(?:db|doc|log|public|script|tmp|vendor)%
 
     add_mapping %r%^test/fixtures/(.*)s.yml% do |_, m|
       ["test/unit/#{m[1]}_test.rb",
