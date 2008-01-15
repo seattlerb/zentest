@@ -80,6 +80,11 @@ Dir.chdir root_dir do
       end
     end
   end
+
+  # pick up rubinius - allows for simple symlinks to your build dir
+  Dir.chdir('install') do
+    versions.push(*Dir["rubinius*"])
+  end
 end
 
 versions = ENV['VERSIONS'].split(/:/) if ENV.has_key? 'VERSIONS'
@@ -87,6 +92,8 @@ versions = ENV['VERSIONS'].split(/:/) if ENV.has_key? 'VERSIONS'
 results = {}
 versions.each do |version|
   ruby = "#{root_dir}/install/#{version}/bin/ruby"
+  ruby.sub!(/bin.ruby/, 'shotgun/rubinius') if version =~ /rubinius/
+
   puts
   puts "VERSION = #{version}"
   puts

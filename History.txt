@@ -1,7 +1,8 @@
 === 3.8.0 / 2008-01-12
 
-* 9 minor enhancements:
+* 10 minor enhancements:
 
+  * Added basic support for rubinius in multiruby.
   * Changed Dunno! message to only output on -v
   * Added Getting Started with Autotest by Philippe Hanrigou (with permission)
   * Updated example_dot_autotest.rb for newer plugins.
