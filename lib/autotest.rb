@@ -217,7 +217,7 @@ class Autotest
     self.find_files_to_test # failed + changed/affected
     cmd = self.make_test_cmd self.files_to_test
 
-    puts cmd
+    puts cmd unless $q
 
     old_sync = $stdout.sync
     $stdout.sync = true

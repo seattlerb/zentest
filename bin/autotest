@@ -2,6 +2,7 @@
 
 $v    ||= false
 $h    ||= false
+$q    ||= false
 $help ||= false
 
 if $h or $help then
@@ -15,6 +16,7 @@ if $h or $help then
           "\t-v\t\tBe verbose.",
           "\t\t\tPrints files that autotest doesn't know how to map to",
           "\t\t\ttests.",
+          "\t-q\t\tBe more quiet.",
          ]
   STDERR.puts help.join("\n")
   exit 1
