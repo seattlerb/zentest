@@ -27,6 +27,10 @@ end
 
 class TestAutotest < Test::Unit::TestCase
 
+  def deny test
+    assert ! test
+  end
+
   RUBY = File.join(Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name']) unless defined? RUBY
 
   def setup
@@ -42,10 +46,13 @@ class TestAutotest < Test::Unit::TestCase
     klassname.sub!(/^(\w+)(Autotest)$/, '\2::\1') unless klassname == "Autotest"
     @a = klassname.split(/::/).inject(Object) { |k,n| k.const_get(n) }.new
     @a.output = StringIO.new
-    @a.files.clear
-    @a.files[@impl] = Time.at(1)
-    @a.files[@test] = Time.at(2)
     @a.last_mtime = Time.at(2)
+
+    @files = {}
+    @files[@impl] = Time.at(1)
+    @files[@test] = Time.at(2)
+
+    @a.find_order = @files.keys.sort
   end
 
   def test_add_exception
@@ -88,9 +95,11 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_consolidate_failures_experiment
-    @a.files.clear
-    @a.files[@impl] = Time.at(1)
-    @a.files[@test] = Time.at(2)
+    @files.clear
+    @files[@impl] = Time.at(1)
+    @files[@test] = Time.at(2)
+
+    @a.find_order = @files.keys.sort
 
     input = [['test_fail1', @test_class], ['test_fail2', @test_class], ['test_error1', @test_class], ['test_error2', @test_class]]
     result = @a.consolidate_failures input
@@ -105,7 +114,7 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_consolidate_failures_multiple_possibilities
-    @a.files[@other_test] = Time.at(42)
+   @files[@other_test] = Time.at(42)
     result = @a.consolidate_failures([['test_unmatched', @test_class]])
     expected = { @test => ['test_unmatched']}
     assert_equal expected, result
@@ -114,11 +123,14 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_consolidate_failures_nested_classes
-    @a.files.clear
-    @a.files['lib/outer.rb'] = Time.at(5)
-    @a.files['lib/outer/inner.rb'] = Time.at(5)
-    @a.files[@inner_test] = Time.at(5)
-    @a.files[@outer_test] = Time.at(5)
+    @files.clear
+    @files['lib/outer.rb'] = Time.at(5)
+    @files['lib/outer/inner.rb'] = Time.at(5)
+    @files[@inner_test] = Time.at(5)
+    @files[@outer_test] = Time.at(5)
+
+    @a.find_order = @files.keys.sort
+
     result = @a.consolidate_failures([['test_blah1', @inner_test_class]])
     expected = { @inner_test => ['test_blah1'] }
     assert_equal expected, result
@@ -154,10 +166,10 @@ class TestAutotest < Test::Unit::TestCase
   # TODO: lots of filename edgecases for find_files_to_test
   def test_find_files_to_test
     @a.last_mtime = Time.at(0)
-    assert @a.find_files_to_test(@a.files)
+    assert @a.find_files_to_test(@files)
 
-    @a.last_mtime = @a.files.values.sort.last + 1
-    assert ! @a.find_files_to_test(@a.files)
+    @a.last_mtime = @files.values.sort.last + 1
+    deny @a.find_files_to_test(@files)
   end
 
   def test_find_files_to_test_dunno
@@ -181,12 +193,12 @@ class TestAutotest < Test::Unit::TestCase
     assert_equal empty, @a.files_to_test
 
     # ensure we do nothing when nothing changes...
-    files = { @impl => @a.files[@impl] } # same time
-    assert ! @a.find_files_to_test(files)
+    files = { @impl => @files[@impl] } # same time
+    deny @a.find_files_to_test(files)
     assert_equal empty, @a.files_to_test
     assert_equal "", @a.output.string
 
-    files = { @impl => @a.files[@impl] } # same time
+    files = { @impl => @files[@impl] } # same time
     assert(! @a.find_files_to_test(files))
     assert_equal empty, @a.files_to_test
     assert_equal "", @a.output.string
@@ -197,11 +209,48 @@ class TestAutotest < Test::Unit::TestCase
     util_find_files_to_test(@test, @test => [])
   end
 
+  def test_reorder_alpha
+    @a.order = :alpha
+    expected = @files.sort
+
+    assert_equal expected, @a.reorder(@files)
+  end
+
+  def test_reorder_reverse
+    @a.order = :reverse
+    expected = @files.sort.reverse
+
+    assert_equal expected, @a.reorder(@files)
+  end
+
+  def test_reorder_random
+    srand 42
+    @a.order = :random
+    expected = ["test/test_blah.rb", "lib/blah.rb"].map { |f| [f, @files[f]] }
+
+    assert_equal expected, @a.reorder(@files)
+  end
+
+  def test_reorder_natural
+    srand 42
+
+    @files['lib/untested_blah.rb'] = Time.at(2)
+    @a.find_order = @files.keys.sort_by { rand }
+
+    @a.order = :natural
+    expected = @a.find_order.map { |f| [f, @files[f]] }
+
+    assert_equal expected, @a.reorder(@files)
+  end
+
   def test_handle_results
     @a.files_to_test.clear
-    @a.files.clear
-    @a.files[@impl] = Time.at(1)
-    @a.files[@test] = Time.at(2)
+    @files.clear
+    @files[@impl] = Time.at(1)
+    @files[@test] = Time.at(2)
+
+    @a.find_order = @files.keys.sort
+
     empty = {}
     assert_equal empty, @a.files_to_test, "must start empty"
 
@@ -246,7 +295,7 @@ test_error2(#{@test_class}):
         from -e:1
 '
     @a.files_to_test[@test] = Time.at(42)
-    @a.files[@test] = []
+    @files[@test] = []
     expected = { @test => Time.at(42) }
     assert_equal expected, @a.files_to_test
     @a.handle_results(s3)
@@ -256,7 +305,7 @@ test_error2(#{@test_class}):
 
     @a.handle_results(s1)
     assert_equal empty, @a.files_to_test
-    assert ! @a.tainted
+    deny @a.tainted
   end
 
   def test_hook_overlap
@@ -287,14 +336,14 @@ test_error2(#{@test_class}):
 
   def test_hook_response
     Autotest.clear_hooks
-    assert ! @a.hook(:blah)
+    deny @a.hook(:blah)
 
     Autotest.add_hook(:blah) { false }
-    assert ! @a.hook(:blah)
+    deny @a.hook(:blah)
 
     Autotest.add_hook(:blah) { false }
-    assert ! @a.hook(:blah)
-    
+    deny @a.hook(:blah)
+
     Autotest.add_hook(:blah) { true  }
     assert @a.hook(:blah)
   end
@@ -340,14 +389,14 @@ test_error2(#{@test_class}):
     assert_equal expect, actual
   end
 
-  def test_tests_for_file
-    assert_equal [@test], @a.tests_for_file(@impl)
-    assert_equal [@test], @a.tests_for_file(@test)
+  def test_test_files_for
+    assert_equal [@test], @a.test_files_for(@impl)
+    assert_equal [@test], @a.test_files_for(@test)
 
-    assert_equal ['test/test_unknown.rb'], @a.tests_for_file('test/test_unknown.rb')
-    assert_equal [], @a.tests_for_file('lib/unknown.rb')
-    assert_equal [], @a.tests_for_file('unknown.rb')
-    assert_equal [], @a.tests_for_file('test_unknown.rb')
+    assert_equal [], @a.test_files_for('test/test_unknown.rb')
+    assert_equal [], @a.test_files_for('lib/unknown.rb')
+    assert_equal [], @a.test_files_for('unknown.rb')
+    assert_equal [], @a.test_files_for('test_unknown.rb')
   end
 
   def util_exceptions
@@ -360,7 +409,7 @@ test_error2(#{@test_class}):
 
     assert @a.find_files_to_test(files)
     assert_equal expected, @a.files_to_test
-    assert_equal t, @a.files[f]
+    assert_equal t, @a.last_mtime
     assert_equal "", @a.output.string
   end
 

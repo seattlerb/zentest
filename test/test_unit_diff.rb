@@ -25,6 +25,85 @@ class TestUnitDiff < Test::Unit::TestCase
     util_unit_diff(header, input, expected, :parse_input)
   end
 
+  def test_input_mini_rspec
+    header = <<-HEADER
+Started
+.......F
+Finished in 0.1 seconds
+
+    HEADER
+
+    failure = <<-FAILURE
+1)
+The unless expression should fail FAILED
+Expected nil to equal "baz":
+    FAILURE
+
+    backtrace = <<-BACKTRACE
+      PositiveExpectation#== at spec/mini_rspec.rb:217
+          main.__script__ {} at spec/language/unless_spec.rb:49
+                   Proc#call at kernel/core/proc.rb:127
+               SpecRunner#it at spec/mini_rspec.rb:368
+                     main.it at spec/mini_rspec.rb:412
+          main.__script__ {} at spec/language/unless_spec.rb:48
+                   Proc#call at kernel/core/proc.rb:127
+         SpecRunner#describe at spec/mini_rspec.rb:378
+               main.describe at spec/mini_rspec.rb:408
+             main.__script__ at spec/language/unless_spec.rb:3
+    CompiledMethod#as_script at kernel/bootstrap/primitives.rb:41
+                   main.load at kernel/core/compile.rb:150
+          main.__script__ {} at last_mspec.rb:11
+               Array#each {} at kernel/core/array.rb:545
+       Integer(Fixnum)#times at kernel/core/integer.rb:15
+                  Array#each at kernel/core/array.rb:545
+             main.__script__ at last_mspec.rb:16
+    CompiledMethod#as_script at kernel/bootstrap/primitives.rb:41
+                   main.load at kernel/core/compile.rb:150
+             main.__script__ at kernel/loader.rb:145
+    BACKTRACE
+
+    footer = "\n8 examples, 1 failures\n"
+    input = header + failure + backtrace + footer
+
+    expected_backtrace = backtrace.split("\n").map {|l| "#{l}\n"}
+    expected = [[["1)\n", "The unless expression should fail FAILED\n",
+      "Expected nil to equal \"baz\":\n",
+      *expected_backtrace]],
+      ["\n", "8 examples, 1 failures\n"]]
+    util_unit_diff(header, input, expected, :parse_input)
+  end
+
+  def test_input_mini_rspec_multiline
+    header = <<-HEADER
+Started
+.......F
+Finished in 0.1 seconds
+
+    HEADER
+
+failure = <<-FAILURE
+1)
+Compiler compiles a case without an argument FAILED
+Expected #<TestGenerator [[:push, :false], [:gif, #<Label 5>], [:push_literal, "foo"], [:string_dup], [:goto, #<Label 19>], [:set_label, #<Label 5>], [:push, :nil], [:gif, #<Label 10>], [:push_literal, "foo"], [:string_dup], [:goto, #<Label 19>], [:set_label, #<Label 10>], [:push, 2], [:push, 1], [:send, :==, 1, false], [:gif, #<Label 17>], [:push_literal, "bar"], [:string_dup], [:goto, #<Label 19>], [:set_label, #<Label 17>], [:push_literal, "baz"], [:string_dup], [:set_label, #<Label 19>]]
+to equal #<TestGenerator [[:push, false], [:gif, #<Label 5>], [:push, "foo"], [:string_dup], [:goto, #<Label 6>], [:set_label, #<Label 5>], [:push, nil], [:set_label, #<Label 6>], [:pop], [:push, nil], [:gif, #<Label 12>], [:push, "foo"], [:string_dup], [:goto, #<Label 13>], [:set_label, #<Label 12>], [:push, nil], [:set_label, #<Label 13>], [:pop], [:push, 2], [:push, 1], [:send, :==, 1], [:gif, #<Label 21>], [:push, "bar"], [:string_dup], [:goto, #<Label 23>], [:set_label, #<Label 21>], [:push_literal, "baz"], [:string_dup], [:set_label, #<Label 23>], [:sret]]:
+      FAILURE
+
+backtrace = <<-BACKTRACE
+      PositiveExpectation#== at spec/mini_rspec.rb:216
+                    main.gen at ./compiler2/spec/helper.rb:125
+          main.__script__ {} at compiler2/spec/control_spec.rb:448
+    BACKTRACE
+
+    footer = "\n8 examples, 1 failures\n"
+    input = header + failure + backtrace + footer
+
+    expected_backtrace = backtrace.split("\n").map {|l| "#{l}\n"}
+    expected_failure = failure.split("\n").map {|l| "#{l}\n"}
+    expected = [[[*(expected_failure + expected_backtrace)]],
+      ["\n", "8 examples, 1 failures\n"]]
+    util_unit_diff(header, input, expected, :parse_input)
+  end
+
   def test_unit_diff_empty # simulates broken pipe at the least
     input = ""
     expected = ""
@@ -38,7 +117,7 @@ class TestUnitDiff < Test::Unit::TestCase
              "<\"<body>\">.\n"
             ]
 
-    expected = [["  1) Failure:\n", "test_test1(TestBlah) [./blah.rb:25]:\n"], ["<html>"], ["<body>"]]
+    expected = [["  1) Failure:\n", "test_test1(TestBlah) [./blah.rb:25]:\n"], ["<html>"], ["<body>"], []]
 
     assert_equal expected, @diff.parse_diff(input)
   end
@@ -50,7 +129,7 @@ class TestUnitDiff < Test::Unit::TestCase
              "<\"line4\\nline5\\nline6\\n\">.\n"
             ]
 
-    expected = [["  1) Failure:\n", "test_test1(TestBlah) [./blah.rb:25]:\n"], ["line1\\nline2\\nline3\\n"], ["line4\\nline5\\nline6\\n"]]
+    expected = [["  1) Failure:\n", "test_test1(TestBlah) [./blah.rb:25]:\n"], ["line1\\nline2\\nline3\\n"], ["line4\\nline5\\nline6\\n"], []]
 
     assert_equal expected, @diff.parse_diff(input)
   end
@@ -65,7 +144,8 @@ class TestUnitDiff < Test::Unit::TestCase
     expected = [["  2) Failure:\n",
                  "test_test2(TestBlah) [./blah.rb:29]:\n"],
                 ["line1"],
-                ["line2\\nline3\\n\\n"]
+                ["line2\\nline3\\n\\n"],
+                []
                ]
 
     assert_equal expected, @diff.parse_diff(input)
@@ -77,7 +157,7 @@ class TestUnitDiff < Test::Unit::TestCase
              "Unknown expected data.\n",
              "<false> is not true.\n"]
 
-    expected = [[" 13) Failure:\n", "test_case_stmt(TestRubyToRubyC) [./r2ctestcase.rb:1198]:\n", "Unknown expected data.\n"], ["<false> is not true.\n"], nil]
+    expected = [[" 13) Failure:\n", "test_case_stmt(TestRubyToRubyC) [./r2ctestcase.rb:1198]:\n", "Unknown expected data.\n"], ["<false> is not true.\n"], nil, []]
 
     assert_equal expected, @diff.parse_diff(input)
   end
@@ -90,7 +170,7 @@ class TestUnitDiff < Test::Unit::TestCase
     expected = [["1) Failure:\n",
                  "test_util_capture(AssertionsTest) [test/test_zentest_assertions.rb:53]:\n"],
                 ["out"],
-                ["out"]]
+                ["out"], []]
 
     assert_equal expected, @diff.parse_diff(input)
   end
@@ -103,7 +183,34 @@ class TestUnitDiff < Test::Unit::TestCase
     expected = [["1) Failure:\n",
                  "test_util_capture(AssertionsTest) [test/test_zentest_assertions.rb:53]:\n"],
                 ["out"],
-                ["out\\n"]]
+                ["out\\n"], []]
+
+    assert_equal expected, @diff.parse_diff(input)
+  end
+
+  def test_parse_diff_mini_rspec
+    input = ["1)\n", "The unless expression should fail FAILED\n",
+      "Expected nil to equal \"baz\":\n",
+      "    PositiveExpectation#== at spec/mini_rspec.rb:217\n"]
+
+    expected = [["1)\n", "The unless expression should fail FAILED\n"],
+      ["nil"],
+      ["\"baz\""],
+      ["    PositiveExpectation#== at spec/mini_rspec.rb:217"]]
+
+    assert_equal expected, @diff.parse_diff(input)
+  end
+
+  def test_parse_diff_mini_rspec_multiline
+    input = ["1)\n", "The unless expression should fail FAILED\n",
+    "Expected #<TestGenerator [[:push, :true],\n", "  [:dup]\n", "]\n",
+    "to equal #<TestGenerator [[:pop],\n", "  [:dup]\n", "]:\n",
+    "    PositiveExpectation#== at spec/mini_rspec.rb:217\n"]
+
+    expected = [["1)\n", "The unless expression should fail FAILED\n"],
+      ["#<TestGenerator [[:push, :true],\n", "  [:dup]\n", "]"],
+      ["#<TestGenerator [[:pop],\n", "  [:dup]\n", "]"],
+      ["    PositiveExpectation#== at spec/mini_rspec.rb:217"]]
 
     assert_equal expected, @diff.parse_diff(input)
   end
@@ -160,7 +267,7 @@ class TestUnitDiff < Test::Unit::TestCase
   def util_unit_diff(header, input, expected, msg=:unit_diff)
     output = StringIO.new("")
     actual = @diff.send(msg, StringIO.new(input), output)
-    assert_equal header, output.string
+    assert_equal header, output.string, "header output"
     assert_equal expected, actual
   end
 end

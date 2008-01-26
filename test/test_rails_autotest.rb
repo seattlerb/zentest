@@ -42,152 +42,183 @@ class TestRailsAutotest < TestAutotest
                       test/views/articles_view_test.rb
                       test/views/layouts_view_test.rb)
 
-    @a.files.clear
+    @files.clear
 
     (@rails_unit_tests +
      @rails_controller_tests +
      @rails_view_tests +
      @rails_functional_tests +
-     @extra_files).flatten.each_with_index do |path, t|
-      @a.files[path] = Time.at(t+1)
+     @extra_files +
+     [@impl]).flatten.each_with_index do |path, t|
+      @files[path] = Time.at(t+1)
     end
-    @a.last_mtime = @a.files.values.sort.last
+
+    @a.find_order = @files.keys
+    @a.last_mtime = @files.values.sort.last
   end
 
   # Overridden from superclass... the scenario just doesn't happen the same way.
   def test_consolidate_failures_multiple_matches
     @test2 = 'test/unit/route_again_test.rb'
-    @a.files[@test2] = Time.at(42)
-    @a.files['app/views/routes/edit.rhtml'] = Time.at(42)
-    @a.files['app/views/routes/list.rhtml'] = Time.at(42)
+    @files[@test2] = Time.at(42)
+    @files['app/views/routes/edit.rhtml'] = Time.at(42)
+    @files['app/views/routes/list.rhtml'] = Time.at(42)
+
+    @a.find_order = @files.keys
+
     result = @a.consolidate_failures([['test_unmatched', @test_class]])
     expected = {"test/unit/route_test.rb"=>["test_unmatched"]}
     assert_equal expected, result
     assert_equal '', @a.output.string
   end
 
-  def test_tests_for_file
+  def test_reorder_random
+    srand 42
+    @a.order = :random
+    expected = ["test/views/admin/themes_view_test.rb",
+                "test/functional/articles_controller_test.rb",
+                "app/models/route.rb",
+                "test/views/articles_view_test.rb",
+                "test/views/route_view_test.rb",
+                "test/controllers/articles_controller_test.rb",
+                "test/functional/admin/themes_controller_test.rb",
+                "test/functional/route_controller_test.rb",
+                "test/unit/route_test.rb",
+                "test/functional/dummy_controller_test.rb",
+                "test/controllers/admin/themes_controller_test.rb",
+                "test/views/layouts_view_test.rb",
+                "test/controllers/dummy_controller_test.rb",
+                "test/controllers/route_controller_test.rb"]
+    expected.map! { |f| [f, @files[f]] }
+
+    assert_equal expected, @a.reorder(@files)
+  end
+
+  def test_test_files_for
     empty = []
-    assert_equal empty, @a.tests_for_file('blah.rb')
-    assert_equal empty, @a.tests_for_file('test_blah.rb')
+    assert_equal empty, @a.test_files_for('blah.rb')
+    assert_equal empty, @a.test_files_for('test_blah.rb')
 
     # controllers
-    util_tests_for_file('app/controllers/admin/themes_controller.rb',
+    util_test_files_for('app/controllers/admin/themes_controller.rb',
                         'test/controllers/admin/themes_controller_test.rb',
                         'test/functional/admin/themes_controller_test.rb')
 
-    util_tests_for_file('app/controllers/application.rb',
+    util_test_files_for('app/controllers/application.rb',
                         @rails_controller_tests,
                         @rails_view_tests,
                         @rails_functional_tests)
 
-    util_tests_for_file('app/controllers/route_controller.rb',
+    util_test_files_for('app/controllers/route_controller.rb',
                         'test/controllers/route_controller_test.rb',
                         'test/functional/route_controller_test.rb')
 
-    util_tests_for_file('app/controllers/notest_controller.rb')
+    util_test_files_for('app/controllers/notest_controller.rb')
 
     # helpers
-    util_tests_for_file('app/helpers/application_helper.rb',
+    util_test_files_for('app/helpers/application_helper.rb',
                         @rails_view_tests,
                         @rails_functional_tests)
 
-    util_tests_for_file('app/helpers/route_helper.rb',
+    util_test_files_for('app/helpers/route_helper.rb',
                         'test/views/route_view_test.rb',
                         'test/functional/route_controller_test.rb')
 
     # model
-    util_tests_for_file('app/models/route.rb',
+    util_test_files_for('app/models/route.rb',
                         @test)
 
-    util_tests_for_file('app/models/notest.rb')
+    util_test_files_for('app/models/notest.rb')
 
     # views
-    util_tests_for_file('app/views/layouts/default.rhtml',
+    util_test_files_for('app/views/layouts/default.rhtml',
                         'test/views/layouts_view_test.rb')
 
-    util_tests_for_file('app/views/route/index.rhtml',
+    util_test_files_for('app/views/route/index.rhtml',
                         'test/views/route_view_test.rb',
                         'test/functional/route_controller_test.rb')
 
-    util_tests_for_file('app/views/route/xml.rxml',
+    util_test_files_for('app/views/route/xml.rxml',
                         'test/views/route_view_test.rb',
                         'test/functional/route_controller_test.rb')
 
-    util_tests_for_file('app/views/shared/notest.rhtml')
+    util_test_files_for('app/views/shared/notest.rhtml')
 
-    util_tests_for_file('app/views/articles/flag.rhtml',
+    util_test_files_for('app/views/articles/flag.rhtml',
                         'test/views/articles_view_test.rb',
                         'test/functional/articles_controller_test.rb')
 
     # tests
-    util_tests_for_file('test/fixtures/routes.yml',
+    util_test_files_for('test/fixtures/routes.yml',
                         @test,
                         'test/controllers/route_controller_test.rb',
                         'test/views/route_view_test.rb',
                         'test/functional/route_controller_test.rb')
 
-    util_tests_for_file('test/test_helper.rb',
+    util_test_files_for('test/test_helper.rb',
                         @rails_unit_tests, @rails_controller_tests,
                         @rails_view_tests, @rails_functional_tests)
 
-    util_tests_for_file(@test, @test)
+    util_test_files_for(@test, @test)
 
-    util_tests_for_file('test/controllers/route_controller_test.rb',
+    util_test_files_for('test/controllers/route_controller_test.rb',
                         'test/controllers/route_controller_test.rb')
 
-    util_tests_for_file('test/views/route_view_test.rb',
+    util_test_files_for('test/views/route_view_test.rb',
                         'test/views/route_view_test.rb')
 
-    util_tests_for_file('test/functional/route_controller_test.rb',
+    util_test_files_for('test/functional/route_controller_test.rb',
                         'test/functional/route_controller_test.rb')
 
-    util_tests_for_file('test/functional/admin/themes_controller_test.rb',
+    util_test_files_for('test/functional/admin/themes_controller_test.rb',
                         'test/functional/admin/themes_controller_test.rb')
 
     # global conf thingies
-    util_tests_for_file('config/boot.rb',
+    util_test_files_for('config/boot.rb',
                         @rails_unit_tests, @rails_controller_tests,
                         @rails_view_tests, @rails_functional_tests)
 
-    util_tests_for_file('config/database.yml',
+    util_test_files_for('config/database.yml',
                         @rails_unit_tests, @rails_controller_tests,
                         @rails_view_tests, @rails_functional_tests)
 
-    util_tests_for_file('config/environment.rb',
+    util_test_files_for('config/environment.rb',
                         @rails_unit_tests, @rails_controller_tests,
                         @rails_view_tests, @rails_functional_tests)
 
-    util_tests_for_file('config/environments/test.rb',
+    util_test_files_for('config/environments/test.rb',
                         @rails_unit_tests, @rails_controller_tests,
                         @rails_view_tests, @rails_functional_tests)
 
-    util_tests_for_file('config/routes.rb',
+    util_test_files_for('config/routes.rb',
                         @rails_controller_tests,
                         @rails_view_tests, @rails_functional_tests)
 
     # ignored crap
-    util_tests_for_file('vendor/plugins/cartographer/lib/keys.rb')
+    util_test_files_for('vendor/plugins/cartographer/lib/keys.rb')
 
-    util_tests_for_file('Rakefile')
+    util_test_files_for('Rakefile')
   end
 
   def test_consolidate_failures_multiple_matches_before
     @test_class = 'BlahTest'
-    @a.files.clear
-    @a.files['app/model/blah.rb'] = Time.at(42)
-    @a.files['app/model/different_blah.rb'] = Time.at(42)
-    @a.files['test/unit/blah_test.rb'] = Time.at(42)
-    @a.files['test/unit/different_blah_test.rb'] = Time.at(42)
+    @files.clear
+    @files['app/model/blah.rb'] = Time.at(42)
+    @files['app/model/different_blah.rb'] = Time.at(42)
+    @files['test/unit/blah_test.rb'] = Time.at(42)
+    @files['test/unit/different_blah_test.rb'] = Time.at(42)
+
+    @a.find_order = @files.keys
+
     result = @a.consolidate_failures([['test_matched', @test_class]])
     expected = { 'test/unit/blah_test.rb' => [ 'test_matched' ] }
     assert_equal expected, result
     assert_equal "", @a.output.string
   end
 
-  def util_tests_for_file(file, *expected)
+  def util_test_files_for(file, *expected)
     assert_equal(expected.flatten.sort.uniq,
-                 @a.tests_for_file(file).sort.uniq, "tests for #{file}")
+                 @a.test_files_for(file).sort.uniq, "tests for #{file}")
   end
 
   def test_path_to_classname
@@ -200,7 +231,8 @@ class TestRailsAutotest < TestAutotest
     util_path_to_classname 'BlahTest', 'test/controllers/blah_test.rb'
     util_path_to_classname 'BlahTest', 'test/helpers/blah_test.rb'
 
-    util_path_to_classname 'OuterTest::InnerTest', 'test/controllers/outer/inner_test.rb'
+    util_path_to_classname('OuterTest::InnerTest',
+                           'test/controllers/outer/inner_test.rb')
   end
 end
 

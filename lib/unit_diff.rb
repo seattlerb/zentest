@@ -82,14 +82,8 @@ class UnitDiff
         output.puts input.gets # the rest of "Finished in..."
         output.puts
        next
-      when /^\s*$/ then
+      when /^\s*$/, /^\(?\s*\d+\) (Failure|Error):/, /^\d+\)/ then
         print_lines = false
-        type = nil
-        current = []
-        data << current
-      when /^\(?\s*\d+\) (Failure|Error):/ then
-        print_lines = false # if line =~ /Failure|Error/
-        type = $1
         current = []
         data << current
       when /^Finished in \d/ then
@@ -111,6 +105,7 @@ class UnitDiff
     header = []
     expect = []
     butwas = []
+    footer = []
     found = false
     state = :header
 
@@ -118,19 +113,43 @@ class UnitDiff
       case state
       when :header then
         header << result.shift
-        state = :expect if result.first =~ /^</
+        state = :expect if result.first =~ /^<|^Expected/
       when :expect then
-        state = :butwas if result.first.sub!(/ expected but was/, '')
-        expect << result.shift
+        if result.first =~ /^Expected (.*?) to equal (.*?):$/ then
+          expect << $1
+          butwas << $2
+          state = :footer
+          result.shift
+        elsif result.first =~ /^Expected (.*?)$/ then
+          expect << "#{$1}\n"
+          result.shift
+        elsif result.first =~ /^to equal / then
+          state = :spec_butwas
+          bw = result.shift.sub(/^to equal (.*):?$/, '\1')
+          butwas << bw
+        else
+          state = :butwas if result.first.sub!(/ expected but was/, '')
+          expect << result.shift
+        end
       when :butwas then
         butwas = result[0..-1]
+        result.clear
+      when :spec_butwas then
+        if result.first =~ /^\s+\S+ at |^:\s*$/
+          state = :footer
+        else
+          butwas << result.shift
+        end
+      when :footer then
+        butwas.last.sub!(/:$/, '')
+        footer = result.map {|l| l.chomp }
         result.clear
       else
         raise "unknown state #{state}"
       end
     end
 
-    return header, expect, nil if butwas.empty?
+    return header, expect, nil, footer if butwas.empty?
 
     expect.last.chomp!
     expect.first.sub!(/^<\"/, '')
@@ -141,7 +160,7 @@ class UnitDiff
     butwas.first.sub!( /^<\"/, '')
     butwas.last.sub!(/\">$/, '')
 
-    return header, expect, butwas
+    return header, expect, butwas, footer
   end
 
   ##
@@ -164,12 +183,12 @@ class UnitDiff
       first = []
       second = []
 
-      if result.first !~ /Failure/ then
+      if result.first =~ /Error/ then
         output.push result.join('')
         next
       end
 
-      prefix, expect, butwas = parse_diff(result)
+      prefix, expect, butwas, result_footer = parse_diff(result)
 
       output.push prefix.compact.map {|line| line.strip}.join("\n")
 
@@ -188,7 +207,7 @@ class UnitDiff
             if result.empty? then
               output.push "[no difference--suspect ==]"
             else
-              output.push result.split("\n")
+              output.push result.map { |line| line.chomp }
             end
 
             if $k then
@@ -200,6 +219,7 @@ class UnitDiff
           end
         end
 
+        output.push result_footer
         output.push ''
       else
         output.push expect.join('')

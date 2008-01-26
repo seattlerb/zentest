@@ -57,6 +57,8 @@ $TESTING = false unless defined? $TESTING
 
 class Autotest
 
+  T0 = Time.at 0
+
   HOOKS = Hash.new { |h,k| h[k] = [] }
   unless defined? WINDOZE then
     WINDOZE = /win32/ =~ RUBY_PLATFORM
@@ -128,14 +130,17 @@ class Autotest
 
   attr_accessor(:extra_class_map,
                 :extra_files,
-                :files,
                 :files_to_test,
+                :find_order,
                 :interrupted,
                 :last_mtime,
                 :libs,
+                :order,
                 :output,
                 :results,
+                :sleep,
                 :tainted,
+                :test_directories,
                 :unit_diff,
                 :wants_to_quit)
 
@@ -143,16 +148,21 @@ class Autotest
   # Initialize the instance and then load the user's .autotest file, if any.
 
   def initialize
+    # these two are set directly because they're wrapped with
+    # add/remove/clear accessor methods
     @exception_list = []
-    @extra_class_map = {}
-    @extra_files = []
-    @files = Hash.new Time.at(0)
-    @files_to_test = Hash.new { |h,k| h[k] = [] }
-    @libs = %w[. lib test].join(File::PATH_SEPARATOR)
-    @output = $stderr
-    @sleep = 1
-    @unit_diff = "unit_diff -u"
     @test_mappings = {}
+
+    self.extra_class_map = {}
+    self.extra_files = []
+    self.find_order = []
+    self.files_to_test = Hash.new { |h,k| h[k] = [] }
+    self.libs = %w[. lib test].join(File::PATH_SEPARATOR)
+    self.order = :random
+    self.output = $stderr
+    self.sleep = 1
+    self.test_directories = ['.']
+    self.unit_diff = "unit_diff -u"
 
     self.add_mapping(/^lib\/.*\.rb$/) do |filename, _|
       possible = File.basename(filename).gsub '_', '_?'
@@ -214,7 +224,7 @@ class Autotest
   def run_tests
     hook :run_command
 
-    self.find_files_to_test # failed + changed/affected
+    self.find_files_to_test
     cmd = self.make_test_cmd self.files_to_test
 
     puts cmd unless $q
@@ -262,7 +272,7 @@ class Autotest
         unless hook :interrupt then
           puts "Interrupt a second time to quit"
           self.interrupted = true
-          sleep 1.5
+          Kernel.sleep 1.5
         end
         raise Interrupt, nil # let the run loop catch it
       end
@@ -296,7 +306,7 @@ class Autotest
   def consolidate_failures(failed)
     filters = Hash.new { |h,k| h[k] = [] }
 
-    class_map = Hash[*self.files.keys.grep(/^test/).map { |f|
+    class_map = Hash[*self.find_order.grep(/^test/).map { |f|
                        [path_to_classname(f), f]
                      }.flatten]
     class_map.merge!(self.extra_class_map)
@@ -319,7 +329,7 @@ class Autotest
 
   def find_files
     result = {}
-    targets = ['.'] + self.extra_files
+    targets = self.test_directories + self.extra_files
 
     Find.find(*targets) do |f|
       Find.prune if f =~ self.exceptions
@@ -331,6 +341,7 @@ class Autotest
       filename = f.sub(/^\.\//, '')
 
       result[filename] = File.stat(filename).mtime rescue next
+      self.find_order << filename
     end
 
     return result
@@ -343,26 +354,16 @@ class Autotest
   # file.
 
   def find_files_to_test(files=find_files)
-    updated = files.select { |filename, mtime|
-      self.files[filename] < mtime
-    }
+    updated = files.select { |filename, mtime| self.last_mtime < mtime }
 
     p updated if $v unless updated.empty? or self.last_mtime.to_i == 0
 
-    # TODO: keep an mtime at app level and drop the files hash
-    updated.each do |filename, mtime|
-      self.files[filename] = mtime
+    updated.map { |f,m| test_files_for(f) }.flatten.uniq.each do |filename|
+      self.files_to_test[filename] # creates key with default value
     end
 
-    updated.each do |filename, mtime|
-      tests_for_file(filename).each do |f|
-        self.files_to_test[f] # creates key with default value
-      end
-    end
-
-    previous = self.last_mtime
-    self.last_mtime = self.files.values.max
-    self.last_mtime > previous
+    self.last_mtime = files.values.max
+    not updated.empty?
   end
 
   ##
@@ -385,10 +386,10 @@ class Autotest
 
   def make_test_cmd files_to_test
     cmds = []
-    full, partial = files_to_test.partition { |k,v| v.empty? }
+    full, partial = reorder(files_to_test).partition { |k,v| v.empty? }
 
     unless full.empty? then
-      classes = full.map {|k,v| k}.flatten.uniq.sort.join(' ')
+      classes = full.map {|k,v| k}.flatten.uniq.join(' ')
       cmds << "#{ruby} -I#{libs} -rtest/unit -e \"%w[#{classes}].each { |f| require f }\" | #{unit_diff}"
     end
 
@@ -400,12 +401,28 @@ class Autotest
     return cmds.join("#{SEP} ")
   end
 
+  def reorder files_to_test
+    case self.order
+    when :alpha then
+      files_to_test.sort_by { |k,v| k }
+    when :reverse then
+      files_to_test.sort_by { |k,v| k }.reverse
+    when :random then
+      files_to_test.sort_by { |k,v| rand }
+    when :natural then
+      (self.find_order & files_to_test.keys).map { |f| [f, files_to_test[f]] }
+    else
+      raise "unknown order type: #{self.order.inspect}"
+    end
+  end
+
   ##
   # Rerun the tests from cold (reset state)
 
   def rerun_all_tests
     reset
     run_tests
+
     hook :all_good if all_good
   end
 
@@ -414,12 +431,13 @@ class Autotest
   # interrupts will kill autotest.
 
   def reset
-    @interrupted = @wants_to_quit = false
-    @files.clear
-    @files_to_test.clear
-    @last_mtime = Time.at(0)
-    find_files_to_test # failed + changed/affected
-    @tainted = false
+    self.interrupted = false
+    self.wants_to_quit = false
+    self.find_order.clear
+    self.files_to_test.clear
+    self.last_mtime = T0
+    self.tainted = false
+
     hook :reset
   end
 
@@ -430,9 +448,7 @@ class Autotest
     ruby = File.join(Config::CONFIG['bindir'],
                      Config::CONFIG['ruby_install_name'])
 
-    unless File::ALT_SEPARATOR.nil? then
-      ruby.gsub! File::SEPARATOR, File::ALT_SEPARATOR
-    end
+    ruby.gsub! File::SEPARATOR, File::ALT_SEPARATOR if File::ALT_SEPARATOR
 
     return ruby
   end
@@ -442,13 +458,13 @@ class Autotest
   # a +test_mapping+ that matches the file and executing the mapping's
   # proc.
 
-  def tests_for_file(filename)
+  def test_files_for(filename)
     result = @test_mappings.find { |file_re, ignored| filename =~ file_re }
     result = result.nil? ? [] : Array(result.last.call(filename, $~))
 
     output.puts "Dunno! #{filename}" if ($v or $TESTING) and result.empty?
 
-    result.sort.uniq
+    result.sort.uniq.select { |f| @find_order.include? f }
   end
 
   ##
@@ -457,7 +473,7 @@ class Autotest
   def wait_for_changes
     hook :waiting
     begin
-      sleep @sleep
+      Kernel.sleep self.sleep
     end until find_files_to_test
   end
 
@@ -468,9 +484,7 @@ class Autotest
   # Returns all known files in the codebase matching +regexp+.
 
   def files_matching regexp
-    @files.keys.select { |k|
-      k =~ regexp
-    }
+    self.find_order.select { |k| k =~ regexp }
   end
 
   ##
@@ -492,7 +506,7 @@ class Autotest
   # Removed a file mapping matching +regexp+.
 
   def remove_mapping regexp
-    @test_mappings.delete regexp
+    test_mappings.delete regexp
   end
 
   ##
@@ -537,7 +551,7 @@ class Autotest
   ##
   # Return a compiled regexp of exceptions for find_files or nil if no
   # filtering should take place. This regexp is generated from
-  # @exception_list.
+  # +exception_list+.
 
   def exceptions
     unless defined? @exceptions then
@@ -560,6 +574,14 @@ class Autotest
   # event.
 
   def hook(name)
+    deprecated = {
+      :run => :initialize,      # TODO: remove 2008-03-14 (pi day!)
+    }
+
+    if deprecated[name] and not HOOKS[name].empty? then
+      warn "hook #{name} has been deprecated, use #{deprecated[name]}"
+    end
+
     HOOKS[name].inject(false) do |handled,plugin|
       plugin[self] || handled
     end
