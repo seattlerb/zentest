@@ -140,6 +140,7 @@ class Autotest
                 :files_to_test,
                 :find_order,
                 :interrupted,
+                :known_files,
                 :last_mtime,
                 :libs,
                 :order,
@@ -357,6 +358,8 @@ class Autotest
       self.find_order.push(*order.sort)
     end
 
+    self.known_files = Hash[*find_order.map { |f| [f, true] }.flatten]
+
     return result
   end
 
@@ -485,7 +488,7 @@ class Autotest
 
     output.puts "Dunno! #{filename}" if ($v or $TESTING) and result.empty?
 
-    result.sort.uniq.select { |f| @find_order.include? f }
+    result.sort.uniq.select { |f| known_files[f] }
   end
 
   ##
