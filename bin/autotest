@@ -2,6 +2,7 @@
 
 $v    ||= false
 $h    ||= false
+$f    ||= false
 $q    ||= false
 $help ||= false
 
@@ -16,7 +17,11 @@ if $h or $help then
           "\t-v\t\tBe verbose.",
           "\t\t\tPrints files that autotest doesn't know how to map to",
           "\t\t\ttests.",
+          nil,
           "\t-q\t\tBe more quiet.",
+          nil,
+          "\t-f\t\tFast start.",
+          "\t\t\tDoesn't initially run tests at start.",
          ]
   STDERR.puts help.join("\n")
   exit 1

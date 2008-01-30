@@ -133,6 +133,7 @@ class Autotest
     new.run
   end
 
+  attr_writer :known_files
   attr_accessor(:completed_re,
                 :extra_class_map,
                 :extra_files,
@@ -140,7 +141,6 @@ class Autotest
                 :files_to_test,
                 :find_order,
                 :interrupted,
-                :known_files,
                 :last_mtime,
                 :libs,
                 :order,
@@ -167,6 +167,7 @@ class Autotest
     self.failed_results_re = /^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/
     self.files_to_test = new_hash_of_arrays
     self.find_order = []
+    self.known_files = nil
     self.libs = %w[. lib test].join(File::PATH_SEPARATOR)
     self.order = :random
     self.output = $stderr
@@ -197,6 +198,8 @@ class Autotest
     hook :run                           # TODO: phase out
     reset
     add_sigint_handler
+
+    self.last_mtime = Time.now if $f
 
     loop do # ^c handler
       begin
@@ -358,8 +361,6 @@ class Autotest
       self.find_order.push(*order.sort)
     end
 
-    self.known_files = Hash[*find_order.map { |f| [f, true] }.flatten]
-
     return result
   end
 
@@ -396,6 +397,16 @@ class Autotest
     hook color unless $TESTING
 
     self.tainted = true unless self.files_to_test.empty?
+  end
+
+  ##
+  # Lazy accessor for the known_files hash.
+
+  def known_files
+    unless @known_files then
+      @known_files = Hash[*find_order.map { |f| [f, true] }.flatten]
+    end
+    @known_files
   end
 
   ##
@@ -452,12 +463,13 @@ class Autotest
   # interrupts will kill autotest.
 
   def reset
-    self.interrupted = false
-    self.wants_to_quit = false
-    self.find_order.clear
     self.files_to_test.clear
+    self.find_order.clear
+    self.interrupted = false
+    self.known_files = nil
     self.last_mtime = T0
     self.tainted = false
+    self.wants_to_quit = false
 
     hook :reset
   end
