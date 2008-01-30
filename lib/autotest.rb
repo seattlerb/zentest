@@ -478,6 +478,9 @@ class Autotest
 
   def test_files_for(filename)
     result = @test_mappings.find { |file_re, ignored| filename =~ file_re }
+
+    p :test_file_for => [filename, result.first] if result and $DEBUG
+
     result = result.nil? ? [] : Array(result.last.call(filename, $~))
 
     output.puts "Dunno! #{filename}" if ($v or $TESTING) and result.empty?

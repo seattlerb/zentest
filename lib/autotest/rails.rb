@@ -7,6 +7,13 @@ class Autotest::Rails < Autotest
 
     add_exception %r%^\./(?:db|doc|log|public|script|tmp|vendor)%
 
+    clear_mappings
+
+    self.add_mapping(/^lib\/.*\.rb$/) do |filename, _|
+      impl = File.basename(filename, '.rb')
+      files_matching %r%^test/unit/#{impl}_test.rb$%
+    end
+
     add_mapping %r%^test/fixtures/(.*)s.yml% do |_, m|
       ["test/unit/#{m[1]}_test.rb",
        "test/controllers/#{m[1]}_controller_test.rb",

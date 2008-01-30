@@ -414,7 +414,7 @@ test_error2(#{@test_class}):
   end
 
   def util_mappings
-    @a.test_mappings.keys.sort_by { |x| x.to_s }
+    @a.test_mappings.map { |k,v| k }.sort_by { |x| x.to_s }
   end
 
   def util_path_to_classname(e,i)
