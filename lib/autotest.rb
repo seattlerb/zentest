@@ -103,8 +103,9 @@ class Autotest
   def self.autodiscover
     style = []
 
-    $:.push(*Dir["vendor/plugins/*/lib"])
     paths = $:.dup
+    paths.push 'lib'
+    paths.push(*Dir["vendor/plugins/*/lib"])
 
     begin
       require 'rubygems'
@@ -114,8 +115,12 @@ class Autotest
     end
 
     paths.each do |d|
+      next unless File.directory? d
       f = File.join(d, 'autotest', 'discover.rb')
-      load f if File.exist? f
+      if File.exist? f then
+        $: << d unless $:.include? d
+        load f
+      end
     end
 
     @@discoveries.map { |proc| proc.call }.flatten.compact.sort.uniq
@@ -128,8 +133,10 @@ class Autotest
     new.run
   end
 
-  attr_accessor(:extra_class_map,
+  attr_accessor(:completed_re,
+                :extra_class_map,
                 :extra_files,
+                :failed_results_re,
                 :files_to_test,
                 :find_order,
                 :interrupted,
@@ -140,7 +147,7 @@ class Autotest
                 :results,
                 :sleep,
                 :tainted,
-                :test_directories,
+                :find_directories,
                 :unit_diff,
                 :wants_to_quit)
 
@@ -151,17 +158,19 @@ class Autotest
     # these two are set directly because they're wrapped with
     # add/remove/clear accessor methods
     @exception_list = []
-    @test_mappings = {}
+    @test_mappings = []
 
+    self.completed_re = /\d+ tests, \d+ assertions, \d+ failures, \d+ errors/
     self.extra_class_map = {}
     self.extra_files = []
+    self.failed_results_re = /^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/
+    self.files_to_test = new_hash_of_arrays
     self.find_order = []
-    self.files_to_test = Hash.new { |h,k| h[k] = [] }
     self.libs = %w[. lib test].join(File::PATH_SEPARATOR)
     self.order = :random
     self.output = $stderr
     self.sleep = 1
-    self.test_directories = ['.']
+    self.find_directories = ['.']
     self.unit_diff = "unit_diff -u"
 
     self.add_mapping(/^lib\/.*\.rb$/) do |filename, _|
@@ -304,9 +313,9 @@ class Autotest
   # file.
 
   def consolidate_failures(failed)
-    filters = Hash.new { |h,k| h[k] = [] }
+    filters = new_hash_of_arrays
 
-    class_map = Hash[*self.find_order.grep(/^test/).map { |f|
+    class_map = Hash[*self.find_order.grep(/^test/).map { |f| # TODO: ugly
                        [path_to_classname(f), f]
                      }.flatten]
     class_map.merge!(self.extra_class_map)
@@ -329,19 +338,23 @@ class Autotest
 
   def find_files
     result = {}
-    targets = self.test_directories + self.extra_files
+    targets = self.find_directories + self.extra_files
 
-    Find.find(*targets) do |f|
-      Find.prune if f =~ self.exceptions
+    targets.each do |target|
+      order = []
+      Find.find(target) do |f|
+        Find.prune if f =~ self.exceptions
 
-      next if test ?d, f
-      next if f =~ /(swp|~|rej|orig)$/          # temporary/patch files
-      next if f =~ /\/\.?#/                     # Emacs autosave/cvs merge files
+        next if test ?d, f
+        next if f =~ /(swp|~|rej|orig)$/ # temporary/patch files
+        next if f =~ /\/\.?#/            # Emacs autosave/cvs merge files
 
-      filename = f.sub(/^\.\//, '')
+        filename = f.sub(/^\.\//, '')
 
-      result[filename] = File.stat(filename).mtime rescue next
-      self.find_order << filename
+        result[filename] = File.stat(filename).mtime rescue next
+        order << filename
+      end
+      self.find_order.push(*order.sort)
     end
 
     return result
@@ -371,12 +384,13 @@ class Autotest
   # there are failures record this.
 
   def handle_results(results)
-    failed = results.scan(/^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/)
-    completed = results =~ /\d+ tests, \d+ assertions, \d+ failures, \d+ errors/
+    failed = results.scan(self.failed_results_re)
+    completed = results =~ self.completed_re
 
     self.files_to_test = consolidate_failures failed if completed
 
-    hook completed && self.files_to_test.empty? ? :green : :red unless $TESTING
+    color = completed && self.files_to_test.empty? ? :green : :red
+    hook color unless $TESTING
 
     self.tainted = true unless self.files_to_test.empty?
   end
@@ -399,6 +413,10 @@ class Autotest
     end
 
     return cmds.join("#{SEP} ")
+  end
+
+  def new_hash_of_arrays
+    Hash.new { |h,k| h[k] = [] }
   end
 
   def reorder files_to_test
@@ -499,14 +517,16 @@ class Autotest
   #   end
 
   def add_mapping(regexp, &proc)
-    @test_mappings[regexp] = proc
+    @test_mappings << [regexp, proc]
   end
 
   ##
   # Removed a file mapping matching +regexp+.
 
   def remove_mapping regexp
-    test_mappings.delete regexp
+    @test_mappings.delete_if do |k,v|
+      k == regexp
+    end
   end
 
   ##
