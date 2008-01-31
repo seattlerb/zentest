@@ -6,16 +6,9 @@ require 'rubygems'
 require 'hoe'
 require './lib/zentest.rb'
 
-Hoe.new("ZenTest", ZenTest::VERSION) do |p|
-  p.author = ['Ryan Davis', 'Eric Hodel']
-
-  changes = p.paragraphs_of("History.txt", 0..4).join("\n\n")
-  urls, summary, *description = p.paragraphs_of("README.txt", 1, 3, 3..8)
-
-  p.url = urls.gsub(/^\* /, '').split(/\n/)
-  p.changes = changes
-  p.summary = summary
-  p.description = description.join("\n\n")
+Hoe.new("ZenTest", ZenTest::VERSION) do |zentest|
+  zentest.developer('Ryan Davis', 'ryand-ruby@zenspider.com')
+  zentest.developer('Eric Hodel', 'drbrain@segment7.net')
 end
 
 task :autotest do

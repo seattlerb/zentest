@@ -1,3 +1,24 @@
+=== 3.8.1 / 2008-01-30
+
+* 15 minor enhancements:
+
+  * Added Wilson's patch to allow unit_diff to work with mspec. Adding rspec next.
+  * Minor overhaul for autotest:
+    * Added -f flag to start up without testing.
+    * Added -q flag to autotest to make it extra quiet. Patch by Aaron Patterson.
+    * Added ability to set test execution order, defaults to :random. EVIL!
+    * Added completed_re and failed_results_re to help subclasses like rspec.
+    * Added deprecation warnings for hooks. Deprecated :run.
+    * Added find_directories accessor, defaults to ['.']
+    * Added sleep accessor, defaults to 1 second.
+    * Changed find_files to order files in the same order as find_directories.
+    * Changed how autodiscover works with $:, added lib to the front.
+    * Cleaned out nearly every @ and use accessor methods instead. You should too.
+    * Made test_mappings ordered.
+    * Removed @files, adding @find_order and @known_files.
+    * Renamed tests_for_file to test_files_for.
+    * test_files_for now only returns known files.
+
 === 3.8.0 / 2008-01-12
 
 * 10 minor enhancements:
