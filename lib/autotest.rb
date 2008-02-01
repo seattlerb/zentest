@@ -211,11 +211,8 @@ class Autotest
         end
         wait_for_changes
       rescue Interrupt
-        if self.wants_to_quit then
-          break
-        else
-          reset
-        end
+        break if self.wants_to_quit
+        reset
       end
     end
     hook :quit
@@ -343,6 +340,7 @@ class Autotest
   def find_files
     result = {}
     targets = self.find_directories + self.extra_files
+    self.find_order.clear
 
     targets.each do |target|
       order = []
@@ -508,9 +506,7 @@ class Autotest
 
   def wait_for_changes
     hook :waiting
-    begin
-      Kernel.sleep self.sleep
-    end until find_files_to_test
+    Kernel.sleep self.sleep until find_files_to_test
   end
 
   ############################################################
