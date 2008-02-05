@@ -222,10 +222,10 @@ class Autotest
   # Keep running the tests after a change, until all pass.
 
   def get_to_green
-    until all_good do
+    begin
       run_tests
       wait_for_changes unless all_good
-    end
+    end until all_good
   end
 
   ##
