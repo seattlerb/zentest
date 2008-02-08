@@ -404,8 +404,8 @@ test_error2(#{@test_class}):
   end
 
   def util_find_files_to_test(f, expected)
-    t = @a.last_mtime + 1
-    files = { f => t }
+    t = @a.last_mtime
+    files = { f => t + 1 }
 
     assert @a.find_files_to_test(files)
     assert_equal expected, @a.files_to_test

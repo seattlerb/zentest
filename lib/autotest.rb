@@ -234,7 +234,10 @@ class Autotest
   def run_tests
     hook :run_command
 
-    self.find_files_to_test
+    new_mtime = self.find_files_to_test
+    return unless new_mtime
+    self.last_mtime = new_mtime
+
     cmd = self.make_test_cmd self.files_to_test
 
     puts cmd unless $q
@@ -377,8 +380,11 @@ class Autotest
       self.files_to_test[filename] # creates key with default value
     end
 
-    self.last_mtime = files.values.max
-    not updated.empty?
+    if updated.empty? then
+      nil
+    else
+      files.values.max
+    end
   end
 
   ##
