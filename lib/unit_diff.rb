@@ -128,7 +128,7 @@ class UnitDiff
           bw = result.shift.sub(/^to equal (.*):?$/, '\1')
           butwas << bw
         else
-          state = :butwas if result.first.sub!(/ expected but was/, '')
+          state = :butwas if result.first.sub!(/ expected( but was|, not)/, '')
           expect << result.shift
         end
       when :butwas then
