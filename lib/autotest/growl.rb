@@ -1,13 +1,16 @@
 # -*- ruby -*-
 
 module Autotest::Growl
-  def self.growl title, msg, pri=0
-    title += " in #{Dir.pwd}"
-    msg += " at #{Time.now}"
-    system "growlnotify -n autotest --image /Applications/Mail.app/Contents/Resources/Caution.tiff -p #{pri} -m #{msg.inspect} #{title}"
+  def self.growl title, msg, pri = 0, img = nil
+    title += " in #{Dir.pwd.split(/\//)[-3..-1].join("/")}"
+    msg += " at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}"
+    # TODO: parameterize default image
+    img ||= "/Applications/Mail.app/Contents/Resources/Caution.tiff"
+    cmd = "growlnotify -n autotest --image #{img} -p #{pri} -m #{msg.inspect} #{title}"
+    system cmd
   end
 
-  Autotest.add_hook :run do  |at|
+  Autotest.add_hook :initialize do  |at|
     growl "autotest running", "Started"
   end
 
