@@ -241,7 +241,7 @@ class Autotest
     cmd = self.make_test_cmd self.files_to_test
     return if cmd.empty?
 
-    p :cmd => cmd unless $q
+    puts cmd unless $q
 
     old_sync = $stdout.sync
     $stdout.sync = true
