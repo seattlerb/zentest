@@ -1,12 +1,14 @@
 require 'test/unit'
 require 'test/zentest_assertions'
 
-$TESTING_RTC = true
+unless defined? $TESTING_RTC then
+  $TESTING_RTC = true
 
-begin
-  require 'test/rails'
-rescue LoadError, NameError
-  $TESTING_RTC = false
+  begin
+    require 'test/rails'
+  rescue LoadError, NameError
+    $TESTING_RTC = false
+  end
 end
 
 begin
