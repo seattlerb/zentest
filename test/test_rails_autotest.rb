@@ -73,25 +73,16 @@ class TestRailsAutotest < TestAutotest
   end
 
   def test_reorder_random
-    srand 42
     @a.order = :random
-    expected = ["test/views/admin/themes_view_test.rb",
-                "test/functional/articles_controller_test.rb",
-                "app/models/route.rb",
-                "test/views/articles_view_test.rb",
-                "test/views/route_view_test.rb",
-                "test/controllers/articles_controller_test.rb",
-                "test/functional/admin/themes_controller_test.rb",
-                "test/functional/route_controller_test.rb",
-                "test/unit/route_test.rb",
-                "test/functional/dummy_controller_test.rb",
-                "test/controllers/admin/themes_controller_test.rb",
-                "test/views/layouts_view_test.rb",
-                "test/controllers/dummy_controller_test.rb",
-                "test/controllers/route_controller_test.rb"]
-    expected.map! { |f| [f, @files[f]] }
 
-    assert_equal expected, @a.reorder(@files)
+    srand 42
+    expected, size = @files.dup, @files.size
+    expected = expected.sort_by { rand(size) }
+
+    srand 42
+    result = @a.reorder(@files.dup)
+
+    assert_equal expected, result
   end
 
   def test_test_files_for

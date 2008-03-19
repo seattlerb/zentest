@@ -1,6 +1,8 @@
 ##
 # Extra assertions for Test::Unit
 
+Test::Unit::Assertions = MiniTest::Unit::TestCase if defined? MiniTest # HACK
+
 module Test::Unit::Assertions
 
   ##
@@ -67,7 +69,7 @@ module Test::Unit::Assertions
   ##
   # Alias for assert_not_equal
 
-  alias deny_equal assert_not_equal
+  alias deny_equal assert_not_equal # rescue nil
 
   ##
   # Asserts that +obj+ responds to #include? and that obj does not include

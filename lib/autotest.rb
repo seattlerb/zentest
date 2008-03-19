@@ -445,7 +445,8 @@ class Autotest
     when :reverse then
       files_to_test.sort_by { |k,v| k }.reverse
     when :random then
-      files_to_test.sort_by { |k,v| rand }
+      max = files_to_test.size
+      files_to_test.sort_by { |k,v| rand(max) }
     when :natural then
       (self.find_order & files_to_test.keys).map { |f| [f, files_to_test[f]] }
     else

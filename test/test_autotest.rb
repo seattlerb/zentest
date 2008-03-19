@@ -224,11 +224,16 @@ class TestAutotest < Test::Unit::TestCase
   end
 
   def test_reorder_random
-    srand 42
     @a.order = :random
-    expected = ["test/test_blah.rb", "lib/blah.rb"].map { |f| [f, @files[f]] }
 
-    assert_equal expected, @a.reorder(@files)
+    srand 42
+    expected, size = @files.dup, @files.size
+    expected = expected.sort_by { rand(size) }
+
+    srand 42
+    result = @a.reorder(@files.dup)
+
+    assert_equal expected, result
   end
 
   def test_reorder_natural

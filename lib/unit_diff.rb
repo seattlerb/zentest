@@ -207,7 +207,7 @@ class UnitDiff
             if result.empty? then
               output.push "[no difference--suspect ==]"
             else
-              output.push result.map { |line| line.chomp }
+              output.push result.split(/\n/)
             end
 
             if $k then
