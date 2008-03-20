@@ -1,3 +1,20 @@
+=== 3.9.2 / 2008-03-20
+
+* 4 minor enhancements:
+
+  * Added compatibility with miniunit differences.
+  * Added email_notify, jabber_notify, and rcov autotest plugins.
+  * Updated rakefile to include examples automatically in example_dot_autotest.
+  * multiruby now outputs each command so you can grab it easily.
+
+* 5 bug fixes:
+
+  * Ensure tests are run after reset.
+  * Fixed all test/rails tests to run in any combo.
+  * Fixed up growl.rb a bit... still buggy (growlnotify, not growl.rb).
+  * Fixes for -f (fast start) and last_mtime in general.
+  * Fixes for 1.9 and rubinius
+
 === 3.9.1 / 2008-01-31
 
 * 1 bug fix:
