@@ -1,3 +1,9 @@
+=== 3.9.3 / 2008-04-01
+
+* 1 minor enhancement:
+
+  * Added EXCLUDED_VERSIONS to multiruby. Integrated with hoe.
+
 === 3.9.2 / 2008-03-20
 
 * 4 minor enhancements:
