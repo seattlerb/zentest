@@ -27,9 +27,13 @@ end
 
 class TestAutotest < Test::Unit::TestCase
 
-  def deny test
-    assert ! test
-  end
+  def deny test, msg=nil
+    if msg then
+      assert ! test, msg
+    else
+      assert ! test
+    end
+  end unless respond_to? :deny
 
   RUBY = File.join(Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name']) unless defined? RUBY
 
@@ -313,30 +317,24 @@ test_error2(#{@test_class}):
     deny @a.tainted
   end
 
-  def test_hook_overlap
-    Autotest.clear_hooks
-
-    @a.instance_variable_set :@blah1, false
-    @a.instance_variable_set :@blah2, false
-    @a.instance_variable_set :@blah3, false
-
-    Autotest.add_hook(:blah) do |at|
-      at.instance_variable_set :@blah1, true
-    end
-
-    Autotest.add_hook(:blah) do |at|
-      at.instance_variable_set :@blah2, true
-    end
-
-    Autotest.add_hook(:blah) do |at|
-      at.instance_variable_set :@blah3, true
-    end
+  def test_hook_overlap_returning_false
+    util_reset_hooks_returning false
 
     @a.hook :blah
 
     assert @a.instance_variable_get(:@blah1), "Hook1 should work on blah"
     assert @a.instance_variable_get(:@blah2), "Hook2 should work on blah"
     assert @a.instance_variable_get(:@blah3), "Hook3 should work on blah"
+  end
+
+  def test_hook_overlap_returning_true
+    util_reset_hooks_returning true
+
+    @a.hook :blah
+
+    assert @a.instance_variable_get(:@blah1), "Hook1 should work on blah"
+    deny @a.instance_variable_get(:@blah2), "Hook2 should NOT work on blah"
+    deny @a.instance_variable_get(:@blah3), "Hook3 should NOT work on blah"
   end
 
   def test_hook_response
@@ -424,5 +422,28 @@ test_error2(#{@test_class}):
 
   def util_path_to_classname(e,i)
     assert_equal e, @a.path_to_classname(i)
+  end
+
+  def util_reset_hooks_returning val
+    Autotest.clear_hooks
+
+    @a.instance_variable_set :@blah1, false
+    @a.instance_variable_set :@blah2, false
+    @a.instance_variable_set :@blah3, false
+
+    Autotest.add_hook(:blah) do |at|
+      at.instance_variable_set :@blah1, true
+      val
+    end
+
+    Autotest.add_hook(:blah) do |at|
+      at.instance_variable_set :@blah2, true
+      val
+    end
+
+    Autotest.add_hook(:blah) do |at|
+      at.instance_variable_set :@blah3, true
+      val
+    end
   end
 end
