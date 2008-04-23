@@ -195,7 +195,6 @@ class Autotest
 
   def run
     hook :initialize
-    hook :run                           # TODO: phase out
     reset
     add_sigint_handler
 
@@ -617,15 +616,15 @@ class Autotest
 
   def hook(name)
     deprecated = {
-      :run => :initialize,      # TODO: remove 2008-03-14 (pi day!)
+      # none currently
     }
 
     if deprecated[name] and not HOOKS[name].empty? then
       warn "hook #{name} has been deprecated, use #{deprecated[name]}"
     end
 
-    HOOKS[name].inject(false) do |handled,plugin|
-      plugin[self] || handled
+    HOOKS[name].any? do |plugin|
+      plugin[self]
     end
   end
 

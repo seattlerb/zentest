@@ -1,8 +1,9 @@
-=== 3.9.3 / 2008-04-01
+=== 3.9.3 / 2008-04-22
 
-* 1 minor enhancement:
+* 2 minor enhancements:
 
   * Added EXCLUDED_VERSIONS to multiruby. Integrated with hoe.
+  * Phased out deprecated :run hook.
 
 === 3.9.2 / 2008-03-20
 
