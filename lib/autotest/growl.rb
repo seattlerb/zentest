@@ -2,7 +2,7 @@
 
 module Autotest::Growl
   def self.growl title, msg, pri = 0, img = nil
-    title += " in #{Dir.pwd.split(/\//)[-3..-1].join("/")}"
+    title += " in #{Dir.pwd.split(/\//).last(3).join("/")}"
     msg += " at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}"
     # TODO: parameterize default image
     img ||= "/Applications/Mail.app/Contents/Resources/Caution.tiff"

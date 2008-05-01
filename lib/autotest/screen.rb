@@ -54,11 +54,6 @@ class Autotest::Screen
     message 'Run Tests' if execute?
   end
 
-  Autotest.add_hook :interrupt do |at|
-    message 'Run Tests' if execute?
-  end
-
-
   Autotest.add_hook :quit do |at|
     clear if execute?
   end

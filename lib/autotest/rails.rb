@@ -12,6 +12,7 @@ class Autotest::Rails < Autotest
     self.add_mapping(/^lib\/.*\.rb$/) do |filename, _|
       impl = File.basename(filename, '.rb')
       files_matching %r%^test/unit/#{impl}_test.rb$%
+      # TODO: (unit|functional|integration) maybe?
     end
 
     add_mapping %r%^test/fixtures/(.*)s.yml% do |_, m|
