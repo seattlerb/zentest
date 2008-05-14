@@ -24,7 +24,7 @@ Dir.chdir root_dir do
       if dir == "versions" then
         puts "  Downloading initial ruby tarballs to ~/.multiruby/versions:"
         Dir.chdir dir do
-          files = %w[ ruby-1.8.6-p111.tar.gz 1.9/ruby-1.9.0-0.tar.gz ]
+          files = %w[ ruby-1.8.6-p114.tar.gz 1.9/ruby-1.9.0-1.tar.gz ]
           files.each do |file|
             require 'open-uri'
             open("http://ftp.ruby-lang.org/pub/ruby/#{file}") do |f|
