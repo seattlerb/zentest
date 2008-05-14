@@ -7,6 +7,15 @@ def run(cmd)
   raise "ERROR: Command failed with exit code #{$?}" unless system cmd
 end
 
+def extract_latest_version url
+  file = URI.parse(url).read
+  versions = file.scan(/href="(ruby.*tar.gz)"/).flatten.reject { |s|
+    s =~ /preview/
+  }.sort_by { |s|
+    s.split(/\D+/).map { |i| i.to_i }
+  }.flatten.last
+end
+
 root_dir = File.expand_path(ENV['MULTIRUBY'] ||
                             File.join(ENV['HOME'], ".multiruby"))
 
@@ -22,22 +31,25 @@ Dir.chdir root_dir do
       puts "creating #{dir}"
       Dir.mkdir dir
       if dir == "versions" then
-        puts "  Downloading initial ruby tarballs to ~/.multiruby/versions:"
+        warn "  Downloading initial ruby tarballs to ~/.multiruby/versions:"
         Dir.chdir dir do
-          files = %w[ ruby-1.8.6-p114.tar.gz 1.9/ruby-1.9.0-1.tar.gz ]
-          files.each do |file|
-            require 'open-uri'
-            open("http://ftp.ruby-lang.org/pub/ruby/#{file}") do |f|
-              base = File.basename file
-              puts "    #{base} via HTTP... this might take a while."
+          require 'open-uri'
+          base_url = "http://ftp.ruby-lang.org/pub/ruby"
+
+          %w(1.8 1.9).each do |v|
+            warn "    Determining latest version for #{v}"
+            base = extract_latest_version("#{base_url}/#{v}/")
+            url = File.join base_url, v, base
+            warn "    Fetching #{base} via HTTP... this might take a while."
+            open(url) do |f|
               File.open base, 'w' do |out|
                 out.write f.read
               end
             end
           end
         end
-        puts "  ...done"
-        puts "  Put other ruby tarballs in ~/.multiruby/versions to use them."
+        warn "  ...done"
+        warn "  Put other ruby tarballs in ~/.multiruby/versions to use them."
       end
     end
   end
