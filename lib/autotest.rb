@@ -59,6 +59,9 @@ class Autotest
 
   T0 = Time.at 0
 
+  ALL_HOOKS = [ :all_good, :initialize, :interrupt, :quit, :ran_command,
+                :reset, :run_command, :waiting ]
+
   HOOKS = Hash.new { |h,k| h[k] = [] }
   unless defined? WINDOZE then
     WINDOZE = /win32/ =~ RUBY_PLATFORM
@@ -483,8 +486,9 @@ class Autotest
   # Determine and return the path of the ruby executable.
 
   def ruby
-    ruby = File.join(Config::CONFIG['bindir'],
-                     Config::CONFIG['ruby_install_name'])
+    ruby = ENV['RUBY']
+    ruby ||= File.join(Config::CONFIG['bindir'],
+                       Config::CONFIG['ruby_install_name'])
 
     ruby.gsub! File::SEPARATOR, File::ALT_SEPARATOR if File::ALT_SEPARATOR
 

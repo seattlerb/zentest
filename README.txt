@@ -64,10 +64,10 @@ implementation.
 
 == REQUIREMENTS
 
-* Ruby 1.6+
-* Test::Unit
+* Ruby 1.6+, JRuby 1.1.2+, or rubinius
+* Test::Unit or miniunit
 * Hoe
-* Rake or rubygems for install/uninstall
+* rubygems
 * diff.exe on windoze. Try http://gnuwin32.sourceforge.net/packages.html
 
 == INSTALL
