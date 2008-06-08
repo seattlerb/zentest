@@ -33,15 +33,15 @@ class TestRailsHelperTestCase < Test::Unit::TestCase
   def test_self_inherited
     assert defined? TRHelperTest
 
-    assert_includes 'tr_helper', TRHelperTest.instance_methods
+    assert_includes TRHelperTest.instance_methods, 'tr_helper'
   end
 
   def test_self_inherited_namespaced
     assert defined? Widgets
     assert defined? Widgets::SomeHelperTest
 
-    assert_includes 'widgets_some_helper',
-                    Widgets::SomeHelperTest.instance_methods
+    assert_includes(Widgets::SomeHelperTest.instance_methods,
+                    'widgets_some_helper')
   end
 
 end if $TESTING_RTC

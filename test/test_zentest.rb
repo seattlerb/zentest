@@ -229,7 +229,7 @@ end
   # Accessors & Adders:
 
   def test_initialize
-    assert_not_nil(@tester, "Tester must be initialized")
+    refute_nil(@tester, "Tester must be initialized")
     # TODO: should do more at this stage
   end
 

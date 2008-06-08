@@ -543,6 +543,7 @@ class Autotest
 
   def add_mapping(regexp, &proc)
     @test_mappings << [regexp, proc]
+    nil
   end
 
   ##
@@ -552,6 +553,7 @@ class Autotest
     @test_mappings.delete_if do |k,v|
       k == regexp
     end
+    nil
   end
 
   ##
@@ -561,6 +563,7 @@ class Autotest
 
   def clear_mappings
     @test_mappings.clear
+    nil
   end
 
   ############################################################
@@ -573,6 +576,7 @@ class Autotest
   def add_exception regexp
     raise "exceptions already compiled" if defined? @exceptions
     @exception_list << regexp
+    nil
   end
 
   ##
@@ -582,6 +586,7 @@ class Autotest
   def remove_exception regexp
     raise "exceptions already compiled" if defined? @exceptions
     @exception_list.delete regexp
+    nil
   end
 
   ##
@@ -591,6 +596,7 @@ class Autotest
   def clear_exceptions
     raise "exceptions already compiled" if defined? @exceptions
     @exception_list.clear
+    nil
   end
 
   ##

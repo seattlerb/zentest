@@ -25,7 +25,24 @@ class TestUnitDiff < Test::Unit::TestCase
     util_unit_diff(header, input, expected, :parse_input)
   end
 
-  def test_input_mini_rspec
+  def test_input_miniunit
+    header = "Loaded suite -e\nStarted\nF\nFinished in 0.035332 seconds.\n\n"
+    input = "#{header}  1) Failure:
+test_blah(TestBlah) [./blah.rb:25]:
+Expected ['a', 'b', 'c'], not ['a', 'c', 'b'].
+
+1 tests, 1 assertions, 1 failures, 0 errors
+"
+
+    expected = [[["  1) Failure:\n",
+                  "test_blah(TestBlah) [./blah.rb:25]:\n",
+                  "Expected ['a', 'b', 'c'], not ['a', 'c', 'b'].\n"]],
+                ["\n", "1 tests, 1 assertions, 1 failures, 0 errors\n"]]
+
+    util_unit_diff(header, input, expected, :parse_input)
+  end
+
+  def test_input_mspec
     header = <<-HEADER
 Started
 .......F
@@ -40,15 +57,15 @@ Expected nil to equal "baz":
     FAILURE
 
     backtrace = <<-BACKTRACE
-      PositiveExpectation#== at spec/mini_rspec.rb:217
+      PositiveExpectation#== at spec/mspec.rb:217
           main.__script__ {} at spec/language/unless_spec.rb:49
                    Proc#call at kernel/core/proc.rb:127
-               SpecRunner#it at spec/mini_rspec.rb:368
-                     main.it at spec/mini_rspec.rb:412
+               SpecRunner#it at spec/mspec.rb:368
+                     main.it at spec/mspec.rb:412
           main.__script__ {} at spec/language/unless_spec.rb:48
                    Proc#call at kernel/core/proc.rb:127
-         SpecRunner#describe at spec/mini_rspec.rb:378
-               main.describe at spec/mini_rspec.rb:408
+         SpecRunner#describe at spec/mspec.rb:378
+               main.describe at spec/mspec.rb:408
              main.__script__ at spec/language/unless_spec.rb:3
     CompiledMethod#as_script at kernel/bootstrap/primitives.rb:41
                    main.load at kernel/core/compile.rb:150
@@ -73,7 +90,7 @@ Expected nil to equal "baz":
     util_unit_diff(header, input, expected, :parse_input)
   end
 
-  def test_input_mini_rspec_multiline
+  def test_input_mspec_multiline
     header = <<-HEADER
 Started
 .......F
@@ -89,7 +106,7 @@ to equal #<TestGenerator [[:push, false], [:gif, #<Label 5>], [:push, "foo"], [:
       FAILURE
 
 backtrace = <<-BACKTRACE
-      PositiveExpectation#== at spec/mini_rspec.rb:216
+      PositiveExpectation#== at spec/mspec.rb:216
                     main.gen at ./compiler2/spec/helper.rb:125
           main.__script__ {} at compiler2/spec/control_spec.rb:448
     BACKTRACE
@@ -117,11 +134,39 @@ backtrace = <<-BACKTRACE
              "<\"<body>\">.\n"
             ]
 
-    expected = [["  1) Failure:\n", "test_test1(TestBlah) [./blah.rb:25]:\n"], ["<html>"], ["<body>"], []]
+    expected = [["  1) Failure:\n", "test_test1(TestBlah) [./blah.rb:25]:\n"],
+                ["<html>"],
+                ["<body>"],
+                []]
 
     assert_equal expected, @diff.parse_diff(input)
   end
 
+  def test_parse_diff_miniunit
+    input = ["  1) Failure:\n",
+             "test_blah(TestBlah) [./blah.rb:25]:\n",
+             "Expected ['a', 'b', 'c'], not ['a', 'c', 'b'].\n"]
+
+    expected = [["  1) Failure:\n", "test_blah(TestBlah) [./blah.rb:25]:\n"],
+                ["['a', 'b', 'c']"],
+                ["['a', 'c', 'b']"],
+                []]
+
+    assert_equal expected, @diff.parse_diff(input)
+  end
+
+  def test_parse_diff_miniunit_multiline
+    input = ["  1) Failure:\n",
+             "test_blah(TestBlah) [./blah.rb:25]:\n",
+             "Expected ['a',\n'b',\n'c'], not ['a',\n'c',\n'b'].\n"]
+
+    expected = [["  1) Failure:\n", "test_blah(TestBlah) [./blah.rb:25]:\n"],
+                ["['a',\n'b',\n'c']"],
+                ["['a',\n'c',\n'b']"],
+                []]
+
+    assert_equal expected, @diff.parse_diff(input)
+  end
   def test_parse_diff1
     input = ["  1) Failure:\n",
              "test_test1(TestBlah) [./blah.rb:25]:\n",
@@ -188,29 +233,29 @@ backtrace = <<-BACKTRACE
     assert_equal expected, @diff.parse_diff(input)
   end
 
-  def test_parse_diff_mini_rspec
+  def test_parse_diff_mspec
     input = ["1)\n", "The unless expression should fail FAILED\n",
       "Expected nil to equal \"baz\":\n",
-      "    PositiveExpectation#== at spec/mini_rspec.rb:217\n"]
+      "    PositiveExpectation#== at spec/mspec.rb:217\n"]
 
     expected = [["1)\n", "The unless expression should fail FAILED\n"],
       ["nil"],
       ["\"baz\""],
-      ["    PositiveExpectation#== at spec/mini_rspec.rb:217"]]
+      ["    PositiveExpectation#== at spec/mspec.rb:217"]]
 
     assert_equal expected, @diff.parse_diff(input)
   end
 
-  def test_parse_diff_mini_rspec_multiline
+  def test_parse_diff_mspec_multiline
     input = ["1)\n", "The unless expression should fail FAILED\n",
     "Expected #<TestGenerator [[:push, :true],\n", "  [:dup]\n", "]\n",
     "to equal #<TestGenerator [[:pop],\n", "  [:dup]\n", "]:\n",
-    "    PositiveExpectation#== at spec/mini_rspec.rb:217\n"]
+    "    PositiveExpectation#== at spec/mspec.rb:217\n"]
 
     expected = [["1)\n", "The unless expression should fail FAILED\n"],
       ["#<TestGenerator [[:push, :true],\n", "  [:dup]\n", "]"],
       ["#<TestGenerator [[:pop],\n", "  [:dup]\n", "]"],
-      ["    PositiveExpectation#== at spec/mini_rspec.rb:217"]]
+      ["    PositiveExpectation#== at spec/mspec.rb:217"]]
 
     assert_equal expected, @diff.parse_diff(input)
   end

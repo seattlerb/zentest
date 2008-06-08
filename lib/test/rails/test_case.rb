@@ -13,3 +13,16 @@ class Test::Rails::TestCase < Test::Unit::TestCase
 
 end
 
+module Test::Unit::Assertions
+  ##
+  # TODO: should this go in this file?
+  # Asserts that model indeed has a given callback
+  #
+  # assert_callback(Model, :before_save, :something)
+
+  def assert_callback(model_class, callback, method_name, message=nil)
+    vars = model_class.instance_variable_get(:@inheritable_attributes)
+    assert vars.has_key?(callback), message
+    assert_include vars[callback], method_name, message
+  end
+end

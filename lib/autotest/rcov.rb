@@ -12,5 +12,11 @@ module Autotest::RCov
   Autotest.add_hook :all_good do |at|
     system "rake #{@@command} PATTERN=#{@@pattern}"
   end
+
+  Autotest.add_hook :initialize do |at|
+    at.add_exception 'coverage'
+    at.add_exception 'coverage.info'
+    false
+  end
 end
 

@@ -115,15 +115,21 @@ class UnitDiff
         header << result.shift
         state = :expect if result.first =~ /^<|^Expected/
       when :expect then
-        if result.first =~ /^Expected (.*?) to equal (.*?):$/ then
+        case result.first
+        when /^Expected (.*?) to equal (.*?):$/ then
           expect << $1
           butwas << $2
           state = :footer
           result.shift
-        elsif result.first =~ /^Expected (.*?)$/ then
+        when /^Expected (.*?), not (.*)$/m then
+          expect << $1
+          butwas << $2
+          state = :footer
+          result.shift
+        when /^Expected (.*?)$/ then
           expect << "#{$1}\n"
           result.shift
-        elsif result.first =~ /^to equal / then
+        when /^to equal / then
           state = :spec_butwas
           bw = result.shift.sub(/^to equal (.*):?$/, '\1')
           butwas << bw
