@@ -1,10 +1,23 @@
-=== 3.9.3 / 2008-04-22
+=== 3.9.3 / 2008-06-09
 
-* 3 minor enhancements:
+* 12 minor enhancements:
 
-  * Multiruby now determines the latest versions 1.8/1.9 automatically.
+  * Added $RUBY env support to autotest so you can swap what ruby to run.
+  * Added ALL_HOOKS array to autotest for hook devs.
   * Added EXCLUDED_VERSIONS to multiruby. Integrated with hoe.
-  * Phased out deprecated :run hook.
+  * Added miniunit compatibility to unit_diff's output.
+  * Multiruby now determines the latest versions 1.8/1.9 automatically.
+  * Removed deprecated :run hook.
+  * Fixed zentest_assertions to be compatible with miniunit. Will phase out.
+  * Minor autotest plugin cleanup / fixes.
+  * Moved assert_callback to test/rails/test_case.rb
+  * Reversed assert_includes' arguments.
+  * Updated requirements info for other ruby impls.
+  * util_capture now returns strings, not iostrings.
+
+* 1 bug fixes:
+
+  * (add|remove)_(mappings|exceptions) now all return nil to help fix autotest hooks.
 
 === 3.9.2 / 2008-03-20
 
