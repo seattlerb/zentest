@@ -1,5 +1,10 @@
 #!/usr/local/bin/ruby -w
 
+if defined? RUBY_ENGINE then
+  warn "rubinius does not support features required by zentest. Skipping tests"
+  return
+end
+
 require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
 $TESTING = true

@@ -2,16 +2,20 @@ require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
 $TESTING = true
 
-# I do this so I can still run ZenTest against the tests and itself...
-require 'zentest' unless defined? $ZENTEST
+require 'zentest_mapping' unless defined? $ZENTEST
+
+class Dummy
+  attr_accessor :inherited_methods
+  include ZenTestMapping
+end
 
 class TestZentestMapping < Test::Unit::TestCase
   def setup
-    @tester = ZenTest.new
+    @tester = Dummy.new
   end
 
   def util_simple_setup
-    @tester.klasses = {
+    klasses = {
       "Something" =>
         {
         "method1" => true,
@@ -25,7 +29,7 @@ class TestZentestMapping < Test::Unit::TestCase
         "self.[]" => true,
       },
     }
-    @tester.test_klasses = {
+    test_klasses = {
       "TestSomething" =>
         {
         "test_class_method4" => true,
@@ -35,7 +39,7 @@ class TestZentestMapping < Test::Unit::TestCase
         "test_class_index" => true,
       },
     }
-    @tester.inherited_methods = @tester.test_klasses.merge(@tester.klasses)
+    @tester.inherited_methods = test_klasses.merge(klasses)
     @generated_code = "
 require 'test/unit' unless defined? $ZENTEST and $ZENTEST
 
