@@ -1,11 +1,8 @@
 #!/usr/bin/env ruby -w
 
 require 'multiruby'
-require 'open-uri'
 
-root_dir = Multiruby.root_dir
-
-ARGV << "-h" if ARGV.empty?
+ARGV << "help" if ARGV.empty?
 
 ARGV.each do |spec|
   case spec

@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'open-uri'
 
 ##
 # multiruby_setup is a script to help you manage multiruby.
@@ -33,7 +34,6 @@ module Multiruby
   TAGS     = %w(    1_8_6 1_8_7 1_9  ).map { |v| "tag:#{v}" }
   BRANCHES = %w(1_8 1_8_6 1_8_7 trunk).map { |v| "branch:#{v}" }
 
-
   def self.help
     File.readlines(__FILE__).each do |line|
       next unless line =~ /^#( |$)/
@@ -52,7 +52,7 @@ module Multiruby
 
   def self.rm name
     Multiruby.in_root_dir do
-      Fileutils.rm_rf Dir["*/#{name}"]
+      FileUtils.rm_rf Dir["*/#{name}"]
       File.unlink "versions/ruby-#{name}.tar.gz"
     end
   end
@@ -83,7 +83,7 @@ module Multiruby
           system "rake clean"
         end
       else
-        Fileutils.rm_rf Dir.pwd
+        FileUtils.rm_rf Dir.pwd
       end
     end
   end
@@ -102,7 +102,7 @@ module Multiruby
         case dir
         when /mri_\d/ then
           system "svn cleanup" # just in case
-          Fileutils.rm_rf "../install/#{dir}" if `svn up` =~ /^[ADUCG] /
+          FileUtils.rm_rf "../install/#{dir}" if `svn up` =~ /^[ADUCG] /
         when /tag/
           warn "don't know how to update tags: #{dir}"
           # url = `svn info`[/^URL: (.*)/, 1]

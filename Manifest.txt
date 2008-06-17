@@ -7,6 +7,7 @@ articles/getting_started_with_autotest.html
 articles/how_to_use_zentest.txt
 bin/autotest
 bin/multiruby
+bin/multiruby_setup
 bin/rails_test_audit
 bin/unit_diff
 bin/zentest
@@ -30,6 +31,7 @@ lib/autotest/kdenotify.rb
 lib/autotest/menu.rb
 lib/autotest/migrate.rb
 lib/autotest/notify.rb
+lib/autotest/once.rb
 lib/autotest/pretty.rb
 lib/autotest/rails.rb
 lib/autotest/rcov.rb
@@ -39,6 +41,7 @@ lib/autotest/shame.rb
 lib/autotest/snarl.rb
 lib/autotest/timestamp.rb
 lib/functional_test_matrix.rb
+lib/multiruby.rb
 lib/test/rails.rb
 lib/test/rails/controller_test_case.rb
 lib/test/rails/functional_test_case.rb
