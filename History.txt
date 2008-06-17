@@ -1,3 +1,20 @@
+=== 3.10.0 / 2008-06-17
+
+* 1 major enhancement:
+
+  * Added multiruby_setup to help manage multiruby installed versions.
+
+* 3 minor enhancements:
+
+  * Added autotest/once plugin to help plugin developers.
+  * Heavily refactored multiruby.
+  * Switched rubinius from shotgun/rubinius to bin/rbx, finally.
+
+* 2 bug fixes:
+
+  * Refactored zentest_mapping test to avoid zentest altogether.
+  * zentest tests bail gracefully for rubinius.
+
 === 3.9.3 / 2008-06-09
 
 * 12 minor enhancements:

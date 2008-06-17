@@ -21,7 +21,8 @@ development. As soon as you save a file, autotest will run the
 corresponding dependent tests.
 
 multiruby runs anything you want on multiple versions of ruby. Great
-for compatibility checking!
+for compatibility checking! Use multiruby_setup to manage your
+installed versions.
 
 Test::Rails helps you build industrial-strength Rails code.
 
@@ -58,6 +59,7 @@ implementation.
 
   autotest
 
+  multiruby_setup mri:svn:current
   multiruby ./TestMyProject.rb
 
   (and other stuff for Test::Rails)

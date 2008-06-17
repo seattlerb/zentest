@@ -1,104 +1,9 @@
 #!/usr/bin/env ruby -w
 
-require 'fileutils'
+require 'multiruby'
 
-def run(cmd)
-  puts "Running command: #{cmd}"
-  raise "ERROR: Command failed with exit code #{$?}" unless system cmd
-end
-
-def extract_latest_version url
-  file = URI.parse(url).read
-  versions = file.scan(/href="(ruby.*tar.gz)"/).flatten.reject { |s|
-    s =~ /preview/
-  }.sort_by { |s|
-    s.split(/\D+/).map { |i| i.to_i }
-  }.flatten.last
-end
-
-root_dir = File.expand_path(ENV['MULTIRUBY'] ||
-                            File.join(ENV['HOME'], ".multiruby"))
-
-unless test ?d, root_dir then
-  puts "creating #{root_dir}"
-  Dir.mkdir root_dir, 0700
-end
-
-versions = []
-Dir.chdir root_dir do
-  %w(build install versions).each do |dir|
-    unless test ?d, dir then
-      puts "creating #{dir}"
-      Dir.mkdir dir
-      if dir == "versions" then
-        warn "  Downloading initial ruby tarballs to ~/.multiruby/versions:"
-        Dir.chdir dir do
-          require 'open-uri'
-          base_url = "http://ftp.ruby-lang.org/pub/ruby"
-
-          %w(1.8 1.9).each do |v|
-            warn "    Determining latest version for #{v}"
-            base = extract_latest_version("#{base_url}/#{v}/")
-            url = File.join base_url, v, base
-            warn "    Fetching #{base} via HTTP... this might take a while."
-            open(url) do |f|
-              File.open base, 'w' do |out|
-                out.write f.read
-              end
-            end
-          end
-        end
-        warn "  ...done"
-        warn "  Put other ruby tarballs in ~/.multiruby/versions to use them."
-      end
-    end
-  end
-
-  tarballs = Dir["versions/rubygems*.tgz"]
-  raise "You should delete all but one rubygem tarball" if tarballs.size > 1
-  rubygem_tarball = File.expand_path tarballs.last rescue nil
-
-  Dir.chdir "build" do
-    Dir["../versions/ruby*.tar.gz"].each do |tarball|
-      next if tarball =~ /rubygems/
-      build_dir = File.basename tarball, ".tar.gz"
-      version = build_dir.sub(/^ruby-?/, '')
-      versions << version
-      inst_dir = "#{root_dir}/install/#{version}"
-      unless test ?d, inst_dir then
-        unless test ?d, build_dir then
-          puts "creating #{inst_dir}"
-          Dir.mkdir inst_dir
-          run "tar zxf #{tarball}"
-        end
-        Dir.chdir build_dir do
-          puts "building and installing #{version}"
-          run "autoconf" unless test ?f, "configure"
-          FileUtils.rm_r "ext/readline" if test ?d, "ext/readline"
-          run "./configure --prefix #{inst_dir} &> log.configure" unless test ?f, "Makefile"
-          run "nice make -j4 &> log.build"
-          run "make install &> log.install"
-          build_dir = Dir.pwd
-
-          if rubygem_tarball and version !~ /1[._-]9/ then
-            rubygems = File.basename rubygem_tarball, ".tgz"
-            run "tar zxf #{rubygem_tarball}" unless test ?d, rubygems
-
-            Dir.chdir rubygems do
-              run "../ruby ./setup.rb &> ../log.rubygems"
-            end
-          end
-        end
-      end
-    end
-  end
-
-  # pick up rubinius - allows for simple symlinks to your build dir
-  Dir.chdir('install') do
-    versions.push(*Dir["rubinius*"])
-  end
-end
-
+root_dir = Multiruby.root_dir
+versions = Multiruby.build_and_install
 versions = ENV['VERSIONS'].split(/:/) if ENV.has_key? 'VERSIONS'
 
 if ENV.has_key? 'EXCLUDED_VERSIONS' then
@@ -109,7 +14,8 @@ end
 results = {}
 versions.each do |version|
   ruby = "#{root_dir}/install/#{version}/bin/ruby"
-  ruby.sub!(/bin.ruby/, 'shotgun/rubinius') if version =~ /rubinius/
+
+  ruby.sub!(/bin.ruby/, 'bin/rbx') if version =~ /rubinius/
 
   puts
   puts "VERSION = #{version}"

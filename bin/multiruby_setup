@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby -w
+
+require 'multiruby'
+require 'open-uri'
+
+root_dir = Multiruby.root_dir
+
+ARGV << "-h" if ARGV.empty?
+
+ARGV.each do |spec|
+  case spec
+  when "-h", "help" then
+    Multiruby.help
+  when "list" then
+    Multiruby.list
+  when /rm:(.*)/ then
+    Multiruby.rm $1
+  when "clean" then
+    Multiruby.clean
+  when "update" then
+    Multiruby.update
+  when "update:rubygems" then
+    Multiruby.update_rubygems
+  when "mri:svn:current" then
+    ARGV << "mri:svn:releases" << "mri:svn:branches"
+  when "mri:svn:releases" then
+    Multiruby::TAGS.each do |v|
+      ARGV << "mri:svn:#{v}"
+    end
+  when "mri:svn:branches" then
+    Multiruby::BRANCHES.each do |v|
+      ARGV << "mri:svn:#{v}"
+    end
+  when /mri:svn:branch:(.*)/ then
+    ver = $1
+    ver = "branches/ruby_#{ver}" unless ver == "trunk"
+
+    Multiruby.svn_co "#{Multiruby::MRI_SVN}/#{ver}", "mri_#{ver}"
+  when /mri:svn:tag:(.*)/ then
+    ver = $1
+    latest = Multiruby.tags.grep(/#{ver}/).last
+
+    Multiruby.svn_co "#{Multiruby::MRI_SVN}/tags/#{latest}", "mri_rel_#{ver}"
+  when /mri:tar:(.*)/ then
+    v = $1
+    Multiruby.fetch_tar v
+  else
+    warn "unknown spec #{spec}"
+  end
+end
+
+Multiruby.build_and_install
