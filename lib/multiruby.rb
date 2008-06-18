@@ -31,8 +31,8 @@ require 'open-uri'
 #
 module Multiruby
   MRI_SVN = "http://svn.ruby-lang.org/repos/ruby"
-  TAGS     = %w(    1_8_6 1_8_7 1_9  ).map { |v| "tag:#{v}" }
-  BRANCHES = %w(1_8 1_8_6 1_8_7 trunk).map { |v| "branch:#{v}" }
+  TAGS     = %w(    1_8_6 1_8_7 1_9  )
+  BRANCHES = %w(1_8 1_8_6 1_8_7 trunk)
 
   def self.build_and_install
     root_dir = self.root_dir
@@ -246,7 +246,7 @@ module Multiruby
     tags = nil
     Multiruby.in_tmp_dir do
       cache = "svn.tag.cache"
-      File.unlink cache if Time.now - File.mtime(cache) > 86400 rescue nil
+      File.unlink cache if Time.now - File.mtime(cache) > 3600 rescue nil
 
       File.open cache, "w" do |f|
         f.write `svn ls #{MRI_SVN}/tags/`
