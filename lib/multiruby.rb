@@ -12,6 +12,7 @@ require 'open-uri'
 #     list            - print installed versions.
 #     update          - update svn builds.
 #     update:rubygems - update rubygems and nuke install dirs.
+#     rubygems:merge  - symlink all rubygem dirs to one dir.
 #     rm:$version     - remove a particular version.
 #     clean           - clean scm build dirs and remove non-scm build dirs.
 #
@@ -23,6 +24,8 @@ require 'open-uri'
 #     mri:svn:branch:$branch - install a specific $branch of mri from svn.
 #     mri:svn:tag:$tag       - install a specific $tag of mri from svn.
 #     mri:tar:$version       - install a specific $version of mri from tarball.
+#     rbx:ln:$dir            - symlink your rbx $dir
+#     rbx:git:current        - install rbx from git
 #
 # NOTES:
 #
@@ -30,7 +33,9 @@ require 'open-uri'
 # * I'll get to adding support for other implementations soon.
 #
 module Multiruby
-  MRI_SVN = "http://svn.ruby-lang.org/repos/ruby"
+  MRI_SVN  = "http://svn.ruby-lang.org/repos/ruby"
+  RBX_GIT  = "git@git.rubini.us"
+
   TAGS     = %w(    1_8_6 1_8_7 1_9  )
   BRANCHES = %w(1_8 1_8_6 1_8_7 trunk)
 
@@ -56,20 +61,26 @@ module Multiruby
 
           unless test ?d, inst_dir then
             unless test ?d, build_dir then
-              puts "creating #{inst_dir}"
-              Dir.mkdir inst_dir
-              run "tar zxf #{tarball}"
+              if test ?d, tarball then
+                dir = File.basename tarball
+                FileUtils.ln_sf "../versions/#{dir}", "../build/#{dir}"
+              else
+                puts "creating #{inst_dir}"
+                Dir.mkdir inst_dir
+                run "tar zxf #{tarball}"
+              end
             end
             Dir.chdir build_dir do
               puts "building and installing #{version}"
-              run "autoconf" unless test ?f, "configure"
-              FileUtils.rm_r "ext/readline" if test ?d, "ext/readline"
-              run "./configure --prefix #{inst_dir} &> log.configure" unless test ?f, "Makefile"
-              run "nice make -j4 &> log.build"
-              run "make install &> log.install"
-              build_dir = Dir.pwd
+              if test ?f, "configure.in" then
+                gnu_utils_build
+              elsif test ?f, "Rakefile" then
+                run "rake"
+              else
+                raise "dunno how to build"
+              end
 
-              if rubygem_tarball and version !~ /1[._-]9|trunk/ then
+              if rubygem_tarball and version !~ /1[._-]9|mri_trunk|rubinius/ then
                 rubygems = File.basename rubygem_tarball, ".tgz"
                 run "tar zxf #{rubygem_tarball}" unless test ?d, rubygems
 
@@ -81,11 +92,6 @@ module Multiruby
           end
         end
       end
-
-      # pick up rubinius - allows for simple symlinks to your build dir
-      self.in_install_dir do
-        versions.push(*Dir["rubinius*"])
-      end
     end
 
     versions
@@ -96,9 +102,9 @@ module Multiruby
       case style
       when :svn, :git then
         if File.exist? "Makefile" then
-          system "make clean"
+          run "make clean"
         elsif File.exist? "Rakefile" then
-          system "rake clean"
+          run "rake clean"
         end
       else
         FileUtils.rm_rf Dir.pwd
@@ -148,6 +154,20 @@ module Multiruby
     end
   end
 
+  def self.git_clone url, dir
+    Multiruby.in_versions_dir do
+      Multiruby.run "git clone #{url} #{dir}" unless File.directory? dir
+      FileUtils.ln_sf "../versions/#{dir}", "../build/#{dir}"
+    end
+  end
+
+  def self.gnu_utils_build
+    run "autoconf" unless test ?f, "configure"
+    run "./configure --prefix #{inst_dir} &> log.configure" unless test ?f, "Makefile"
+    run "nice make -j4 &> log.build"
+    run "make install &> log.install"
+  end
+
   def self.help
     File.readlines(__FILE__).each do |line|
       next unless line =~ /^#( |$)/
@@ -194,10 +214,38 @@ module Multiruby
     end
   end
 
+  def self.merge_rubygems
+    in_install_dir do
+      gems = Dir["*/lib/ruby/gems"]
+
+      unless test ?d, "../gems" then
+        FileUtils.mv gems.first, ".."
+      end
+
+      gems.each do |d|
+        FileUtils.rm_rf d
+        FileUtils.ln_sf "../../../../gems", d
+      end
+    end
+  end
+
+  def self.mri_latest_tag v
+    Multiruby.tags.grep(/#{v}/).last
+  end
+
+  def self.rbx_ln dir
+    dir = File.expand_path dir
+    Multiruby.in_versions_dir do
+      FileUtils.ln_sf dir, "rubinius"
+      FileUtils.ln_sf "../versions/rubinius", "../install/rubinius"
+    end
+  end
+
   def self.rm name
     Multiruby.in_root_dir do
       FileUtils.rm_rf Dir["*/#{name}"]
-      File.unlink "versions/ruby-#{name}.tar.gz"
+      f = "versions/ruby-#{name}.tar.gz"
+      File.unlink f if test ?f, f
     end
   end
 
@@ -238,7 +286,7 @@ module Multiruby
   def self.svn_co url, dir
     Multiruby.in_versions_dir do
       Multiruby.run "svn co #{url} #{dir}" unless File.directory? dir
-      FileUtils.ln_s "../versions/#{dir}", "../build/#{dir}"
+      FileUtils.ln_sf "../versions/#{dir}", "../build/#{dir}"
     end
   end
 
@@ -264,23 +312,56 @@ module Multiruby
     # figure out latest tag on that name and svn sw to it trunk and
     # others will just svn update
 
+    clean = []
+
     self.each_scm_build_dir do |style|
+      dir = File.basename(Dir.pwd)
+      warn dir
+
       case style
       when :svn then
-        dir = File.basename(Dir.pwd)
-        warn dir
         case dir
         when /mri_\d/ then
           system "svn cleanup" # just in case
-          FileUtils.rm_rf "../install/#{dir}" if `svn up` =~ /^[ADUCG] /
-        when /tag/
-          warn "don't know how to update tags: #{dir}"
-          # url = `svn info`[/^URL: (.*)/, 1]
+          svn_up = `svn up`
+          in_build_dir do
+            if svn_up =~ /^[ADUCG] / then
+              clean << dir
+            else
+              warn "  no update"
+            end
+            FileUtils.ln_sf "../build/#{dir}", "../versions/#{dir}"
+          end
+        when /mri_rel_(.+)/ then
+          ver = $1
+          url = `svn info`[/^URL: (.*)/, 1]
+          latest = self.mri_latest_tag(ver).chomp('/')
+          new_url = File.join(File.dirname(url), latest)
+          if new_url != url then
+            run "svn sw #{new_url}"
+            clean << dir
+          else
+            warn "  no update"
+          end
         else
-          warn "don't know how to update: #{dir}"
+          warn "  update in this svn dir not supported yet: #{dir}"
+        end
+      when :git then
+        case dir
+        when /rubinius/ then
+          run "rake git:update build" # minor cheat by building here
+        else
+          warn "  update in this git dir not supported yet: #{dir}"
         end
       else
-        warn "update in non-svn dir not supported yet: #{dir}"
+        warn "  update in non-svn dir not supported yet: #{dir}"
+      end
+    end
+
+    in_install_dir do
+      clean.each do |dir|
+        warn "removing install/#{dir}"
+        FileUtils.rm_rf dir
       end
     end
   end
@@ -298,6 +379,10 @@ module Multiruby
       File.open file, 'w' do |f|
         f.write URI.parse(url+file).read
       end
+    end
+
+    Multiruby.in_install_dir do
+      FileUtils.rm_rf Dir["*"]
     end
   end
 end
