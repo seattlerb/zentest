@@ -73,7 +73,7 @@ module Multiruby
             Dir.chdir build_dir do
               puts "building and installing #{version}"
               if test ?f, "configure.in" then
-                gnu_utils_build
+                gnu_utils_build inst_dir
               elsif test ?f, "Rakefile" then
                 run "rake"
               else
@@ -161,7 +161,7 @@ module Multiruby
     end
   end
 
-  def self.gnu_utils_build
+  def self.gnu_utils_build inst_dir
     run "autoconf" unless test ?f, "configure"
     run "./configure --prefix #{inst_dir} &> log.configure" unless test ?f, "Makefile"
     run "nice make -j4 &> log.build"
