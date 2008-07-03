@@ -1,3 +1,25 @@
+=== 3.11.0 / 2008-07-03
+
+* 10 minor enhancements:
+
+  * Added git support.
+  * Added rbx:ln:$dir and rbx:git:current.
+  * Added rubygems:merge as a nice little hack to share rubygems setups.
+  * Added svn tag updating (eg will svn sw from mri 1.8.6 222 to 1.8.6 231).
+  * Made it possible to have manually specified tags.
+  * Made multiruby a little more self-repairing wrt symlinks and build dirs.
+  * Refactored into mri_latest_tag(v).
+  * Removed rubinius specific symlink hacks, now fully supported.
+  * mri:svn:releases figures out all the latest patch levels.
+  * multiruby_setup help now exits instead of building.
+  * multiruby_setup list and clean now exit
+  * multiruby_setup clean now checks for rakefile first, since rbx has both. :(
+
+* 2 bug fixes:
+
+  * Fixed bug in mri:svn:branch:xxx with svn dir name.
+  * multiruby_setup rm now smarter about tarballs.
+
 === 3.10.0 / 2008-06-17
 
 * 1 major enhancement:
