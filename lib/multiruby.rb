@@ -157,7 +157,7 @@ module Multiruby
   def self.git_clone url, dir
     Multiruby.in_versions_dir do
       Multiruby.run "git clone #{url} #{dir}" unless File.directory? dir
-      FileUtils.ln_sf "../versions/#{dir}", "../build/#{dir}"
+      FileUtils.ln_sf "../versions/#{dir}", "../install/#{dir}"
     end
   end
 
