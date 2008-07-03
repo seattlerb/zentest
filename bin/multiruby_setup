@@ -11,10 +11,12 @@ ARGV.each do |spec|
     exit 0
   when "list" then
     Multiruby.list
+    exit 0
   when /rm:(.*)/ then
     Multiruby.rm $1
   when "clean" then
     Multiruby.clean
+    exit 0
   when "update" then
     Multiruby.update
   when "update:rubygems" then

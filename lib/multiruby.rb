@@ -101,10 +101,10 @@ module Multiruby
     self.each_scm_build_dir do |style|
       case style
       when :svn, :git then
-        if File.exist? "Makefile" then
-          run "make clean"
-        elsif File.exist? "Rakefile" then
+        if File.exist? "Rakefile" then
           run "rake clean"
+        elsif File.exist? "Makefile" then
+          run "make clean"
         end
       else
         FileUtils.rm_rf Dir.pwd
