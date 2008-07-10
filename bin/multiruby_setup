@@ -54,7 +54,7 @@ ARGV.each do |spec|
   when /rbx:ln:(.*)/ then
     Multiruby.rbx_ln $1
   when /rbx:git:current/ then
-    Multiruby.git_clone "#{Multiruby::RBX_GIT}:code", "rubinius"
+    Multiruby.git_clone "#{Multiruby::RBX_GIT}/code", "rubinius"
   else
     warn "unknown spec #{spec}"
   end

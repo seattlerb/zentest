@@ -34,7 +34,7 @@ require 'open-uri'
 #
 module Multiruby
   MRI_SVN  = "http://svn.ruby-lang.org/repos/ruby"
-  RBX_GIT  = "git@git.rubini.us"
+  RBX_GIT  = "git://git.rubini.us"
 
   TAGS     = %w(    1_8_6 1_8_7 1_9  )
   BRANCHES = %w(1_8 1_8_6 1_8_7 trunk)
