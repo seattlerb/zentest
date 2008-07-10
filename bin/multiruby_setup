@@ -12,6 +12,8 @@ ARGV.each do |spec|
   when "list" then
     Multiruby.list
     exit 0
+  when "build" then
+    # do nothing
   when /rm:(.*)/ then
     Multiruby.rm $1
   when "clean" then

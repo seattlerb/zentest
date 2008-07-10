@@ -75,7 +75,7 @@ module Multiruby
               if test ?f, "configure.in" then
                 gnu_utils_build inst_dir
               elsif test ?f, "Rakefile" then
-                run "rake"
+                rake_build inst_dir
               else
                 raise "dunno how to build"
               end
@@ -157,7 +157,7 @@ module Multiruby
   def self.git_clone url, dir
     Multiruby.in_versions_dir do
       Multiruby.run "git clone #{url} #{dir}" unless File.directory? dir
-      FileUtils.ln_sf "../versions/#{dir}", "../install/#{dir}"
+      FileUtils.ln_sf "../versions/#{dir}", "../build/#{dir}"
     end
   end
 
@@ -166,6 +166,11 @@ module Multiruby
     run "./configure --prefix #{inst_dir} &> log.configure" unless test ?f, "Makefile"
     run "nice make -j4 &> log.build"
     run "make install &> log.install"
+  end
+
+  def self.rake_build inst_dir
+    run "rake &> log.build"
+    FileUtils.ln_sf "../build/#{File.basename Dir.pwd}", inst_dir
   end
 
   def self.help
