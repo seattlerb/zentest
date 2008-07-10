@@ -271,12 +271,12 @@ module Multiruby
     raise "ERROR: Command failed with exit code #{$?}" unless system cmd
   end
 
-  def self.setup_dirs
+  def self.setup_dirs(download = true)
     %w(build install versions tmp).each do |dir|
       unless test ?d, dir then
         puts "creating #{dir}"
         Dir.mkdir dir
-        if dir == "versions" then
+        if dir == "versions" && download then
           warn "  Downloading initial ruby tarballs to ~/.multiruby/versions:"
           %w(1.8 1.9).each do |v|
             self.fetch_tar v

@@ -4,6 +4,9 @@ require 'multiruby'
 
 ARGV << "help" if ARGV.empty?
 
+Dir.chdir Multiruby.root_dir
+Multiruby.setup_dirs(false)
+
 ARGV.each do |spec|
   case spec
   when "-h", "help" then
