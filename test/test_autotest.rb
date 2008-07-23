@@ -182,7 +182,7 @@ class TestAutotest < Test::Unit::TestCase
     files = { "fooby.rb" => Time.at(42) }
     assert @a.find_files_to_test(files)  # we find fooby,
     assert_equal empty, @a.files_to_test # but it isn't something to test
-    assert_equal "Dunno! fooby.rb\n", @a.output.string
+    assert_equal "No tests matched fooby.rb\n", @a.output.string
   end
 
   def test_find_files_to_test_lib
