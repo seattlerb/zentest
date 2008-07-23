@@ -507,7 +507,8 @@ class Autotest
 
     result = result.nil? ? [] : Array(result.last.call(filename, $~))
 
-    output.puts "Dunno! #{filename}" if ($v or $TESTING) and result.empty?
+    output.puts "No tests matched #{filename}" if
+      ($v or $TESTING) and result.empty?
 
     result.sort.uniq.select { |f| known_files[f] }
   end
