@@ -29,9 +29,12 @@ $TESTING = false unless defined? $TESTING
 #   Autotest.add_hook hook_name { |autotest| ... }
 #
 # The available hooks are: initialize, run, run_command, ran_command,
-#   red, green, all_good, reset, interrupt, and quit.
+#   red, green, updated, all_good, reset, interrupt, and quit.
 #
 # See example_dot_autotest.rb for more details.
+#
+# If a hook returns a true value, it signals to autotest that the hook
+# was handled and should not continue executing hooks.
 #
 # Naming:
 #
@@ -377,7 +380,9 @@ class Autotest
   def find_files_to_test(files=find_files)
     updated = files.select { |filename, mtime| self.last_mtime < mtime }
 
-    p updated if $v unless updated.empty? or self.last_mtime.to_i == 0
+    p updated if $v unless updated.empty? || self.last_mtime.to_i == 0
+
+    hook :updated, updated unless updated.empty? || self.last_mtime.to_i == 0
 
     updated.map { |f,m| test_files_for(f) }.flatten.uniq.each do |filename|
       self.files_to_test[filename] # creates key with default value
@@ -625,7 +630,7 @@ class Autotest
   # until one returns true. Returns false if no hook handled the
   # event.
 
-  def hook(name)
+  def hook(name, *args)
     deprecated = {
       # none currently
     }
@@ -635,7 +640,7 @@ class Autotest
     end
 
     HOOKS[name].any? do |plugin|
-      plugin[self]
+      plugin[self, *args]
     end
   end
 

@@ -36,6 +36,7 @@ lib/autotest/pretty.rb
 lib/autotest/rails.rb
 lib/autotest/rcov.rb
 lib/autotest/redgreen.rb
+lib/autotest/restart.rb
 lib/autotest/screen.rb
 lib/autotest/shame.rb
 lib/autotest/snarl.rb

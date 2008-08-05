@@ -14,9 +14,11 @@
 # require 'autotest/menu'
 # require 'autotest/migrate'
 # require 'autotest/notify'
+# require 'autotest/once'
 # require 'autotest/pretty'
 # require 'autotest/rcov'
 # require 'autotest/redgreen'
+# require 'autotest/restart'
 # require 'autotest/screen'
 # require 'autotest/shame'
 # require 'autotest/snarl'
@@ -31,12 +33,13 @@
 # Autotest::EmailNotify.recipients = o
 # Autotest::EmailNotify.use_svn = o
 # Autotest::EmailNotify.report_every_run = o
-# Autotest::Growl.growl title, msg, pri = 0
+# Autotest::Growl.growl title, msg, pri = 0, img = nil
 # Autotest::JabberNotify.recipients = o
 # Autotest::JabberNotify.account = o
 # Autotest::JabberNotify.password = o
 # Autotest::JabberNotify.use_svn = o
 # Autotest::JabberNotify.report_every_run = o
+# Autotest::RCov.command = o
 # Autotest::RCov.pattern = o
 # Autotest::Shame.chat_app = o
 # Autotest::Snarl.snarl title, msg, ico = nil
