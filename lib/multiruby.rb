@@ -39,6 +39,13 @@ module Multiruby
   TAGS     = %w(    1_8_6 1_8_7 1_9  )
   BRANCHES = %w(1_8 1_8_6 1_8_7 trunk)
 
+  HELP = []
+
+  File.readlines(__FILE__).each do |line|
+    next unless line =~ /^#( |$)/
+    HELP << line.sub(/^# ?/, '')
+  end
+
   def self.build_and_install
     root_dir = self.root_dir
     versions = []
@@ -128,13 +135,15 @@ module Multiruby
     end
   end
 
-  def self.extract_latest_version url
+  def self.extract_latest_version url, matching=nil
     file = URI.parse(url).read
     versions = file.scan(/href="(ruby.*tar.gz)"/).flatten.reject { |s|
       s =~ /preview/
     }.sort_by { |s|
       s.split(/\D+/).map { |i| i.to_i }
-    }.flatten.last
+    }.flatten
+    versions = versions.grep(/#{Regexp.escape(matching)}/) if matching
+    versions.last
   end
 
   def self.fetch_tar v
@@ -143,8 +152,10 @@ module Multiruby
 
     in_versions_dir do
       warn "    Determining latest version for #{v}"
-      base = extract_latest_version("#{base_url}/#{v}/")
-      url = File.join base_url, v, base
+      ver = v[/\d+\.\d+/]
+      base = extract_latest_version("#{base_url}/#{ver}/", v)
+      abort "Could not determine release for #{v}" unless base
+      url = File.join base_url, ver, base
       warn "    Fetching #{base} via HTTP... this might take a while."
       open(url) do |f|
         File.open base, 'w' do |out|
@@ -174,10 +185,7 @@ module Multiruby
   end
 
   def self.help
-    File.readlines(__FILE__).each do |line|
-      next unless line =~ /^#( |$)/
-      puts line.sub(/^# ?/, '')
-    end
+    puts HELP.join
   end
 
   def self.in_build_dir

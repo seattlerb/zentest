@@ -199,31 +199,7 @@ class UnitDiff
       output.push prefix.compact.map {|line| line.strip}.join("\n")
 
       if butwas then
-        Tempfile.open("expect") do |a|
-          a.write(massage(expect))
-          a.rewind
-          Tempfile.open("butwas") do |b|
-            b.write(massage(butwas))
-            b.rewind
-
-            diff_flags = $u ? "-u" : $c ? "-c" : ""
-            diff_flags += " -b" if $b
-
-            result = `#{DIFF} #{diff_flags} #{a.path} #{b.path}`
-            if result.empty? then
-              output.push "[no difference--suspect ==]"
-            else
-              output.push result.split(/\n/)
-            end
-
-            if $k then
-              warn "moving #{a.path} to #{a.path}.keep"
-              File.rename a.path, a.path + ".keep"
-              warn "moving #{b.path} to #{b.path}.keep"
-              File.rename b.path, b.path + ".keep"
-            end
-          end
-        end
+        output.push self.diff(expect, butwas)
 
         output.push result_footer
         output.push ''
@@ -238,6 +214,36 @@ class UnitDiff
     end
 
     return output.flatten.join("\n")
+  end
+
+  def diff expect, butwas
+    Tempfile.open("expect") do |a|
+      a.write(massage(expect))
+      a.rewind
+      Tempfile.open("butwas") do |b|
+        b.write(massage(butwas))
+        b.rewind
+
+        diff_flags = $u ? "-u" : $c ? "-c" : ""
+        diff_flags += " -b" if $b
+
+        result = `#{DIFF} #{diff_flags} #{a.path} #{b.path}`
+        output = if result.empty? then
+                   "[no difference--suspect ==]"
+                 else
+                   result.split(/\n/)
+                 end
+
+        if $k then
+          warn "moving #{a.path} to #{a.path}.keep"
+          File.rename a.path, a.path + ".keep"
+          warn "moving #{b.path} to #{b.path}.keep"
+          File.rename b.path, b.path + ".keep"
+        end
+
+        output
+      end
+    end
   end
 
   def massage(data)
