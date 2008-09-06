@@ -217,6 +217,8 @@ class UnitDiff
   end
 
   def diff expect, butwas
+    output = nil
+
     Tempfile.open("expect") do |a|
       a.write(massage(expect))
       a.rewind
@@ -240,10 +242,10 @@ class UnitDiff
           warn "moving #{b.path} to #{b.path}.keep"
           File.rename b.path, b.path + ".keep"
         end
-
-        output
       end
     end
+
+    output
   end
 
   def massage(data)
