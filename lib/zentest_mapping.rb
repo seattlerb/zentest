@@ -86,7 +86,7 @@ module ZenTestMapping
     name = name.sub(/_bang.*$/, '!') # FIX: deal w/ extensions separately
     name = name.sub(/_eh/, '?')
     is_cls_method = name.sub!(/^class_/, '')
-    name = name.sub(/^(#{mapped_re})(.*)$/) {$1}
+    name = name.sub(/^(#{mapped_re})(_.*)?$/) {$1}
     name = name.sub(/^(#{known_methods_re})(.*)$/) {$1} unless known_methods_re.empty?
 
     # look up in method map

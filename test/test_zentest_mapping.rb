@@ -214,4 +214,9 @@ end
     assert_equal("-@",  @tester.test_to_normal("test_unary_minus"))
     assert_equal("+@",  @tester.test_to_normal("test_unary_plus"))
   end
+
+  def test_to_normal_subset
+    self.util_simple_setup
+    assert_equal("get_foo",  @tester.test_to_normal("test_get_foo"))
+  end
 end
