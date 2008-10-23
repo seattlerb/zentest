@@ -1,19 +1,31 @@
-=== 3.11.0 / 2008-07-03
+=== 3.11.0 / 2008-10-22
 
-* 10 minor enhancements:
+* 19 minor enhancements:
 
+  * Added :updated hook, gets list of updated files before running tests.
+  * Added autotest/restart.rb - restarts autotest if .autotest updated.
+  * Added better help to multiruby.
+  * Added dummy build command to multiruby_setup.
   * Added git support.
   * Added rbx:ln:$dir and rbx:git:current.
   * Added rubygems:merge as a nice little hack to share rubygems setups.
   * Added svn tag updating (eg will svn sw from mri 1.8.6 222 to 1.8.6 231).
+  * Autotest hooks now take *args as well as instance of autotest.
   * Made it possible to have manually specified tags.
   * Made multiruby a little more self-repairing wrt symlinks and build dirs.
   * Refactored into mri_latest_tag(v).
+  * Refactored unit_diff to make it a bit easier to use as a library.
+  * Refactored zentest mapping main methods into munge/unmunge.
   * Removed rubinius specific symlink hacks, now fully supported.
   * mri:svn:releases figures out all the latest patch levels.
+  * multiruby_setup clean now checks for rakefile first, since rbx has both. :(
   * multiruby_setup help now exits instead of building.
   * multiruby_setup list and clean now exit
-  * multiruby_setup clean now checks for rakefile first, since rbx has both. :(
+
+* 2 bug fixes:
+
+  * ZenTestMapping converts operator prefixes to operators only when an _ follows.
+  * Apparently Tempfile.open doesn't return it's last value. fixed.
 
 * 2 bug fixes:
 
