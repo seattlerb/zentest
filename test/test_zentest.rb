@@ -12,10 +12,6 @@ $TESTING = true
 # I do this so I can still run ZenTest against the tests and itself...
 require 'zentest' unless defined? $ZENTEST
 
-class TrueClass # stupid YAML is breaking my tests. Enters via Test::Rails
-  remove_method :taguri, :taguri=, :to_yaml if defined? YAML
-end
-
 # These are just classes set up for quick testing.
 # TODO: need to test a compound class name Mod::Cls
 
@@ -563,6 +559,9 @@ assert_equal expected, util_testcase("Something2::Blah2", "TestSomething2::TestB
   end
 
   def test_testcase9
+    # stupid YAML is breaking my tests. Enters via Test::Rails. order dependent.
+    TrueClass.send :remove_method, :taguri, :taguri=, :to_yaml if defined? YAML
+
     expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass TestTrueClass < Test::Unit::TestCase\n  def test_and\n    raise NotImplementedError, 'Need to write test_and'\n  end\n\n  def test_carat\n    raise NotImplementedError, 'Need to write test_carat'\n  end\n\n  def test_or\n    raise NotImplementedError, 'Need to write test_or'\n  end\n\n  def test_to_s\n    raise NotImplementedError, 'Need to write test_to_s'\n  end\nend\n\n# Number of errors detected: 4"
 
     assert_equal expected, util_testcase("TestTrueClass")
