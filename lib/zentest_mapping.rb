@@ -55,18 +55,48 @@ module ZenTestMapping
 
   @@method_map = @@orig_method_map.merge(@@orig_method_map.invert)
 
-  # Generates a test method name from a normal method,
-  # taking into account names composed of metacharacters
-  # (used for arithmetic, etc
-  def normal_to_test(name)
-    name = name.to_s.dup # wtf?
+  @@mapped_re = @@orig_method_map.values.sort_by { |k| k.length }.map {|s|
+    Regexp.escape(s)
+  }.reverse.join("|")
+
+  def munge name
+    name = name.to_s.dup
+
     is_cls_method = name.sub!(/^self\./, '')
+
     name = @@method_map[name] if @@method_map.has_key? name
     name = name.sub(/=$/, '_equals')
     name = name.sub(/\?$/, '_eh')
     name = name.sub(/\!$/, '_bang')
+
+    name = yield name if block_given?
+
     name = "class_" + name if is_cls_method
-    "test_#{name}"
+
+    name
+  end
+
+  # Generates a test method name from a normal method,
+  # taking into account names composed of metacharacters
+  # (used for arithmetic, etc
+  def normal_to_test name
+    "test_#{munge name}"
+  end
+
+  def unmunge name
+    name = name.to_s.dup
+
+    is_cls_method = name.sub!(/^class_/, '')
+
+    name = name.sub(/_equals(_.*)?$/, '=') unless name =~ /index/
+    name = name.sub(/_bang(_.*)?$/, '!')
+    name = name.sub(/_eh(_.*)?$/, '?')
+    name = name.sub(/^(#{@@mapped_re})(_.*)?$/) {$1}
+    name = yield name if block_given?
+    name = @@method_map[name] if @@method_map.has_key? name
+    name = 'self.' + name if is_cls_method
+
+    name
   end
 
   # Converts a method name beginning with test to its
@@ -74,26 +104,14 @@ module ZenTestMapping
   # symbolic names which may have been anglicised by
   # #normal_to_test().
   def test_to_normal(name, klassname=nil)
-    name = name.to_s
-
-    known_methods = (@inherited_methods[klassname] || {}).keys.sort.reverse
-
-    mapped_re = @@orig_method_map.values.sort_by { |k| k.length }.map {|s| Regexp.escape(s)}.reverse.join("|")
-    known_methods_re = known_methods.map {|s| Regexp.escape(s)}.join("|")
-
-    name = name.sub(/^test_/, '')
-    name = name.sub(/_equals/, '=') unless name =~ /index/
-    name = name.sub(/_bang.*$/, '!') # FIX: deal w/ extensions separately
-    name = name.sub(/_eh/, '?')
-    is_cls_method = name.sub!(/^class_/, '')
-    name = name.sub(/^(#{mapped_re})(_.*)?$/) {$1}
-    name = name.sub(/^(#{known_methods_re})(.*)$/) {$1} unless known_methods_re.empty?
-
-    # look up in method map
-    name = @@method_map[name] if @@method_map.has_key? name
-
-    name = 'self.' + name if is_cls_method
-
-    name
+    unmunge(name.to_s.sub(/^test_/, '')) do |n|
+      if defined? @inherited_methods then
+        known_methods = (@inherited_methods[klassname] || {}).keys.sort.reverse
+        known_methods_re = known_methods.map {|s| Regexp.escape(s) }.join("|")
+        n = n.sub(/^(#{known_methods_re})(_.*)?$/) { $1 } unless
+          known_methods_re.empty?
+        n
+      end
+    end
   end
 end
