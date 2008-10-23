@@ -13,13 +13,13 @@ $TESTING = true
 require 'zentest' unless defined? $ZENTEST
 
 class TrueClass # stupid YAML is breaking my tests. Enters via Test::Rails
-  remove_method :taguri, :taguri=, :to_yaml rescue nil
+  remove_method :taguri, :taguri=, :to_yaml if defined? YAML
 end
 
 # These are just classes set up for quick testing.
 # TODO: need to test a compound class name Mod::Cls
 
-class Cls1              # ZenTest SKIP
+class Cls1                  # ZenTest SKIP
   def meth1; end
   def self.meth2; end
 end
@@ -37,7 +37,7 @@ class SuperDuper            # ZenTest SKIP
   def overridden; end
 end
 
-class LowlyOne < SuperDuper     # ZenTest SKIP
+class LowlyOne < SuperDuper # ZenTest SKIP
   def self.cls_extended; end
   def overridden; end
   def extended; end
@@ -145,6 +145,10 @@ end
 class TestTrueClass; end
 
 class TestZenTest < Test::Unit::TestCase
+  unless defined? Mini then
+    alias :refute_nil :assert_not_nil
+  end
+
 
   def setup
     @tester = ZenTest.new()
