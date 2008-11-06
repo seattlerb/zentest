@@ -8,6 +8,7 @@ module Autotest::Growl
     img ||= "/Applications/Mail.app/Contents/Resources/Caution.tiff"
     cmd = "growlnotify -n autotest --image #{img} -p #{pri} -m #{msg.inspect} #{title}"
     system cmd
+    nil
   end
 
   Autotest.add_hook :initialize do  |at|

@@ -1,3 +1,9 @@
+=== 3.11.1 / 2008-11-06
+
+* 1 bug fix:
+
+  * Fixed growl autotest plugin hooks to not return true, preempting other plugins.
+
 === 3.11.0 / 2008-10-22
 
 * 19 minor enhancements:
