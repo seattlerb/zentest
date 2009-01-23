@@ -41,6 +41,7 @@ lib/autotest/screen.rb
 lib/autotest/shame.rb
 lib/autotest/snarl.rb
 lib/autotest/timestamp.rb
+lib/focus.rb
 lib/functional_test_matrix.rb
 lib/multiruby.rb
 lib/test/rails.rb
@@ -58,6 +59,7 @@ lib/unit_diff.rb
 lib/zentest.rb
 lib/zentest_mapping.rb
 test/test_autotest.rb
+test/test_focus.rb
 test/test_help.rb
 test/test_rails_autotest.rb
 test/test_rails_controller_test_case.rb
