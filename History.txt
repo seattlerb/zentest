@@ -1,5 +1,9 @@
 === 3.11.1 / 2009-01-20
 
+* 1 minor enhancement:
+
+  * Parameterized test_lib so you can override test/unit. Thanks JB!
+
 * 1 bug fix:
 
   * Fixed growl autotest plugin hooks to not return true, preempting other plugins.

@@ -154,6 +154,7 @@ class Autotest
                 :results,
                 :sleep,
                 :tainted,
+                :test_lib,
                 :find_directories,
                 :unit_diff,
                 :wants_to_quit)
@@ -178,6 +179,7 @@ class Autotest
     self.order = :random
     self.output = $stderr
     self.sleep = 1
+    self.test_lib = "test/unit"
     self.find_directories = ['.']
     self.unit_diff = "unit_diff -u"
 
@@ -430,7 +432,7 @@ class Autotest
 
     unless full.empty? then
       classes = full.map {|k,v| k}.flatten.uniq.join(' ')
-      cmds << "#{ruby} -I#{libs} -rtest/unit -e \"%w[#{classes}].each { |f| require f }\" | #{unit_diff}"
+      cmds << "#{ruby} -I#{libs} -r#{test_lib} -e \"%w[#{classes}].each { |f| require f }\" | #{unit_diff}"
     end
 
     partial.each do |klass, methods|

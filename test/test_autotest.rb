@@ -402,6 +402,16 @@ test_error2(#{@test_class}):
     assert_equal [], @a.test_files_for('test_unknown.rb')
   end
 
+  def test_test_lib
+    assert_equal "test/unit", @a.test_lib
+
+    @a.test_lib = "MONKEY"
+    assert_equal "MONKEY", @a.test_lib
+
+    f = { @test => [], "test/test_fooby.rb" => %w(first second) }
+    assert_match @a.test_lib, @a.make_test_cmd(f)
+  end
+
   def util_exceptions
     @a.exception_list.sort_by { |r| r.to_s }
   end
