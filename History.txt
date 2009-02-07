@@ -1,3 +1,9 @@
+=== 3.11.2 / ????-??-??
+
+* 1 bug fix:
+
+  * updated rubygems download location. Thanks Simone Carletti!
+
 === 3.11.1 / 2009-01-20
 
 * 1 minor enhancement:

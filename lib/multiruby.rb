@@ -380,10 +380,10 @@ module Multiruby
   end
 
   def self.update_rubygems
-    url = "http://files.rubyforge.rubyuser.de/rubygems/"
+    url = "http://files.rubyforge.vm.bytemark.co.uk/rubygems/"
     html = URI.parse(url).read
 
-    versions = html.scan(/href="rubygems-update-(\d+(?:\.\d+)+).gem/).flatten
+    versions = html.scan(/href="rubygems-update-(\d+(?:\.\d+)+).gem/i).flatten
     latest = versions.sort_by { |s| s.scan(/\d+/).map { |s| s.to_i } }.last
 
     Multiruby.in_versions_dir do
