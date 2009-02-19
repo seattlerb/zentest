@@ -11,6 +11,7 @@ module Autotest::Emacs
 
   def self.emacs_autotest status
     `#{@@client_cmd} \"(autotest-update '#{status})\"`
+    nil
   end
 
   Autotest.add_hook :run_command do  |at|

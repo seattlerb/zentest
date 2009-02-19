@@ -48,6 +48,7 @@ class Autotest::Screen
   def self.send_cmd(msg)
     cmd = %(#{screen_cmd} -X eval 'hardstatus alwayslastline "#{(statusline + msg).gsub('"', '\"')}"') #' stupid ruby-mode
     system cmd
+    nil
   end
 
   Autotest.add_hook :run do  |at|
