@@ -169,19 +169,19 @@ class Autotest
     @test_mappings = []
 
     self.completed_re = /\d+ tests, \d+ assertions, \d+ failures, \d+ errors/
-    self.extra_class_map = {}
-    self.extra_files = []
+    self.extra_class_map   = {}
+    self.extra_files       = []
     self.failed_results_re = /^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/
-    self.files_to_test = new_hash_of_arrays
-    self.find_order = []
-    self.known_files = nil
-    self.libs = %w[. lib test].join(File::PATH_SEPARATOR)
-    self.order = :random
-    self.output = $stderr
-    self.sleep = 1
-    self.test_lib = "test/unit"
-    self.find_directories = ['.']
-    self.unit_diff = "unit_diff -u"
+    self.files_to_test     = new_hash_of_arrays
+    self.find_order        = []
+    self.known_files       = nil
+    self.libs              = %w[. lib test].join(File::PATH_SEPARATOR)
+    self.order             = :random
+    self.output            = $stderr
+    self.sleep             = 1
+    self.test_lib          = "test/unit"
+    self.find_directories  = ['.']
+    self.unit_diff         = "unit_diff -u"
 
     self.add_mapping(/^lib\/.*\.rb$/) do |filename, _|
       possible = File.basename(filename).gsub '_', '_?'
