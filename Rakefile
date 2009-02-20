@@ -4,6 +4,9 @@ $: << 'lib'
 
 require 'rubygems'
 require 'hoe'
+
+Hoe.add_include_dirs("../../minitest/dev/lib")
+
 require './lib/zentest.rb'
 
 Hoe.new("ZenTest", ZenTest::VERSION) do |zentest|
