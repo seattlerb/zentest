@@ -1,9 +1,7 @@
-require 'test/unit' unless defined? $ZENTEST and $ZENTEST
+$TESTING = true
 
 require 'rubygems'
 require 'minitest/autorun'
-
-$TESTING = true
 
 require 'zentest_mapping' unless defined? $ZENTEST
 

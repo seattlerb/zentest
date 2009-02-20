@@ -297,7 +297,7 @@ test_error2(#{@test_class}):
     assert_equal empty, @a.files_to_test
 
     s3 = '
-/opt/bin/ruby -I.:lib:test -rtest/unit -e "%w[#{@test}].each { |f| require f }" | unit_diff -u
+/opt/bin/ruby -I.:lib:test -rubygems -e "%w[test/unit #{@test}].each { |f| require f }" | unit_diff -u
 -e:1:in `require\': ./#{@test}:23: parse error, unexpected tIDENTIFIER, expecting \'}\' (SyntaxError)
     settings_fields.each {|e| assert_equal e, version.send e.intern}
                                                             ^   from -e:1
@@ -358,7 +358,7 @@ test_error2(#{@test_class}):
       'test/test_fooby.rb' => [ 'test_something1', 'test_something2' ]
     }
 
-    expected = [ "#{RUBY} -I.:lib:test -rtest/unit -e \"%w[#{@test}].each { |f| require f }\" | unit_diff -u",
+    expected = [ "#{RUBY} -I.:lib:test -rubygems -e \"%w[test/unit #{@test}].each { |f| require f }\" | unit_diff -u",
                  "#{RUBY} -I.:lib:test test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\" | unit_diff -u" ].join("; ")
 
     result = @a.make_test_cmd f
@@ -403,14 +403,14 @@ test_error2(#{@test_class}):
     assert_equal [], @a.test_files_for('test_unknown.rb')
   end
 
-  def test_test_lib
-    assert_equal "test/unit", @a.test_lib
+  def test_testlib
+    assert_equal "test/unit", @a.testlib
 
-    @a.test_lib = "MONKEY"
-    assert_equal "MONKEY", @a.test_lib
+    @a.testlib = "MONKEY"
+    assert_equal "MONKEY", @a.testlib
 
     f = { @test => [], "test/test_fooby.rb" => %w(first second) }
-    assert_match @a.test_lib, @a.make_test_cmd(f)
+    assert_match @a.testlib, @a.make_test_cmd(f)
   end
 
   def util_exceptions

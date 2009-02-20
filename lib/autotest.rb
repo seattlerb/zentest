@@ -154,7 +154,7 @@ class Autotest
                 :results,
                 :sleep,
                 :tainted,
-                :test_lib,
+                :testlib,
                 :find_directories,
                 :unit_diff,
                 :wants_to_quit)
@@ -179,7 +179,7 @@ class Autotest
     self.order             = :random
     self.output            = $stderr
     self.sleep             = 1
-    self.test_lib          = "test/unit"
+    self.testlib          = "test/unit"
     self.find_directories  = ['.']
     self.unit_diff         = "unit_diff -u"
 
@@ -431,8 +431,9 @@ class Autotest
     full, partial = reorder(files_to_test).partition { |k,v| v.empty? }
 
     unless full.empty? then
-      classes = full.map {|k,v| k}.flatten.uniq.join(' ')
-      cmds << "#{ruby} -I#{libs} -r#{test_lib} -e \"%w[#{classes}].each { |f| require f }\" | #{unit_diff}"
+      classes = full.map {|k,v| k}.flatten.uniq
+      classes.unshift testlib
+      cmds << "#{ruby} -I#{libs} -rubygems -e \"%w[#{classes.join(' ')}].each { |f| require f }\" | #{unit_diff}"
     end
 
     partial.each do |klass, methods|
