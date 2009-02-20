@@ -2,8 +2,9 @@
 
 $TESTING = true
 
-require 'test/unit/testcase'
-require 'test/unit' if $0 == __FILE__
+require 'rubygems'
+require 'minitest/autorun'
+
 require 'stringio'
 require 'autotest'
 
@@ -25,7 +26,7 @@ class Autotest
   end
 end
 
-class TestAutotest < Test::Unit::TestCase
+class TestAutotest < MiniTest::Unit::TestCase
 
   def deny test, msg=nil
     if msg then

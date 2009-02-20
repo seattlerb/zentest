@@ -5,9 +5,10 @@ if defined? RUBY_ENGINE then
   return
 end
 
-require 'test/unit' unless defined? $ZENTEST and $ZENTEST
-
 $TESTING = true
+
+require 'rubygems'
+require 'minitest/autorun'
 
 # I do this so I can still run ZenTest against the tests and itself...
 require 'zentest' unless defined? $ZENTEST
@@ -140,12 +141,7 @@ end
 
 class TestTrueClass; end
 
-class TestZenTest < Test::Unit::TestCase
-  unless defined? Mini then
-    alias :refute_nil :assert_not_nil
-  end
-
-
+class TestZenTest < MiniTest::Unit::TestCase
   def setup
     @tester = ZenTest.new()
   end

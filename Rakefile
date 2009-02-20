@@ -9,6 +9,8 @@ require './lib/zentest.rb'
 Hoe.new("ZenTest", ZenTest::VERSION) do |zentest|
   zentest.developer('Ryan Davis', 'ryand-ruby@zenspider.com')
   zentest.developer('Eric Hodel', 'drbrain@segment7.net')
+
+  zentest.testlib = :minitest
 end
 
 task :autotest do
