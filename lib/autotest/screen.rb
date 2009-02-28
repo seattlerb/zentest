@@ -62,7 +62,7 @@ class Autotest::Screen
   Autotest.add_hook :ran_command do |at|
     if execute? then
       output = at.results.join
-      failed = output.scan(/^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/)
+      failed = output.scan(/^\s+\d+\) (?:Failure|Error):\n.*?\(.*?\)/)
       if failed.size == 0 then
         message "All Green", :green
       else
