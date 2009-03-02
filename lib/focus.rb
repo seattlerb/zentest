@@ -1,7 +1,3 @@
-class Focus
-  VERSION = '1.0.0'
-end
-
 class Module
   def focus *wanteds
     wanteds.map! { |m| m.to_s }
