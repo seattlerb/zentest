@@ -28,8 +28,7 @@ $TESTING = false unless defined? $TESTING
 #
 #   Autotest.add_hook hook_name { |autotest| ... }
 #
-# The available hooks are: initialize, run, run_command, ran_command,
-#   red, green, updated, all_good, reset, interrupt, and quit.
+# The available hooks are listed in +ALL_HOOKS+.
 #
 # See example_dot_autotest.rb for more details.
 #
@@ -62,8 +61,8 @@ class Autotest
 
   T0 = Time.at 0
 
-  ALL_HOOKS = [ :all_good, :initialize, :interrupt, :quit, :ran_command,
-                :reset, :run_command, :waiting ]
+  ALL_HOOKS = [ :all_good, :died, :green, :initialize, :interrupt, :quit,
+                :ran_command, :red, :reset, :run_command, :updated, :waiting ]
 
   HOOKS = Hash.new { |h,k| h[k] = [] }
   unless defined? WINDOZE then
@@ -223,6 +222,8 @@ class Autotest
       end
     end
     hook :quit
+  rescue Exception
+    hook :died
   end
 
   ##
