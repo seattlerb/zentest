@@ -418,7 +418,7 @@ class ZenTest
     end # @klasses[klassname]
   end
 
-  def test_to_normal(name, klassname=nil)
+  def test_to_normal(_name, klassname=nil)
     super do |name|
       if defined? @inherited_methods then
         known_methods = (@inherited_methods[klassname] || {}).keys.sort.reverse
