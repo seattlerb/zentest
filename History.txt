@@ -1,8 +1,31 @@
-=== 4.0.0 / ????-??-??
+=== 4.0.0 / 2009-03-02
 
-* 1 bug fix:
+* 2 minor enhancements:
 
-  * updated rubygems download location. Thanks Simone Carletti!
+  * Deleted autotest/screen - releasing as a separate gem soon.
+  * Deleted test-rails and rails_test_audit.
+
+* 8 minor enhancements:
+
+  * Added "tags" command to multiruby_setup.
+  * Added "the_usual" as a recipe for multiruby_setup. Motivated by Dr. Nic.
+  * Added :died hook to Autotest (yoshuki).
+  * Added focus.rb, helping you ignore extra tests while you focus on something.
+  * Added multigem command line tool!
+  * Cleaned up multiruby to make it easier to tweak.
+  * Parameterized testlib so you can override test/unit in autotest. Thanks JB!
+  * Switched tests and rakefile to minitest. 20% faster!
+
+* 7 bug fixes:
+
+  * Fix Autotest::Screen to distinguish between errors and failures. (khalsah)
+  * Fixed some hook commands from overriding others.
+  * Hopefully fixed growl support on 10.5.x?
+  * Supposedly adding -w to growlnotify will fix autotest/growl.
+  * Updated missing entries in Autotest::ALL_HOOKS.
+  * Updated rubygems download location. (carletti)
+    * Still not automated :(
+  * ruby 1.9.1 fixes.
 
 === 3.11.1 / 2009-01-20
 
