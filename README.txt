@@ -6,12 +6,13 @@
 
 == DESCRIPTION
 
-ZenTest provides 4 different tools and 1 library: zentest, unit_diff,
-autotest, multiruby, and Test::Rails.
+ZenTest provides 4 different tools: zentest, unit_diff, autotest, and
+multiruby.
 
 ZenTest scans your target and unit-test code and writes your missing
 code based on simple naming rules, enabling XP at a much quicker
-pace. ZenTest only works with Ruby and Test::Unit.
+pace. ZenTest only works with Ruby and Test::Unit. Nobody uses this
+tool anymore but it is the package namesake, so it stays.
 
 unit_diff is a command-line filter to diff expected results from
 actual results and allow you to quickly see exactly what is wrong.
@@ -23,8 +24,6 @@ corresponding dependent tests.
 multiruby runs anything you want on multiple versions of ruby. Great
 for compatibility checking! Use multiruby_setup to manage your
 installed versions.
-
-Test::Rails helps you build industrial-strength Rails code.
 
 == STRATEGERY
 
@@ -43,7 +42,7 @@ implementation.
 == FEATURES
 
 * Scans your ruby code and tests and generates missing methods for you.
-* Includes a very helpful filter for Test::Unit output called unit_diff.
+* Includes a very helpful filter for Test/Spec output called unit_diff.
 * Continually and intelligently test only those files you change with autotest.
 * Test against multiple versions with multiruby.
 * Enhance and automatically audit your rails tests using Test::Rails.
@@ -67,7 +66,7 @@ implementation.
 == REQUIREMENTS
 
 * Ruby 1.6+, JRuby 1.1.2+, or rubinius
-* Test::Unit or miniunit
+* Test::Unit or miniunit (or something else ... I have no idea)
 * Hoe
 * rubygems
 * diff.exe on windoze. Try http://gnuwin32.sourceforge.net/packages.html
