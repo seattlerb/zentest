@@ -8,36 +8,52 @@ require 'open-uri'
 #
 #   cmds:
 #
-#     h, help         - show this help.
-#     list            - print installed versions.
-#     update          - update svn builds.
-#     update:rubygems - update rubygems and nuke install dirs.
-#     rubygems:merge  - symlink all rubygem dirs to one dir.
-#     rm:$version     - remove a particular version.
-#     clean           - clean scm build dirs and remove non-scm build dirs.
+#     -h, --help, help = show this help.
+#     list             = print installed versions.
+#     build            = build and install everything. used internally.
+#     tags = list all tags from svn.
+#     update           = update svn builds.
+#     update:rubygems  = update rubygems and nuke install dirs.
+#     rubygems:merge   = symlink all rubygem dirs to one dir.
+#     rm:$version      = remove a particular version.
+#     clean            = clean scm build dirs and remove non-scm build dirs.
 #
 #   specs:
 #
-#     mri:svn:current        - alias for mri:svn:releases and mri:svn:branches.
-#     mri:svn:releases       - alias for supported releases of mri ruby.
-#     mri:svn:branches       - alias for active branches of mri ruby.
-#     mri:svn:branch:$branch - install a specific $branch of mri from svn.
-#     mri:svn:tag:$tag       - install a specific $tag of mri from svn.
-#     mri:tar:$version       - install a specific $version of mri from tarball.
-#     rbx:ln:$dir            - symlink your rbx $dir
-#     rbx:git:current        - install rbx from git
+#     the_usual              = alias for latest versions from tar + rubygems
+#     mri:svn:current        = alias for mri:svn:releases and mri:svn:branches.
+#     mri:svn:releases       = alias for supported releases of mri ruby.
+#     mri:svn:branches       = alias for active branches of mri ruby.
+#     mri:svn:branch:$branch = install a specific $branch of mri from svn.
+#     mri:svn:tag:$tag       = install a specific $tag of mri from svn.
+#     mri:tar:$version       = install a specific $version of mri from tarball.
+#     rbx:ln:$dir            = symlink your rbx $dir
+#     rbx:git:current        = install rbx from git
+#
+#   environment variables:
+#
+#     GEM_URL  = url for rubygems tarballs
+#     MRI_SVN  = url for MRI SVN
+#     RBX_GIT  = url for rubinius git
+#     RUBY_URL = url for MRI tarballs
+#     VERSIONS = what versions to install
 #
 # NOTES:
 #
 # * you can add a symlink to your rubinius build into ~/.multiruby/install
-# * I'll get to adding support for other implementations soon.
+# * I need patches/maintainers for other implementations.
 #
 module Multiruby
-  MRI_SVN  = "http://svn.ruby-lang.org/repos/ruby"
-  RBX_GIT  = "git://git.rubini.us"
+  def self.env name, fallback; ENV[name] || fallback; end # :nodoc:
 
-  TAGS     = %w(    1_8_6 1_8_7 1_9  )
+  TAGS     = %w(    1_8_6 1_8_7 1_9_1)
   BRANCHES = %w(1_8 1_8_6 1_8_7 trunk)
+
+  VERSIONS = env('VERSIONS', TAGS.join(":")).split(/:/)
+  MRI_SVN  = env 'MRI_SVN',  'http://svn.ruby-lang.org/repos/ruby'
+  RBX_GIT  = env 'RBX_GIT',  'git://git.rubini.us'
+  RUBY_URL = env 'RUBY_URL', 'http://ftp.ruby-lang.org/pub/ruby'
+  GEM_URL  = env 'GEM_URL',  'http://files.rubyforge.vm.bytemark.co.uk/rubygems'
 
   HELP = []
 
@@ -138,7 +154,7 @@ module Multiruby
   def self.extract_latest_version url, matching=nil
     file = URI.parse(url).read
     versions = file.scan(/href="(ruby.*tar.gz)"/).flatten.reject { |s|
-      s =~ /preview/
+      s =~ /preview|-rc\d/
     }.sort_by { |s|
       s.split(/\D+/).map { |i| i.to_i }
     }.flatten
@@ -147,19 +163,18 @@ module Multiruby
   end
 
   def self.fetch_tar v
-    require 'open-uri'
-    base_url = "http://ftp.ruby-lang.org/pub/ruby"
-
     in_versions_dir do
-      warn "    Determining latest version for #{v}"
+      warn "  Determining latest version for #{v}"
       ver = v[/\d+\.\d+/]
-      base = extract_latest_version("#{base_url}/#{ver}/", v)
+      base = extract_latest_version("#{RUBY_URL}/#{ver}/", v)
       abort "Could not determine release for #{v}" unless base
-      url = File.join base_url, ver, base
-      warn "    Fetching #{base} via HTTP... this might take a while."
-      open(url) do |f|
-        File.open base, 'w' do |out|
-          out.write f.read
+      url = File.join RUBY_URL, ver, base
+      unless File.file? base then
+        warn "    Fetching #{base} via HTTP... this might take a while."
+        open(url) do |f|
+          File.open base, 'w' do |out|
+            out.write f.read
+          end
         end
       end
     end
@@ -274,19 +289,19 @@ module Multiruby
     root_dir
   end
 
-  def self.run(cmd)
+  def self.run cmd
     puts "Running command: #{cmd}"
     raise "ERROR: Command failed with exit code #{$?}" unless system cmd
   end
 
-  def self.setup_dirs(download = true)
+  def self.setup_dirs download = true
     %w(build install versions tmp).each do |dir|
       unless test ?d, dir then
         puts "creating #{dir}"
         Dir.mkdir dir
         if dir == "versions" && download then
           warn "  Downloading initial ruby tarballs to ~/.multiruby/versions:"
-          %w(1.8 1.9).each do |v|
+          VERSIONS.each do |v|
             self.fetch_tar v
           end
           warn "  ...done"
@@ -380,17 +395,20 @@ module Multiruby
   end
 
   def self.update_rubygems
-    url = "http://files.rubyforge.vm.bytemark.co.uk/rubygems/"
-    html = URI.parse(url).read
+    warn "  Determining latest version for rubygems"
+    html = URI.parse(GEM_URL).read
 
     versions = html.scan(/href="rubygems-update-(\d+(?:\.\d+)+).gem/i).flatten
     latest = versions.sort_by { |s| s.scan(/\d+/).map { |s| s.to_i } }.last
 
     Multiruby.in_versions_dir do
-      File.unlink(*Dir["rubygems*"])
       file = "rubygems-#{latest}.tgz"
-      File.open file, 'w' do |f|
-        f.write URI.parse(url+file).read
+      unless File.file? file then
+        warn "    Fetching rubygems-#{latest}.tgz via HTTP."
+        File.unlink(*Dir["rubygems*"])
+        File.open file, 'w' do |f|
+          f.write URI.parse(GEM_URL+"/"+file).read
+        end
       end
     end
 
