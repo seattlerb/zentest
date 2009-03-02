@@ -7,9 +7,9 @@ articles/Article.css
 articles/getting_started_with_autotest.html
 articles/how_to_use_zentest.txt
 bin/autotest
+bin/multigem
 bin/multiruby
 bin/multiruby_setup
-bin/rails_test_audit
 bin/unit_diff
 bin/zentest
 example.txt
@@ -38,7 +38,6 @@ lib/autotest/rails.rb
 lib/autotest/rcov.rb
 lib/autotest/redgreen.rb
 lib/autotest/restart.rb
-lib/autotest/screen.rb
 lib/autotest/shame.rb
 lib/autotest/snarl.rb
 lib/autotest/timestamp.rb
