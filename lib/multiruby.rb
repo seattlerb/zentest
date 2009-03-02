@@ -9,14 +9,14 @@ require 'open-uri'
 #   cmds:
 #
 #     -h, --help, help = show this help.
-#     list             = print installed versions.
 #     build            = build and install everything. used internally.
-#     tags = list all tags from svn.
+#     clean            = clean scm build dirs and remove non-scm build dirs.
+#     list             = print installed versions.
+#     rm:$version      = remove a particular version.
+#     rubygems:merge   = symlink all rubygem dirs to one dir.
+#     tags             = list all tags from svn.
 #     update           = update svn builds.
 #     update:rubygems  = update rubygems and nuke install dirs.
-#     rubygems:merge   = symlink all rubygem dirs to one dir.
-#     rm:$version      = remove a particular version.
-#     clean            = clean scm build dirs and remove non-scm build dirs.
 #
 #   specs:
 #
@@ -194,11 +194,6 @@ module Multiruby
     run "make install &> log.install"
   end
 
-  def self.rake_build inst_dir
-    run "rake &> log.build"
-    FileUtils.ln_sf "../build/#{File.basename Dir.pwd}", inst_dir
-  end
-
   def self.help
     puts HELP.join
   end
@@ -259,6 +254,11 @@ module Multiruby
 
   def self.mri_latest_tag v
     Multiruby.tags.grep(/#{v}/).last
+  end
+
+  def self.rake_build inst_dir
+    run "rake &> log.build"
+    FileUtils.ln_sf "../build/#{File.basename Dir.pwd}", inst_dir
   end
 
   def self.rbx_ln dir
