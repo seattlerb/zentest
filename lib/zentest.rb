@@ -1,8 +1,10 @@
 
-require 'zentest_mapping'
-
 $stdlib = {}
-ObjectSpace.each_object(Module) { |m| $stdlib[m.name] = true }
+ObjectSpace.each_object(Module) do |m|
+  $stdlib[m.name] = true if m.respond_to? :name
+end
+
+require 'zentest_mapping'
 
 $:.unshift( *$I.split(/:/) ) if defined? $I and String === $I
 $r = false unless defined? $r # reverse mapping for testclass names
