@@ -177,7 +177,6 @@ class UnitDiff
     $b = false unless defined? $b
     $c = false unless defined? $c
     $k = false unless defined? $k
-    $l = false unless defined? $l
     $u = false unless defined? $u
 
     data, footer = self.parse_input(input, output)
@@ -249,7 +248,7 @@ class UnitDiff
   end
 
   def massage(data)
-    data = data.map { |l| '%3d) %s' % [count+=1, l] } if $l
+    count = 0
     # unescape newlines, strip <> from entire string
     data = data.join
     data = data.gsub(/\\n/, "\n").gsub(/0x[a-f0-9]+/m, '0xXXXXXX') + "\n"

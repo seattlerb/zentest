@@ -10,7 +10,6 @@
 #    -c contextual diff
 #    -h show usage
 #    -k keep temp diff files around
-#    -l prefix line numbers on the diffs
 #    -u unified diff
 #    -v display version
 
@@ -25,7 +24,7 @@ if defined? $v then
 end
 
 if defined? $h then
-  File.open($0) do |f|
+  File.open(__FILE__) do |f|
     begin; end until f.readline =~ /usage:/
     f.readline
     while line = f.readline and line.sub!(/^# ?/, '')
