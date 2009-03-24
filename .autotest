@@ -9,6 +9,10 @@ Autotest.add_hook :initialize do |at|
 
   at.libs << ':../../minitest/dev/lib'
   at.testlib = "minitest/autorun"
+
+  %w(TestZenTest).each do |klass|
+    at.extra_class_map[klass] = "test/test_zentest.rb"
+  end
 end
 
 Autotest.add_hook :all_good do |at|
