@@ -174,7 +174,8 @@ class TestZenTest < MiniTest::Unit::TestCase
     }
     @tester.inherited_methods = @tester.test_klasses.merge(@tester.klasses)
     @generated_code = "
-require 'test/unit' unless defined? $ZENTEST and $ZENTEST
+require 'test/unit/testcase'
+require 'test/unit' if $0 == __FILE__
 
 class Something
   def self.method4(*args)
@@ -418,10 +419,10 @@ end
 
   def test_get_methods_for_subclass_full
     expect = {
-      "self.cls_inherited" => true, 
+      "self.cls_inherited" => true,
       "self.cls_extended" => true,
       "overridden" => true,
-      "extended" => true 
+      "extended" => true
    }
     result = @tester.get_methods_for("LowlyOne", true)
 
@@ -440,7 +441,7 @@ end
 
   def test_result
     self.util_simple_setup
-    
+
     @tester.analyze
     @tester.generate_code
     str = @tester.result.split($/, 2).last
@@ -504,50 +505,52 @@ end
     assert_equal expected, util_testcase("Blah0", "TestBlah0")
   end
 
+  HEADER = "\nrequire 'test/unit/testcase'\nrequire 'test/unit' if $0 == __FILE__\n\n"
+
   def test_testcase1
-    expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass Blah1\n  def missingimpl(*args)\n    raise NotImplementedError, 'Need to write missingimpl'\n  end\nend\n\nclass TestBlah1 < Test::Unit::TestCase\n  def test_missingtest\n    raise NotImplementedError, 'Need to write test_missingtest'\n  end\nend\n\n# Number of errors detected: 2"
+    expected = "#{HEADER}class Blah1\n  def missingimpl(*args)\n    raise NotImplementedError, 'Need to write missingimpl'\n  end\nend\n\nclass TestBlah1 < Test::Unit::TestCase\n  def test_missingtest\n    raise NotImplementedError, 'Need to write test_missingtest'\n  end\nend\n\n# Number of errors detected: 2"
 
     assert_equal expected, util_testcase("Blah1", "TestBlah1")
   end
 
   def test_testcase2
-    expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nmodule Something2\n  class Blah2\n    def missingimpl(*args)\n      raise NotImplementedError, 'Need to write missingimpl'\n    end\n  end\nend\n\nmodule TestSomething2\n  class TestBlah2 < Test::Unit::TestCase\n    def test_missingtest\n      raise NotImplementedError, 'Need to write test_missingtest'\n    end\n  end\nend\n\n# Number of errors detected: 2"
+    expected = "#{HEADER}module Something2\n  class Blah2\n    def missingimpl(*args)\n      raise NotImplementedError, 'Need to write missingimpl'\n    end\n  end\nend\n\nmodule TestSomething2\n  class TestBlah2 < Test::Unit::TestCase\n    def test_missingtest\n      raise NotImplementedError, 'Need to write test_missingtest'\n    end\n  end\nend\n\n# Number of errors detected: 2"
 
 assert_equal expected, util_testcase("Something2::Blah2", "TestSomething2::TestBlah2")
   end
 
   def test_testcase3
-    expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass Blah3\n  def missingimpl(*args)\n    raise NotImplementedError, 'Need to write missingimpl'\n  end\nend\n\n# Number of errors detected: 1"
+    expected = "#{HEADER}class Blah3\n  def missingimpl(*args)\n    raise NotImplementedError, 'Need to write missingimpl'\n  end\nend\n\n# Number of errors detected: 1"
 
     assert_equal expected, util_testcase("TestBlah3")
   end
 
   def test_testcase4
-    expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass TestBlah4 < Test::Unit::TestCase\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\n\n  def test_missingtest2\n    raise NotImplementedError, 'Need to write test_missingtest2'\n  end\nend\n\n# Number of errors detected: 3"
+    expected = "#{HEADER}class TestBlah4 < Test::Unit::TestCase\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\n\n  def test_missingtest2\n    raise NotImplementedError, 'Need to write test_missingtest2'\n  end\nend\n\n# Number of errors detected: 3"
 
     assert_equal expected, util_testcase("Blah4")
   end
 
   def test_testcase5
-    expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass TestMyHash5 < Test::Unit::TestCase\n  def test_index\n    raise NotImplementedError, 'Need to write test_index'\n  end\n\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\nend\n\n# Number of errors detected: 3"
+    expected = "#{HEADER}class TestMyHash5 < Test::Unit::TestCase\n  def test_index\n    raise NotImplementedError, 'Need to write test_index'\n  end\n\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\nend\n\n# Number of errors detected: 3"
 
     assert_equal expected, util_testcase("MyHash5")
   end
 
   def test_testcase6
-    expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nmodule TestMyModule6\n  class TestMyClass6 < Test::Unit::TestCase\n    def test_index\n      raise NotImplementedError, 'Need to write test_index'\n    end\n\n    def test_missingtest1\n      raise NotImplementedError, 'Need to write test_missingtest1'\n    end\n  end\nend\n\n# Number of errors detected: 3"
+    expected = "#{HEADER}module TestMyModule6\n  class TestMyClass6 < Test::Unit::TestCase\n    def test_index\n      raise NotImplementedError, 'Need to write test_index'\n    end\n\n    def test_missingtest1\n      raise NotImplementedError, 'Need to write test_missingtest1'\n    end\n  end\nend\n\n# Number of errors detected: 3"
 
     assert_equal expected, util_testcase("MyModule6::MyClass6")
   end
 
   def test_testcase7
-    expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nmodule TestMyModule7\n  class TestMyClass7 < Test::Unit::TestCase\n    def test_index\n      raise NotImplementedError, 'Need to write test_index'\n    end\n\n    def test_missingtest1\n      raise NotImplementedError, 'Need to write test_missingtest1'\n    end\n  end\nend\n\n# Number of errors detected: 3"
+    expected = "#{HEADER}module TestMyModule7\n  class TestMyClass7 < Test::Unit::TestCase\n    def test_index\n      raise NotImplementedError, 'Need to write test_index'\n    end\n\n    def test_missingtest1\n      raise NotImplementedError, 'Need to write test_missingtest1'\n    end\n  end\nend\n\n# Number of errors detected: 3"
 
     assert_equal expected, util_testcase("MyModule7::MyClass7")
   end
 
   def test_testcase8
-    expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass TestMyClass8 < Test::Unit::TestCase\n  def test_class_foobar\n    raise NotImplementedError, 'Need to write test_class_foobar'\n  end\n\n  def test_class_foobaz\n    raise NotImplementedError, 'Need to write test_class_foobaz'\n  end\nend\n\n# Number of errors detected: 3"
+    expected = "#{HEADER}class TestMyClass8 < Test::Unit::TestCase\n  def test_class_foobar\n    raise NotImplementedError, 'Need to write test_class_foobar'\n  end\n\n  def test_class_foobaz\n    raise NotImplementedError, 'Need to write test_class_foobaz'\n  end\nend\n\n# Number of errors detected: 3"
 
     assert_equal expected, util_testcase("MyClass8")
   end
@@ -556,7 +559,7 @@ assert_equal expected, util_testcase("Something2::Blah2", "TestSomething2::TestB
     # stupid YAML is breaking my tests. Enters via Test::Rails. order dependent.
     TrueClass.send :remove_method, :taguri, :taguri=, :to_yaml if defined? YAML
 
-    expected = "\nrequire 'test/unit' unless defined? $ZENTEST and $ZENTEST\n\nclass TestTrueClass < Test::Unit::TestCase\n  def test_and\n    raise NotImplementedError, 'Need to write test_and'\n  end\n\n  def test_carat\n    raise NotImplementedError, 'Need to write test_carat'\n  end\n\n  def test_or\n    raise NotImplementedError, 'Need to write test_or'\n  end\n\n  def test_to_s\n    raise NotImplementedError, 'Need to write test_to_s'\n  end\nend\n\n# Number of errors detected: 4"
+    expected = "#{HEADER}class TestTrueClass < Test::Unit::TestCase\n  def test_and\n    raise NotImplementedError, 'Need to write test_and'\n  end\n\n  def test_carat\n    raise NotImplementedError, 'Need to write test_carat'\n  end\n\n  def test_or\n    raise NotImplementedError, 'Need to write test_or'\n  end\n\n  def test_to_s\n    raise NotImplementedError, 'Need to write test_to_s'\n  end\nend\n\n# Number of errors detected: 4"
 
     assert_equal expected, util_testcase("TestTrueClass")
   end

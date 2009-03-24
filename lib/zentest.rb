@@ -19,7 +19,6 @@ if $r then
   require f if test ?f, f
 end
 
-$ZENTEST = true
 $TESTING = true
 
 class Module
@@ -477,7 +476,8 @@ class ZenTest
 
     if @missing_methods.size > 0 then
       @result.push ""
-      @result.push "require 'test/unit' unless defined? $ZENTEST and $ZENTEST"
+      @result.push "require 'test/unit/testcase'"
+      @result.push "require 'test/unit' if $0 == __FILE__"
       @result.push ""
     end
 
