@@ -38,6 +38,8 @@ require 'open-uri'
 #     RUBY_URL = url for MRI tarballs
 #     VERSIONS = what versions to install
 #
+#     RUBYOPT is cleared on installs.
+#
 # NOTES:
 #
 # * you can add a symlink to your rubinius build into ~/.multiruby/install
@@ -63,6 +65,8 @@ module Multiruby
   end
 
   def self.build_and_install
+    ENV.delete 'RUBYOPT'
+
     root_dir = self.root_dir
     versions = []
 
