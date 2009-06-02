@@ -430,16 +430,17 @@ class Autotest
   def make_test_cmd files_to_test
     cmds = []
     full, partial = reorder(files_to_test).partition { |k,v| v.empty? }
+    base_cmd = "#{ruby} -I#{libs} -rubygems"
 
     unless full.empty? then
       classes = full.map {|k,v| k}.flatten.uniq
       classes.unshift testlib
-      cmds << "#{ruby} -I#{libs} -rubygems -e \"%w[#{classes.join(' ')}].each { |f| require f }\" | #{unit_diff}"
+      cmds << "#{base_cmd} -e \"%w[#{classes.join(' ')}].each { |f| require f }\" | #{unit_diff}"
     end
 
     partial.each do |klass, methods|
       regexp = Regexp.union(*methods).source
-      cmds << "#{ruby} -I#{libs} #{klass} -n \"/^(#{regexp})$/\" | #{unit_diff}"
+      cmds << "#{base_cmd} #{klass} -n \"/^(#{regexp})$/\" | #{unit_diff}"
     end
 
     return cmds.join("#{SEP} ")
