@@ -112,7 +112,7 @@ module Multiruby
                 run "tar zxf #{rubygem_tarball}" unless test ?d, rubygems
 
                 Dir.chdir rubygems do
-                  run "../ruby ./setup.rb --no-rdoc --no-ri &> ../log.rubygems"
+                  run "../ruby ./setup.rb --no-rdoc --no-ri", "../log.rubygems"
                 end
               end
             end
@@ -193,9 +193,10 @@ module Multiruby
 
   def self.gnu_utils_build inst_dir
     run "autoconf" unless test ?f, "configure"
-    run "./configure --prefix #{inst_dir} &> log.configure" unless test ?f, "Makefile"
-    run "(nice make -j4; nice make) &> log.build"
-    run "make install &> log.install"
+    run "./configure --prefix #{inst_dir}", "log.configure" unless
+      test ?f, "Makefile"
+    run "(nice make -j4; nice make)", "log.build"
+    run "make install", "log.install"
   end
 
   def self.help
@@ -261,7 +262,7 @@ module Multiruby
   end
 
   def self.rake_build inst_dir
-    run "rake &> log.build"
+    run "rake", "log.build"
     FileUtils.ln_sf "../build/#{File.basename Dir.pwd}", inst_dir
   end
 
@@ -293,7 +294,8 @@ module Multiruby
     root_dir
   end
 
-  def self.run cmd
+  def self.run base_cmd, log
+    cmd = "#{base_cmd} > #{log} 2>&1"
     puts "Running command: #{cmd}"
     raise "ERROR: Command failed with exit code #{$?}" unless system cmd
   end
