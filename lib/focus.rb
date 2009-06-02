@@ -6,4 +6,16 @@ class Module
       remove_method unwanted
     end
   end
+
+  def blur
+    parent = self.superclass
+
+    ObjectSpace.each_object Class do |klass|
+      next unless parent > klass
+      next if klass == self
+
+      klass.send :focus
+      klass.send :undef_method, :default_test
+    end
+  end
 end
