@@ -78,7 +78,7 @@ module Multiruby
       rubygem_tarball = File.expand_path rubygems.last rescue nil
 
       Dir.chdir "build" do
-        Dir["../versions/*"].each do |tarball|
+        Dir["../versions/*"].sort.each do |tarball|
           next if tarball =~ /rubygems/
 
           build_dir = File.basename tarball, ".tar.gz"
