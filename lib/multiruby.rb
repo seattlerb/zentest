@@ -294,8 +294,9 @@ module Multiruby
     root_dir
   end
 
-  def self.run base_cmd, log
-    cmd = "#{base_cmd} > #{log} 2>&1"
+  def self.run base_cmd, log = nil
+    cmd = base_cmd
+    cmd += " > #{log} 2>&1" if log
     puts "Running command: #{cmd}"
     raise "ERROR: Command failed with exit code #{$?}" unless system cmd
   end
