@@ -9,11 +9,11 @@ Hoe.add_include_dirs("../../minitest/dev/lib")
 
 require './lib/zentest.rb'
 
-Hoe.new("ZenTest", ZenTest::VERSION) do |zentest|
-  zentest.developer('Ryan Davis', 'ryand-ruby@zenspider.com')
-  zentest.developer('Eric Hodel', 'drbrain@segment7.net')
+Hoe.spec "ZenTest" do
+  developer 'Ryan Davis', 'ryand-ruby@zenspider.com'
+  developer 'Eric Hodel', 'drbrain@segment7.net'
 
-  zentest.testlib = :minitest
+  self.testlib = :minitest
 end
 
 task :autotest do
@@ -55,18 +55,6 @@ task :sort do
   ensure
     sh 'rm x y'
   end
-end
-
-task :rcov_info do
-  ruby "-Ilib -S rcov --text-report --save coverage.info test/test_*.rb"
-end
-
-task :rcov_overlay do
-  rcov, eol = Marshal.load(File.read("coverage.info")).last[ENV["FILE"]], 1
-  puts rcov[:lines].zip(rcov[:coverage]).map { |line, coverage|
-    bol, eol = eol, eol + line.length
-    [bol, eol, "#ffcccc"] unless coverage
-  }.compact.inspect
 end
 
 # vim:syntax=ruby

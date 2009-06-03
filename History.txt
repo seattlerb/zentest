@@ -1,3 +1,25 @@
+=== 4.1.0 / 2009-06-03
+
+* 1 major enhancement:
+
+  * Removed all plugins I don't want to maintain anymore. (gem inst autotest-rails)
+
+* 4 minor enhancements:
+
+  * Added #blur to focus.rb to nuke all other test classes
+  * Clear RUBYOPT before installs (balatero)
+  * Removed test/unit include in zentest so we can focus on miniunit
+  * sort versions for builds. (Jens Wille)
+
+* 6 bug fixes:
+
+  * Fixed a stupid bug when running on some versions of bash >= 3.2.x and using '&>' in a system call. (Jens Wille)
+  * Fixed inconsistent test commands in autotest. (jbarnette)
+  * Fixed unit_diff's usage generation when installed as gem. (borior)
+  * Fixed zentest to deal with unnamed classes. (Bill Dortch)
+  * Removed buggy/unused -l support in unit_diff. (borior)
+  * make twice to make it more resilient to makefile parallel bugs
+
 === 4.0.0 / 2009-03-02
 
 * 2 minor enhancements:
