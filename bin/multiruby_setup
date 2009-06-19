@@ -2,6 +2,8 @@
 
 require 'multiruby'
 
+ENV.delete 'RUBYOPT'
+
 ARGV << "help" if ARGV.empty?
 
 Dir.chdir Multiruby.root_dir
