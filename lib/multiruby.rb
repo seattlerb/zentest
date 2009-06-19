@@ -51,7 +51,7 @@ module Multiruby
   TAGS     = %w(    1_8_6 1_8_7 1_9_1)
   BRANCHES = %w(1_8 1_8_6 1_8_7 trunk)
 
-  VERSIONS = env('VERSIONS', TAGS.join(":")).split(/:/)
+  VERSIONS = env('VERSIONS', TAGS.join(":").gsub(/_/, '.')).split(/:/)
   MRI_SVN  = env 'MRI_SVN',  'http://svn.ruby-lang.org/repos/ruby'
   RBX_GIT  = env 'RBX_GIT',  'git://git.rubini.us'
   RUBY_URL = env 'RUBY_URL', 'http://ftp.ruby-lang.org/pub/ruby'
@@ -193,7 +193,7 @@ module Multiruby
 
   def self.gnu_utils_build inst_dir
     run "autoconf" unless test ?f, "configure"
-    run "./configure --prefix #{inst_dir}", "log.configure" unless
+    run "./configure --enable-shared --prefix #{inst_dir}", "log.configure" unless
       test ?f, "Makefile"
     run "(nice make -j4; nice make)", "log.build"
     run "make install", "log.install"
