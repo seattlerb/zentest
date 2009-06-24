@@ -7,13 +7,11 @@ require 'hoe'
 
 Hoe.add_include_dirs("../../minitest/dev/lib")
 
-require './lib/zentest.rb'
+Hoe.plugin :seattlerb
 
 Hoe.spec "ZenTest" do
   developer 'Ryan Davis', 'ryand-ruby@zenspider.com'
   developer 'Eric Hodel', 'drbrain@segment7.net'
-
-  self.testlib = :minitest
 end
 
 task :autotest do
