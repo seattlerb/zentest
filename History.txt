@@ -1,3 +1,14 @@
+=== 4.1.2 / 2009-06-23
+
+* 1 minor enhancement:
+
+  * multiruby configure now passes --enable-shared to support wilson and friends.
+
+* 2 bug fixes:
+
+  * Delete RUBYOPT in multiruby_setup to avoid catastrophe. dbalatero
+  * Fixed version number munging for tarballs.
+
 === 4.1.1 / 2009-06-03
 
 * 1 bug fix:
