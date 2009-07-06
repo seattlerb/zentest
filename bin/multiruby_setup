@@ -61,7 +61,7 @@ ARGV.each do |spec|
     Multiruby.fetch_tar $1
     ARGV << "build"
   when /rbx:git:current/ then
-    Multiruby.git_clone "#{Multiruby::RBX_GIT}/code", "rubinius"
+    Multiruby.git_clone "#{Multiruby::RBX_GIT}", "rubinius"
     ARGV << "build"
   when /rbx:ln:(.*)/ then
     Multiruby.rbx_ln $1

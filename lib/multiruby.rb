@@ -53,7 +53,7 @@ module Multiruby
 
   VERSIONS = env('VERSIONS', TAGS.join(":").gsub(/_/, '.')).split(/:/)
   MRI_SVN  = env 'MRI_SVN',  'http://svn.ruby-lang.org/repos/ruby'
-  RBX_GIT  = env 'RBX_GIT',  'git://git.rubini.us'
+  RBX_GIT  = env 'RBX_GIT',  'git://github.com/evanphx/rubinius.git'
   RUBY_URL = env 'RUBY_URL', 'http://ftp.ruby-lang.org/pub/ruby'
   GEM_URL  = env 'GEM_URL',  'http://files.rubyforge.vm.bytemark.co.uk/rubygems'
 
