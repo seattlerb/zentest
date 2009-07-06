@@ -80,6 +80,16 @@ class TestAutotest < MiniTest::Unit::TestCase
     assert_equal expect, actual
   end
 
+  def test_add_mapping_front
+    current = util_mappings
+    @a.add_mapping(/blah/, :front) do 42 end
+
+    actual = util_mappings
+    expect = [/blah/] + current
+
+    assert_equal expect, actual
+  end
+
   def test_clear_exceptions
     test_add_exception
     @a.clear_exceptions
@@ -428,7 +438,7 @@ test_error2(#{@test_class}):
   end
 
   def util_mappings
-    @a.test_mappings.map { |k,v| k }.sort_by { |x| x.to_s }
+    @a.test_mappings.map { |k,v| k }
   end
 
   def util_path_to_classname(e,i)

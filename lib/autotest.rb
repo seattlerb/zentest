@@ -542,8 +542,9 @@ class Autotest
   end
 
   ##
-  # Adds a file mapping. +regexp+ should match a file path in the
-  # codebase. +proc+ is passed a matched filename and
+  # Adds a file mapping, optionally prepending the mapping to the
+  # front of the list if +prepend+ is true. +regexp+ should match a
+  # file path in the codebase. +proc+ is passed a matched filename and
   # Regexp.last_match. +proc+ should return an array of tests to run.
   #
   # For example, if test_helper.rb is modified, rerun all tests:
@@ -552,8 +553,12 @@ class Autotest
   #     at.files_matching(/^test.*rb$/)
   #   end
 
-  def add_mapping(regexp, &proc)
-    @test_mappings << [regexp, proc]
+  def add_mapping(regexp, prepend = false, &proc)
+    if prepend then
+      @test_mappings.unshift [regexp, proc]
+    else
+      @test_mappings.push [regexp, proc]
+    end
     nil
   end
 
