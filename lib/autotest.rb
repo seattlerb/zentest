@@ -106,26 +106,10 @@ class Autotest
   #
 
   def self.autodiscover
-    style = []
+    require 'rubygems'
 
-    paths = $:.dup
-    paths.push 'lib'
-    paths.push(*Dir["vendor/plugins/*/lib"])
-
-    begin
-      require 'rubygems'
-      paths.push(*Gem.latest_load_paths)
-    rescue LoadError => e
-      # do nothing
-    end
-
-    paths.each do |d|
-      next unless File.directory? d
-      f = File.join(d, 'autotest', 'discover.rb')
-      if File.exist? f then
-        $: << d unless $:.include? d
-        load f
-      end
+    Gem.find_files("autotest/discover").each do |f|
+      load f
     end
 
     @@discoveries.map { |proc| proc.call }.flatten.compact.sort.uniq
