@@ -1,3 +1,15 @@
+=== 4.1.4 / 2009-08-07
+
+* 2 minor enhancements:
+
+  * Added ability to prepend file mappings in autotest. (irohiroki)
+  * Switched autodiscover to use Gem.find_files.
+
+* 2 bug fixes:
+
+  * Updated doco for API changes. (David Ruan)
+  * Updated git URL for Rubinius. jbarnette
+
 === 4.1.3 / 2009-06-23
 
 * 1 bug fix:
