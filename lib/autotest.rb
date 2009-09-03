@@ -499,7 +499,7 @@ class Autotest
 
     p :test_file_for => [filename, result.first] if result and $DEBUG
 
-    result = result.nil? ? [] : Array(result.last.call(filename, $~))
+    result = result.nil? ? [] : [result.last.call(filename, $~)].flatten
 
     output.puts "No tests matched #{filename}" if
       ($v or $TESTING) and result.empty?
