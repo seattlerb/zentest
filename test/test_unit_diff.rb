@@ -44,6 +44,27 @@ Expected ['a', 'b', 'c'], not ['a', 'c', 'b'].
     util_unit_diff(header, input, expected, :parse_input)
   end
 
+  def test_input_miniunit_multiline
+    header = "Loaded suite -e\nStarted\nF\nFinished in 0.035332 seconds.\n\n"
+    input = "#{header}  1) Failure:
+test_blah(TestBlah) [./blah.rb:25]:
+Expected ['a',
+ 'b',
+ 'c'], not ['a',
+ 'c',
+ 'b'].
+
+1 tests, 1 assertions, 1 failures, 0 errors
+"
+
+    expected = [[["  1) Failure:\n",
+                  "test_blah(TestBlah) [./blah.rb:25]:\n",
+                  "Expected ['a',\n 'b',\n 'c'], not ['a',\n 'c',\n 'b'].\n"]],
+                ["\n", "1 tests, 1 assertions, 1 failures, 0 errors\n"]]
+
+    util_unit_diff(header, input, expected, :parse_input)
+  end
+
   def test_input_mspec
     header = <<-HEADER
 Started
@@ -169,6 +190,7 @@ backtrace = <<-BACKTRACE
 
     assert_equal expected, @diff.parse_diff(input)
   end
+
   def test_parse_diff1
     input = ["  1) Failure:\n",
              "test_test1(TestBlah) [./blah.rb:25]:\n",

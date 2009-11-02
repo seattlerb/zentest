@@ -81,7 +81,7 @@ class UnitDiff
         end
         output.puts input.gets # the rest of "Finished in..."
         output.puts
-       next
+        next
       when /^\s*$/, /^\(?\s*\d+\) (Failure|Error):/, /^\d+\)/ then
         print_lines = false
         current = []
@@ -95,6 +95,22 @@ class UnitDiff
     output.sync = old_sync
     data = data.reject { |o| o == ["\n"] or o.empty? }
     footer = data.pop
+
+    data.map do |result|
+      break if result.find do |line|
+        line =~ / expected( but was|, not)/
+      end
+
+      header = result.find do |line|
+        line =~ /^\(?\s*\d+\) (Failure|Error):/
+      end
+
+      break unless header
+
+      message_index = result.index(header) + 2
+
+      result[message_index..-1] = result[message_index..-1].join
+    end
 
     return data, footer
   end
