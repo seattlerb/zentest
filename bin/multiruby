@@ -11,6 +11,9 @@ if ENV.has_key? 'EXCLUDED_VERSIONS' then
   versions = versions.delete_if { |v| v =~ excludes }
 end
 
+# safekeep original PATH
+original_path = ENV['PATH']
+
 results = {}
 versions.each do |version|
   ruby = "#{root_dir}/install/#{version}/bin/ruby"
@@ -23,10 +26,17 @@ versions.each do |version|
   cmd.sub!(/#{ENV['HOME']}/, '~')
   puts "CMD     = #{cmd}"
   puts
+
+  # prepend ruby binary path prior execution
+  ENV['PATH'] = [File.dirname(ruby), original_path].join(File::PATH_SEPARATOR)
+
   system ruby, *ARGV
   puts
   puts "RESULT = #{$?}"
   results[version] = $?
+
+  # restore the path to original state
+  ENV['PATH'] = original_path
 end
 
 passed, failed = results.keys.partition { |v| results[v] == 0 }
