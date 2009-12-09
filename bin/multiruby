@@ -3,6 +3,23 @@
 require 'multiruby'
 
 root_dir = Multiruby.root_dir
+
+##
+# multiruby -1 1.8.7 ruby_args...
+
+if ARGV.first == "-1" then
+  ARGV.shift
+  vers = Dir["#{root_dir}/install/#{ARGV.shift}*"]
+
+  abort "ambiguous version: #{vers.map { |p| File.basename p }.inspect}" if
+    vers.size != 1
+
+  bin = "#{vers.first}/bin"
+  ENV['PATH'] += File::PATH_SEPARATOR + bin
+
+  exec "#{bin}/ruby", *ARGV
+end
+
 versions = Multiruby.build_and_install
 versions = ENV['VERSIONS'].split(/:/) if ENV.has_key? 'VERSIONS'
 
@@ -27,8 +44,8 @@ versions.each do |version|
   puts "CMD     = #{cmd}"
   puts
 
-  # prepend ruby binary path prior execution
-  ENV['PATH'] = [File.dirname(ruby), original_path].join(File::PATH_SEPARATOR)
+  # append ruby binary path prior execution
+  ENV['PATH'] += File::PATH_SEPARATOR + "#{dir}/bin"
 
   system ruby, *ARGV
   puts
