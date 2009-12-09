@@ -242,7 +242,7 @@ class Autotest
     begin
       open("| #{cmd}", "r") do |f|
         until f.eof? do
-          c = f.getc
+          c = f.getc or break
           putc c
           line << c
           if c == ?\n then
