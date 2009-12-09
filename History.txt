@@ -1,3 +1,17 @@
+=== 4.2.0 / 2009-12-08
+
+* 3 minor enhancements:
+
+  * Added 'multiruby -1 $version' for easier execution (idea from flori)
+  * Set up and tear down PATH in multiruby (luis)
+  * died hook now gets passed the exception (amikula)
+
+* 3 bug fixes:
+
+  * Deal with windoze getc returning nil (undees)
+  * Fix unit_diff for multiline miniunit results.
+  * Fix warning for 1.8.8+
+
 === 4.1.4 / 2009-08-07
 
 * 2 minor enhancements:
