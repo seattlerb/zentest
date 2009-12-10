@@ -1,3 +1,13 @@
+=== 4.2.1 / 2009-12-09
+
+* 1 minor enhancement:
+
+  * Added GEM_HOME/GEM_PATH setting to multiruby.
+
+* 1 bug fix:
+
+  * Fixed multiruby refactoring bug from previous release.
+
 === 4.2.0 / 2009-12-08
 
 * 3 minor enhancements:
