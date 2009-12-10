@@ -4,6 +4,15 @@ require 'multiruby'
 
 root_dir = Multiruby.root_dir
 
+def setenv dir
+  bin  = "#{dir}/bin"
+  gem  = Dir["#{dir}/lib/ruby/gems/*"].first
+
+  ENV['PATH'] += File::PATH_SEPARATOR + bin
+  ENV['GEM_HOME'] = gem
+  ENV['GEM_PATH'] = gem
+end
+
 ##
 # multiruby -1 1.8.7 ruby_args...
 
@@ -14,10 +23,10 @@ if ARGV.first == "-1" then
   abort "ambiguous version: #{vers.map { |p| File.basename p }.inspect}" if
     vers.size != 1
 
-  bin = "#{vers.first}/bin"
-  ENV['PATH'] += File::PATH_SEPARATOR + bin
+  dir = vers.first
+  setenv dir
 
-  exec "#{bin}/ruby", *ARGV
+  exec "#{dir}/bin/ruby", *ARGV
 end
 
 versions = Multiruby.build_and_install
@@ -33,7 +42,8 @@ original_path = ENV['PATH']
 
 results = {}
 versions.each do |version|
-  ruby = "#{root_dir}/install/#{version}/bin/ruby"
+  dir  = "#{root_dir}/install/#{version}"
+  ruby = "#{dir}/bin/ruby"
 
   ruby.sub!(/bin.ruby/, 'bin/rbx') if version =~ /rubinius/
 
@@ -44,8 +54,7 @@ versions.each do |version|
   puts "CMD     = #{cmd}"
   puts
 
-  # append ruby binary path prior execution
-  ENV['PATH'] += File::PATH_SEPARATOR + "#{dir}/bin"
+  setenv dir
 
   system ruby, *ARGV
   puts
