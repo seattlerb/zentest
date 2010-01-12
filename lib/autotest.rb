@@ -243,7 +243,7 @@ class Autotest
       open("| #{cmd}", "r") do |f|
         until f.eof? do
           c = f.getc or break
-          putc c
+          print c
           line << c
           if c == ?\n then
             self.results << if RUBY_VERSION >= "1.9" then
