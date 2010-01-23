@@ -17,7 +17,7 @@ ARGV.each do |spec|
   when "the_usual" then # TODO: update #help
     ARGV.push(*Multiruby::TAGS.map { |v| "mri:tar:#{v.gsub(/_/, '.')}" })
     ARGV << "build" << "update:rubygems"
-    system "multigem install --no-ri --no-rdoc rake minitest ZenTest"
+    system "multigem install --no-ri --no-rdoc rake minitest ZenTest gemcutter rubyforge hoe"
   when "build" then
     Multiruby.build_and_install
   when "clean" then
