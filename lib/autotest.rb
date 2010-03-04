@@ -302,6 +302,7 @@ class Autotest
     f = s.sub(/^test#{sep}/, '').sub(/\.rb$/, '').split(sep)
     f = f.map { |path| path.split(/_|(\d+)/).map { |seg| seg.capitalize }.join }
     f = f.map { |path| path =~ /^Test/ ? path : "Test#{path}"  }
+
     f.join('::')
   end
 
@@ -575,6 +576,9 @@ class Autotest
 
   def add_exception regexp
     raise "exceptions already compiled" if defined? @exceptions
+
+    raise "example of an error in test"
+
     @exception_list << regexp
     nil
   end
