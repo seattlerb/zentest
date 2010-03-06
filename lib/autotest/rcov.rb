@@ -11,6 +11,7 @@ module Autotest::RCov
 
   Autotest.add_hook :all_good do |at|
     system "rake #{@@command} PATTERN=#{@@pattern}"
+    false
   end
 
   Autotest.add_hook :initialize do |at|
