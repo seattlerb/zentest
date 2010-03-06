@@ -577,8 +577,6 @@ class Autotest
   def add_exception regexp
     raise "exceptions already compiled" if defined? @exceptions
 
-    raise "example of an error in test"
-
     @exception_list << regexp
     nil
   end
