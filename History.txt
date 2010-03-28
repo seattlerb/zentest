@@ -1,3 +1,16 @@
+=== 4.3.0 / 2010-03-27
+
+* 1 minor enhancement:
+
+  * Added gemcutter rubyforge and hoe to the_usual setup
+
+* 4 bug fixes:
+
+  * 1.9 compat: don't use putc anymore. (fistfvck (hah!))
+  * Added note that included articles are out of date
+  * Fixed rcov plugin so multiple all_good hooks can coexist
+  * Fixed typo in doco
+
 === 4.2.1 / 2009-12-09
 
 * 1 minor enhancement:
