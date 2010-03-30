@@ -1,3 +1,10 @@
+=== 4.3.1 / 2010-03-30
+
+* 1 bug fix:
+
+  * Fixed autotest output on 1.8. That's what I get for not having
+    tests for dots.
+
 === 4.3.0 / 2010-03-27
 
 * 1 minor enhancement:
