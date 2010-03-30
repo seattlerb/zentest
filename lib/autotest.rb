@@ -59,6 +59,8 @@ $TESTING = false unless defined? $TESTING
 
 class Autotest
 
+  RUBY19 = defined? Encoding
+
   T0 = Time.at 0
 
   ALL_HOOKS = [ :all_good, :died, :green, :initialize, :interrupt, :quit,
@@ -243,10 +245,14 @@ class Autotest
       open("| #{cmd}", "r") do |f|
         until f.eof? do
           c = f.getc or break
-          print c
+          if RUBY19 then
+            print c
+          else
+            putc c
+          end
           line << c
           if c == ?\n then
-            self.results << if RUBY_VERSION >= "1.9" then
+            self.results << if RUBY19 then
                               line.join
                             else
                               line.pack "c*"
