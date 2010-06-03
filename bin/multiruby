@@ -8,7 +8,7 @@ def setenv dir
   bin  = "#{dir}/bin"
   gem  = Dir["#{dir}/lib/ruby/gems/*"].first
 
-  ENV['PATH'] += File::PATH_SEPARATOR + bin
+  ENV['PATH'] = bin + File::PATH_SEPARATOR + ENV['PATH']
   ENV['GEM_HOME'] = gem
   ENV['GEM_PATH'] = gem
 end
