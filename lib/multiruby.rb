@@ -408,6 +408,10 @@ module Multiruby
       end
     end
 
+    Multiruby.in_build_dir do
+      FileUtils.rm_rf Dir["rubygems*"]
+    end
+
     Multiruby.in_install_dir do
       FileUtils.rm_rf Dir["*"]
     end
