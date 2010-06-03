@@ -27,14 +27,11 @@ require 'open-uri'
 #     mri:svn:branch:$branch = install a specific $branch of mri from svn.
 #     mri:svn:tag:$tag       = install a specific $tag of mri from svn.
 #     mri:tar:$version       = install a specific $version of mri from tarball.
-#     rbx:ln:$dir            = symlink your rbx $dir
-#     rbx:git:current        = install rbx from git
 #
 #   environment variables:
 #
 #     GEM_URL  = url for rubygems tarballs
 #     MRI_SVN  = url for MRI SVN
-#     RBX_GIT  = url for rubinius git
 #     RUBY_URL = url for MRI tarballs
 #     VERSIONS = what versions to install
 #
@@ -53,7 +50,6 @@ module Multiruby
 
   VERSIONS = env('VERSIONS', TAGS.join(":").gsub(/_/, '.')).split(/:/)
   MRI_SVN  = env 'MRI_SVN',  'http://svn.ruby-lang.org/repos/ruby'
-  RBX_GIT  = env 'RBX_GIT',  'git://github.com/evanphx/rubinius.git'
   RUBY_URL = env 'RUBY_URL', 'http://ftp.ruby-lang.org/pub/ruby'
   GEM_URL  = env 'GEM_URL',  'http://files.rubyforge.vm.bytemark.co.uk/rubygems'
 
@@ -158,10 +154,11 @@ module Multiruby
   def self.extract_latest_version url, matching=nil
     file = URI.parse(url).read
     versions = file.scan(/href="(ruby.*tar.gz)"/).flatten.reject { |s|
-      s =~ /preview|-rc\d/
+      s =~ /-rc\d/
     }.sort_by { |s|
       s.split(/\D+/).map { |i| i.to_i }
     }.flatten
+
     versions = versions.grep(/#{Regexp.escape(matching)}/) if matching
     versions.last
   end
@@ -264,14 +261,6 @@ module Multiruby
   def self.rake_build inst_dir
     run "rake", "log.build"
     FileUtils.ln_sf "../build/#{File.basename Dir.pwd}", inst_dir
-  end
-
-  def self.rbx_ln dir
-    dir = File.expand_path dir
-    Multiruby.in_versions_dir do
-      FileUtils.ln_sf dir, "rubinius"
-      FileUtils.ln_sf "../versions/rubinius", "../install/rubinius"
-    end
   end
 
   def self.rm name

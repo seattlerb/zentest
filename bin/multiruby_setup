@@ -60,12 +60,6 @@ ARGV.each do |spec|
   when /mri:tar:(.*)/ then
     Multiruby.fetch_tar $1
     ARGV << "build"
-  when /rbx:git:current/ then
-    Multiruby.git_clone "#{Multiruby::RBX_GIT}", "rubinius"
-    ARGV << "build"
-  when /rbx:ln:(.*)/ then
-    Multiruby.rbx_ln $1
-    ARGV << "build"
   else
     warn "unknown spec #{spec}"
   end
