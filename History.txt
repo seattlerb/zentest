@@ -1,3 +1,10 @@
+=== 4.3.3 / 2010-06-17
+
+* 2 minor enhancements:
+
+  * Added options and removed pattern from Autotest::RCov
+  * update_rubygems now deletes cached rubygems installs
+
 === 4.3.2 / 2010-06-02
 
 * 1 minor enhancement:
