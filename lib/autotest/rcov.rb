@@ -1,16 +1,21 @@
 module Autotest::RCov
-  @@command, @@pattern = "rcov", "test/*.rb"
+  @@command, @@options = "rcov", nil
 
   def self.command= o
     @@command = o
   end
 
   def self.pattern= o
-    @@pattern = o
+    warn "RCov.pattern= no longer has any functionality. please remove."
+  end
+
+  def self.options= o
+    @@options = o
   end
 
   Autotest.add_hook :all_good do |at|
-    system "rake #{@@command} PATTERN=#{@@pattern}"
+    options = @@options ? "RCOVOPTS=\"#{@@options}\"" : ""
+    system "rake #{@@command} #{options}"
     false
   end
 
@@ -20,4 +25,3 @@ module Autotest::RCov
     false
   end
 end
-
