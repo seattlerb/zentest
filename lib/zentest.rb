@@ -419,20 +419,6 @@ class ZenTest
     end # @klasses[klassname]
   end
 
-  def test_to_normal(_name, klassname=nil)
-    super do |name|
-      if defined? @inherited_methods then
-        known_methods = (@inherited_methods[klassname] || {}).keys.sort.reverse
-        known_methods_re = known_methods.map {|s| Regexp.escape(s) }.join("|")
-
-        name = name.sub(/^(#{known_methods_re})(_.*)?$/) { $1 } unless
-          known_methods_re.empty?
-
-        name
-      end
-    end
-  end
-
   # create a given method at a given
   # indentation. Returns an array containing
   # the lines of the method.
