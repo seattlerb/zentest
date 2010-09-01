@@ -1,3 +1,19 @@
+=== 4.4.0 / 2010-09-01
+
+* 1 major enhancement:
+
+  * Removed git building. I'm dropping direct support for rubinius.
+
+* 3 minor enhancements:
+
+  * Added multiruby  mri:list:x.y.z command so you can see what's available.
+  * Enabled installing specific patch versions of ruby.
+  * multiruby rubygems:update now forces a build to be less confusing.
+
+* 1 bug fix:
+
+  * Removed redundant test_to_normal, now in zentest_mappings
+
 === 4.3.3 / 2010-06-17
 
 * 2 minor enhancements:
