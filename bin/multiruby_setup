@@ -30,6 +30,7 @@ ARGV.each do |spec|
     Multiruby.merge_rubygems
   when "rubygems:update", "update:rubygems" then
     Multiruby.update_rubygems
+    ARGV << "build"
   when "update" then
     Multiruby.update
   when "tags" then
@@ -57,6 +58,12 @@ ARGV.each do |spec|
     ARGV << "build"
   when /mri:svn:tag:(.*)/ then
     ARGV << "mri:svn:tag:#{$1}:#{$1}" << "build"
+  when /mri:list:(.*)/ then
+    v   = $1
+    ver = v[/\d+\.\d+/]
+    url = "#{Multiruby::RUBY_URL}/#{ver}/"
+
+    puts Multiruby.matching_versions(url, v).join("\n")
   when /mri:tar:(.*)/ then
     Multiruby.fetch_tar $1
     ARGV << "build"

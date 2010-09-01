@@ -123,7 +123,7 @@ module Multiruby
   def self.clean
     self.each_scm_build_dir do |style|
       case style
-      when :svn, :git then
+      when :svn then
         if File.exist? "Rakefile" then
           run "rake clean"
         elsif File.exist? "Makefile" then
@@ -140,9 +140,8 @@ module Multiruby
       Dir["*"].each do |dir|
         next unless File.directory? dir
         Dir.chdir dir do
-          if File.exist?(".svn") || File.exist?(".git") then
-            scm = File.exist?(".svn") ? :svn : :git
-            yield scm
+          if File.exist?(".svn") then
+            yield :svn
           else
             yield :none
           end
@@ -151,23 +150,31 @@ module Multiruby
     end
   end
 
-  def self.extract_latest_version url, matching=nil
+  def self.matching_versions url, matching=nil
     file = URI.parse(url).read
-    versions = file.scan(/href="(ruby.*tar.gz)"/).flatten.reject { |s|
-      s =~ /-rc\d/
-    }.sort_by { |s|
-      s.split(/\D+/).map { |i| i.to_i }
-    }.flatten
+
+    map = {
+      "preview" => "beta",
+      "rc"      => "beta2",
+      "p"       => "release",
+      "tar"     => "aargh",
+      "gz"      => "aargh",
+    }
+
+    versions = file.scan(/href="(ruby.*tar.gz)"/).flatten.sort_by { |s|
+      s.scan(/\d+|[a-z]+/).map { |a| Integer(a) rescue map[a] || a }
+    }
 
     versions = versions.grep(/#{Regexp.escape(matching)}/) if matching
-    versions.last
+
+    versions
   end
 
   def self.fetch_tar v
     in_versions_dir do
       warn "  Determining latest version for #{v}"
       ver = v[/\d+\.\d+/]
-      base = extract_latest_version("#{RUBY_URL}/#{ver}/", v)
+      base = matching_versions("#{RUBY_URL}/#{ver}/", v).last
       abort "Could not determine release for #{v}" unless base
       url = File.join RUBY_URL, ver, base
       unless File.file? base then
@@ -178,13 +185,6 @@ module Multiruby
           end
         end
       end
-    end
-  end
-
-  def self.git_clone url, dir
-    Multiruby.in_versions_dir do
-      Multiruby.run "git clone #{url} #{dir}" unless File.directory? dir
-      FileUtils.ln_sf "../versions/#{dir}", "../build/#{dir}"
     end
   end
 
@@ -201,31 +201,31 @@ module Multiruby
   end
 
   def self.in_build_dir
-    Dir.chdir File.join(self.root_dir, "build") do
+    in_root_dir "build" do
       yield
     end
   end
 
   def self.in_install_dir
-    Dir.chdir File.join(self.root_dir, "install") do
+    in_root_dir "install" do
       yield
     end
   end
 
-  def self.in_root_dir
-    Dir.chdir self.root_dir do
+  def self.in_root_dir subdir = ""
+    Dir.chdir File.join(self.root_dir, subdir) do
       yield
     end
   end
 
   def self.in_tmp_dir
-    Dir.chdir File.join(self.root_dir, "tmp") do
+    in_root_dir "tmp" do
       yield
     end
   end
 
   def self.in_versions_dir
-    Dir.chdir File.join(self.root_dir, "versions") do
+    in_root_dir "versions" do
       yield
     end
   end
@@ -369,13 +369,6 @@ module Multiruby
           end
         else
           warn "  update in this svn dir not supported yet: #{dir}"
-        end
-      when :git then
-        case dir
-        when /rubinius/ then
-          run "rake git:update build" # minor cheat by building here
-        else
-          warn "  update in this git dir not supported yet: #{dir}"
         end
       else
         warn "  update in non-svn dir not supported yet: #{dir}"

@@ -144,6 +144,8 @@ class Autotest
                 :unit_diff,
                 :wants_to_quit)
 
+  alias tainted? tainted
+
   ##
   # Initialize the instance and then load the user's .autotest file, if any.
 
@@ -196,14 +198,14 @@ class Autotest
     loop do # ^c handler
       begin
         get_to_green
-        if self.tainted then
+        if tainted? then
           rerun_all_tests
         else
           hook :all_good
         end
         wait_for_changes
       rescue Interrupt
-        break if self.wants_to_quit
+        break if wants_to_quit
         reset
       end
     end
@@ -371,7 +373,7 @@ class Autotest
   # if any file is newer than the previously recorded most recent
   # file.
 
-  def find_files_to_test(files=find_files)
+  def find_files_to_test files = find_files
     updated = files.select { |filename, mtime| self.last_mtime < mtime }
 
     p updated if $v unless updated.empty? || self.last_mtime.to_i == 0
