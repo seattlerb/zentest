@@ -6,7 +6,7 @@ module Autotest::Restart
       cmd << " -v" if $v
       cmd += ARGV
 
-      exec *cmd
+      exec(*cmd)
     end
   end
 end
