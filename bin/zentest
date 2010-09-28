@@ -10,12 +10,7 @@ if defined? $v then
 end
 
 if defined? $h then
-  puts "usage: #{File.basename $0} [-h -v] test-and-implementation-files..."
-  puts "  -h display this information"
-  puts "  -v display version information"
-  puts "  -r Reverse mapping (ClassTest instead of TestClass)"
-  puts "  -e (Rapid XP) eval the code generated instead of printing it"
-  exit 0
+  ZenTest.usage_with_exit
 end
 
 code = ZenTest.fix(*ARGV)

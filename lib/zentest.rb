@@ -524,10 +524,51 @@ class ZenTest
     return @result.join("\n")
   end
 
+  # Provide a certain amount of help.
+  def self.usage
+    puts <<-EO_USAGE
+usage: #{File.basename $0} [options] test-and-implementation-files...
+
+ZenTest scans your target and unit-test code and writes your missing
+code based on simple naming rules, enabling XP at a much quicker
+pace. ZenTest only works with Ruby and Test::Unit.
+
+ZenTest uses the following rules to figure out what code should be
+generated:
+
+* Definition:
+  * CUT = Class Under Test
+  * TC = Test Class (for CUT)
+* TC's name is the same as CUT w/ "Test" prepended at every scope level.
+  * Example: TestA::TestB vs A::B.
+* CUT method names are used in CT, with "test_" prependend and optional "_ext" extensions for differentiating test case edge boundaries.
+  * Example:
+    * A::B#blah
+    * TestA::TestB#test_blah_normal
+    * TestA::TestB#test_blah_missing_file
+* All naming conventions are bidirectional with the exception of test extensions.
+
+options:
+  -h display this information
+  -v display version information
+  -r Reverse mapping (ClassTest instead of TestClass)
+  -e (Rapid XP) eval the code generated instead of printing it
+
+    EO_USAGE
+  end
+
+  # Give help, then quit.
+  def self.usage_with_exit
+    self.usage
+    exit 0
+  end
+
   # Runs ZenTest over all the supplied files so that
   # they are analysed and the missing methods have
   # skeleton code written.
+  # If no files are supplied, splutter out some help.
   def self.fix(*files)
+    ZenTest.usage_with_exit if files.empty?
     zentest = ZenTest.new
     zentest.scan_files(*files)
     zentest.analyze

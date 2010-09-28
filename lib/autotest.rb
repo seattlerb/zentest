@@ -75,6 +75,45 @@ class Autotest
   @@discoveries = []
 
   ##
+  # Provide some help 
+  def self.usage
+    help = [
+            "autotest [options]",
+            nil,
+            "Autotest automatically tests code that has changed.",
+            "It assumes the code is in lib, and tests are in tests.",
+            "Autotest uses plugins to control what happens.",
+            "You configure plugins with require statements in the",
+            ".autotest file in your project base directory,",
+            "and a default configuration for all your projects",
+            "in the .autotest file in your home directory.",
+
+            nil,
+            "options:",
+            "\t-h",
+            "\t-help\t\tYou're looking at it.",
+            nil,
+            "\t-v\t\tBe verbose.",
+            "\t\t\tPrints files that autotest doesn't know how to map to",
+            "\t\t\ttests.",
+            nil,
+            "\t-q\t\tBe more quiet.",
+            nil,
+            "\t-f\t\tFast start.",
+            "\t\t\tDoesn't initially run tests at start.",
+           ]
+    STDERR.puts help.join("\n")
+  end
+
+  ##
+  # Call Autotest.usage then exit with 1.
+  def self.usage_with_exit
+    self.usage
+    exit 1
+  end
+
+
+  ##
   # Add a proc to the collection of discovery procs. See
   # +autodiscover+.
 
