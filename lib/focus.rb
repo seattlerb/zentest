@@ -7,6 +7,10 @@ class Module
     end
   end
 
+  def focus_re regexp
+    focus(*public_instance_methods.grep(regexp))
+  end
+
   def blur
     parent = self.superclass
 
