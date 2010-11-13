@@ -444,7 +444,7 @@ class Autotest
     if completed then
       completed = completed.scan(/(\d+) (\w+)/).map { |v, k| [k, v.to_i] }
 
-      self.latest_results = Hash[completed]
+      self.latest_results = Hash[*completed.flatten]
       self.files_to_test  = consolidate_failures failed
 
       color = self.files_to_test.empty? ? :green : :red
