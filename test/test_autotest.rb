@@ -28,13 +28,7 @@ end
 
 class TestAutotest < MiniTest::Unit::TestCase
 
-  def deny test, msg=nil
-    if msg then
-      assert ! test, msg
-    else
-      assert ! test
-    end
-  end unless respond_to? :deny
+  alias :deny :refute
 
   RUBY = File.join(Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name']) unless defined? RUBY
 
