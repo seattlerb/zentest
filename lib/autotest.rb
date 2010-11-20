@@ -68,7 +68,7 @@ class Autotest
 
   HOOKS = Hash.new { |h,k| h[k] = [] }
   unless defined? WINDOZE then
-    WINDOZE = /win32/ =~ RUBY_PLATFORM
+    WINDOZE = /mswin|mingw/ =~ RbConfig::CONFIG['host_os']
     SEP = WINDOZE ? '&' : ';'
   end
 
@@ -112,7 +112,6 @@ class Autotest
     exit 1
   end
 
-
   ##
   # Add a proc to the collection of discovery procs. See
   # +autodiscover+.
@@ -153,7 +152,8 @@ class Autotest
       load f
     end
 
-    @@discoveries.map { |proc| proc.call }.flatten.compact.sort.uniq
+    # call all discovery procs and determine the style to use
+    @@discoveries.map{ |proc| proc.call }.flatten.compact.sort.uniq
   end
 
   ##
@@ -212,11 +212,13 @@ class Autotest
     self.unit_diff         = "unit_diff -u"
     self.latest_results    = nil
 
+    # file in /lib -> run test in /test
     self.add_mapping(/^lib\/.*\.rb$/) do |filename, _|
       possible = File.basename(filename).gsub '_', '_?' # ' stupid emacs
       files_matching %r%^test/.*#{possible}$%
     end
 
+    # file in /test -> run it
     self.add_mapping(/^test.*\/test_.*rb$/) do |filename, _|
       filename
     end
@@ -237,8 +239,8 @@ class Autotest
 
     self.last_mtime = Time.now if $f
 
-    loop do # ^c handler
-      begin
+    loop do
+      begin # ^c handler
         get_to_green
         if tainted? then
           rerun_all_tests
@@ -411,16 +413,19 @@ class Autotest
 
   ##
   # Find the files which have been modified, update the recorded
-  # timestamps, and use this to update the files to test. Returns true
-  # if any file is newer than the previously recorded most recent
-  # file.
+  # timestamps, and use this to update the files to test. Returns
+  # the latest mtime of the files modified or nil when nothing was
+  # modified.
 
   def find_files_to_test files = find_files
     updated = files.select { |filename, mtime| self.last_mtime < mtime }
 
-    p updated if $v unless updated.empty? || self.last_mtime.to_i == 0
+    # nothing to update or initially run
+    unless updated.empty? || self.last_mtime.to_i == 0 then
+      p updated if $v
 
-    hook :updated, updated unless updated.empty? || self.last_mtime.to_i == 0
+      hook :updated, updated
+    end
 
     updated.map { |f,m| test_files_for(f) }.flatten.uniq.each do |filename|
       self.files_to_test[filename] # creates key with default value
@@ -485,7 +490,7 @@ class Autotest
       cmds << "#{base_cmd} #{klass} -n \"/^(#{regexp})$/\" | #{unit_diff}"
     end
 
-    return cmds.join("#{SEP} ")
+    cmds.join("#{SEP} ")
   end
 
   def new_hash_of_arrays
