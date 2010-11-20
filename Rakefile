@@ -1,6 +1,6 @@
 # -*- ruby -*-
 
-$: << 'lib'
+$LOAD_PATH << 'lib'
 
 require 'rubygems'
 require 'hoe'
@@ -14,10 +14,12 @@ Hoe.spec "ZenTest" do
   developer 'Eric Hodel', 'drbrain@segment7.net'
 end
 
+desc "run autotest on itself"
 task :autotest do
   ruby "-Ilib -w ./bin/autotest"
 end
 
+desc "update example_dot_autotest.rb with all possible constants"
 task :update do
   system "p4 edit example_dot_autotest.rb"
   File.open "example_dot_autotest.rb", "w" do |f|
@@ -44,15 +46,6 @@ task :update do
     end
   end
   system "p4 diff -du example_dot_autotest.rb"
-end
-
-task :sort do
-  begin
-    sh 'for f in lib/*.rb; do echo $f; grep "^ *def " $f | grep -v sort=skip > x; sort x > y; echo $f; echo; diff x y; done'
-    sh 'for f in test/test_*.rb; do echo $f; grep "^ *def.test_" $f > x; sort x > y; echo $f; echo; diff x y; done'
-  ensure
-    sh 'rm x y'
-  end
 end
 
 # vim:syntax=ruby
