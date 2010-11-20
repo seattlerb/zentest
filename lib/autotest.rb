@@ -1,7 +1,6 @@
 require 'find'
 require 'rbconfig'
 
-$v ||= false
 $TESTING = false unless defined? $TESTING
 
 ##
@@ -66,6 +65,11 @@ class Autotest
   ALL_HOOKS = [ :all_good, :died, :green, :initialize, :interrupt, :quit,
                 :ran_command, :red, :reset, :run_command, :updated, :waiting ]
 
+  @@options = {}
+  def self.options;@@options;end
+  def options;@@options;end
+
+
   HOOKS = Hash.new { |h,k| h[k] = [] }
   unless defined? WINDOZE then
     WINDOZE = /mswin|mingw/ =~ RbConfig::CONFIG['host_os']
@@ -74,42 +78,59 @@ class Autotest
 
   @@discoveries = []
 
-  ##
-  # Provide some help
-  def self.usage
-    help = [
-            "autotest [options]",
-            nil,
-            "Autotest automatically tests code that has changed.",
-            "It assumes the code is in lib, and tests are in tests.",
-            "Autotest uses plugins to control what happens.",
-            "You configure plugins with require statements in the",
-            ".autotest file in your project base directory,",
-            "and a default configuration for all your projects",
-            "in the .autotest file in your home directory.",
+  def self.parse_options
+    require 'optparse'
+    options = {}
+    OptionParser.new do |opts|
+      opts.banner = <<-BANNER.gsub(/^        /, '')
+        Continuous testing for your ruby app.
 
-            nil,
-            "options:",
-            "\t-h",
-            "\t-help\t\tYou're looking at it.",
-            nil,
-            "\t-v\t\tBe verbose.",
-            "\t\t\tPrints files that autotest doesn't know how to map to",
-            "\t\t\ttests.",
-            nil,
-            "\t-q\t\tBe more quiet.",
-            nil,
-            "\t-f\t\tFast start.",
-            "\t\t\tDoesn't initially run tests at start.",
-           ]
-    STDERR.puts help.join("\n")
-  end
+          Autotest automatically tests code that has changed. It
+          assumes the code is in lib, and tests are in tests. Autotest
+          uses plugins to control what happens. You configure plugins
+          with require statements in the .autotest file in your
+          project base directory, and a default configuration for all
+          your projects in the .autotest file in your home directory.
 
-  ##
-  # Call Autotest.usage then exit with 1.
-  def self.usage_with_exit
-    self.usage
-    exit 1
+        Usage:
+            autotest [options]
+      BANNER
+
+      opts.on "-f", "--fast-start", "Do not run full tests at start" do
+        options[:no_full_after_start] = true
+      end
+
+      opts.on("-c", "--no-full-after-failed",
+              "Do not run all tests on red->green") do
+        options[:no_full_after_failed] = true
+      end
+
+      opts.on "-v", "--verbose", "Be annoyingly verbose (debugs .autotest)." do
+        options[:verbose] = true
+      end
+
+      opts.on "-q", "--quiet", "Be quiet." do
+        options[:quiet] = true
+      end
+
+      opts.on("-r", "--rc CONF", String, "Override path to config file") do |o|
+        options[:rc] = o
+      end
+
+      opts.on("-s", "--style STYLE", String,
+              "Manually specify test style. (default: autodiscover)") do |style|
+        options[:style] = Array(style)
+      end
+
+      opts.on "-h", "--help", "Show this." do
+        puts opts
+        exit 1
+      end
+    end.parse!
+
+    Autotest.options.merge! options
+
+    options
   end
 
   ##
@@ -223,7 +244,10 @@ class Autotest
       filename
     end
 
-    [File.expand_path('~/.autotest'), './.autotest'].each do |f|
+    default_configs = [File.expand_path('~/.autotest'), './.autotest']
+    configs = options[:rc] || default_configs
+
+    configs.each do |f|
       load f if File.exist? f
     end
   end
@@ -237,12 +261,12 @@ class Autotest
     reset
     add_sigint_handler
 
-    self.last_mtime = Time.now if $f
+    self.last_mtime = Time.now if options[:no_full_after_start]
 
     loop do
       begin # ^c handler
         get_to_green
-        if tainted? then
+        if tainted? and not options[:no_full_after_failed] then
           rerun_all_tests
         else
           hook :all_good
@@ -281,7 +305,7 @@ class Autotest
     cmd = self.make_test_cmd self.files_to_test
     return if cmd.empty?
 
-    puts cmd unless $q
+    puts cmd unless options[:quiet]
 
     old_sync = $stdout.sync
     $stdout.sync = true
@@ -422,7 +446,7 @@ class Autotest
 
     # nothing to update or initially run
     unless updated.empty? || self.last_mtime.to_i == 0 then
-      p updated if $v
+      p updated if options[:verbose]
 
       hook :updated, updated
     end
@@ -565,7 +589,7 @@ class Autotest
     result = result.nil? ? [] : [result.last.call(filename, $~)].flatten
 
     output.puts "No tests matched #{filename}" if
-      ($v or $TESTING) and result.empty?
+      (options[:verbose] or $TESTING) and result.empty?
 
     result.sort.uniq.select { |f| known_files[f] }
   end

@@ -1,18 +1,11 @@
-#!/usr/local/bin/ruby -ws
-
-$v    ||= false
-$h    ||= false
-$f    ||= false
-$q    ||= false
-$help ||= false
+#!/usr/bin/env ruby
+$-w = true
 
 require 'autotest'
 
-if $h or $help then
-  Autotest.usage_with_exit
-end
+options = Autotest.parse_options
 
-style = Autotest.autodiscover
+style = options[:style] || Autotest.autodiscover
 target = Autotest
 
 unless style.empty? then
