@@ -3,19 +3,5 @@ $-w = true
 
 require 'autotest'
 
-options = Autotest.parse_options
-
-style = options[:style] || Autotest.autodiscover
-target = Autotest
-
-unless style.empty? then
-  mod = "autotest/#{style.join("_")}"
-  puts "loading #{mod}"
-  begin
-    require mod
-  rescue LoadError
-    abort "Autotest style #{mod} doesn't seem to exist. Aborting."
-  end
-  target = Autotest.const_get(style.map {|s| s.capitalize}.join)
-end
-target.run
+Autotest.parse_options
+Autotest.runner.run

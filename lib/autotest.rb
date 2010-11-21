@@ -65,10 +65,13 @@ class Autotest
   ALL_HOOKS = [ :all_good, :died, :green, :initialize, :interrupt, :quit,
                 :ran_command, :red, :reset, :run_command, :updated, :waiting ]
 
-  @@options = {}
-  def self.options;@@options;end
-  def options;@@options;end
+  def self.options
+    @@options ||= {}
+  end
 
+  def options
+    self.class.options
+  end
 
   HOOKS = Hash.new { |h,k| h[k] = [] }
   unless defined? WINDOZE then
@@ -131,6 +134,29 @@ class Autotest
     Autotest.options.merge! options
 
     options
+  end
+
+  ##
+  # Calculates the autotest runner to use to run the tests.
+  #
+  # Can be overridden with --style, otherwise uses ::autodiscover.
+
+  def self.runner
+    style = options[:style] || Autotest.autodiscover
+    target = Autotest
+
+    unless style.empty? then
+      mod = "autotest/#{style.join "_"}"
+      puts "loading #{mod}"
+      begin
+        require mod
+      rescue LoadError
+        abort "Autotest style #{mod} doesn't seem to exist. Aborting."
+      end
+      target = Autotest.const_get(style.map {|s| s.capitalize}.join)
+    end
+
+    target
   end
 
   ##
@@ -197,6 +223,7 @@ class Autotest
                 :libs,
                 :order,
                 :output,
+                :prefix,
                 :results,
                 :sleep,
                 :tainted,
@@ -227,6 +254,7 @@ class Autotest
     self.libs              = %w[. lib test].join(File::PATH_SEPARATOR)
     self.order             = :random
     self.output            = $stderr
+    self.prefix            = nil
     self.sleep             = 1
     self.testlib           = "test/unit"
     self.find_directories  = ['.']
@@ -312,7 +340,7 @@ class Autotest
     self.results = []
     line = []
     begin
-      open("| #{cmd}", "r") do |f|
+      open "| #{cmd}", "r" do |f|
         until f.eof? do
           c = f.getc or break
           if RUBY19 then
@@ -337,7 +365,7 @@ class Autotest
     hook :ran_command
     self.results = self.results.join
 
-    handle_results(self.results)
+    handle_results self.results
   end
 
   ############################################################
@@ -373,26 +401,26 @@ class Autotest
   # Convert a path in a string, s, into a class name, changing
   # underscores to CamelCase, etc.
 
-  def path_to_classname(s)
+  def path_to_classname s
     sep = File::SEPARATOR
-    f = s.sub(/^test#{sep}/, '').sub(/\.rb$/, '').split(sep)
+    f = s.sub(/^test#{sep}/, '').sub(/\.rb$/, '').split sep
     f = f.map { |path| path.split(/_|(\d+)/).map { |seg| seg.capitalize }.join }
     f = f.map { |path| path =~ /^Test/ ? path : "Test#{path}"  }
 
-    f.join('::')
+    f.join '::'
   end
 
   ##
   # Returns a hash mapping a file name to the known failures for that
   # file.
 
-  def consolidate_failures(failed)
+  def consolidate_failures failed
     filters = new_hash_of_arrays
 
     class_map = Hash[*self.find_order.grep(/^test/).map { |f| # TODO: ugly
                        [path_to_classname(f), f]
                      }.flatten]
-    class_map.merge!(self.extra_class_map)
+    class_map.merge! self.extra_class_map
 
     failed.each do |method, klass|
       if class_map.has_key? klass then
@@ -402,7 +430,7 @@ class Autotest
       end
     end
 
-    return filters
+    filters
   end
 
   ##
@@ -417,7 +445,7 @@ class Autotest
 
     targets.each do |target|
       order = []
-      Find.find(target) do |f|
+      Find.find target do |f|
         Find.prune if f =~ self.exceptions
 
         next if test ?d, f
@@ -432,7 +460,7 @@ class Autotest
       self.find_order.push(*order.sort)
     end
 
-    return result
+    result
   end
 
   ##
@@ -451,7 +479,7 @@ class Autotest
       hook :updated, updated
     end
 
-    updated.map { |f,m| test_files_for(f) }.flatten.uniq.each do |filename|
+    updated.map { |f,m| test_files_for f }.flatten.uniq.each do |filename|
       self.files_to_test[filename] # creates key with default value
     end
 
@@ -466,8 +494,8 @@ class Autotest
   # Check results for failures, set the "bar" to red or green, and if
   # there are failures record this.
 
-  def handle_results(results)
-    failed = results.scan(self.failed_results_re)
+  def handle_results results
+    failed = results.scan self.failed_results_re
     completed = results[self.completed_re]
 
     if completed then
@@ -496,25 +524,31 @@ class Autotest
   end
 
   ##
+  # Returns the base of the ruby command.
+
+  def ruby_cmd
+    "#{prefix}#{ruby} -I#{libs} -rubygems"
+  end
+
+  ##
   # Generate the commands to test the supplied files
 
   def make_test_cmd files_to_test
     cmds = []
     full, partial = reorder(files_to_test).partition { |k,v| v.empty? }
-    base_cmd = "#{ruby} -I#{libs} -rubygems"
 
     unless full.empty? then
       classes = full.map {|k,v| k}.flatten.uniq
       classes.unshift testlib
-      cmds << "#{base_cmd} -e \"%w[#{classes.join(' ')}].each { |f| require f }\" | #{unit_diff}"
+      cmds << "#{ruby_cmd} -e \"%w[#{classes.join ' '}].each { |f| require f }\" | #{unit_diff}"
     end
 
     partial.each do |klass, methods|
       regexp = Regexp.union(*methods).source
-      cmds << "#{base_cmd} #{klass} -n \"/^(#{regexp})$/\" | #{unit_diff}"
+      cmds << "#{ruby_cmd} #{klass} -n \"/^(#{regexp})$/\" | #{unit_diff}"
     end
 
-    cmds.join("#{SEP} ")
+    cmds.join "#{SEP} "
   end
 
   def new_hash_of_arrays
@@ -529,7 +563,7 @@ class Autotest
       files_to_test.sort_by { |k,v| k }.reverse
     when :random then
       max = files_to_test.size
-      files_to_test.sort_by { |k,v| rand(max) }
+      files_to_test.sort_by { |k,v| rand max }
     when :natural then
       (self.find_order & files_to_test.keys).map { |f| [f, files_to_test[f]] }
     else
@@ -581,7 +615,7 @@ class Autotest
   # a +test_mapping+ that matches the file and executing the mapping's
   # proc.
 
-  def test_files_for(filename)
+  def test_files_for filename
     result = @test_mappings.find { |file_re, ignored| filename =~ file_re }
 
     p :test_file_for => [filename, result.first] if result and $DEBUG
@@ -624,7 +658,7 @@ class Autotest
   #     at.files_matching(/^test.*rb$/)
   #   end
 
-  def add_mapping(regexp, prepend = false, &proc)
+  def add_mapping regexp, prepend = false, &proc
     if prepend then
       @test_mappings.unshift [regexp, proc]
     else
@@ -708,11 +742,17 @@ class Autotest
   # Hooks:
 
   ##
-  # Call the event hook named +name+, executing all registered hooks
-  # until one returns true. Returns false if no hook handled the
-  # event.
+  # Call the event hook named +name+, passing in optional args
+  # depending on the hook itself.
+  #
+  # Returns false if no hook handled the event.
+  #
+  # === Hook Writers!
+  #
+  # This executes all registered hooks <em>until one returns truthy</em>.
+  # Pay attention to the return value of your block!
 
-  def hook(name, *args)
+  def hook name, *args
     deprecated = {
       # none currently
     }
@@ -721,16 +761,14 @@ class Autotest
       warn "hook #{name} has been deprecated, use #{deprecated[name]}"
     end
 
-    HOOKS[name].any? do |plugin|
-      plugin[self, *args]
-    end
+    HOOKS[name].any? { |plugin| plugin[self, *args] }
   end
 
   ##
   # Add the supplied block to the available hooks, with the given
   # name.
 
-  def self.add_hook(name, &block)
+  def self.add_hook name, &block
     HOOKS[name] << block
   end
 end
