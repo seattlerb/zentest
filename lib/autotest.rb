@@ -588,10 +588,11 @@ class Autotest
   def reset
     self.files_to_test.clear
     self.find_order.clear
-    self.interrupted = false
-    self.known_files = nil
-    self.last_mtime = T0
-    self.tainted = false
+
+    self.interrupted   = false
+    self.known_files   = nil
+    self.last_mtime    = T0
+    self.tainted       = false
     self.wants_to_quit = false
 
     hook :reset
@@ -728,11 +729,11 @@ class Autotest
 
   def exceptions
     unless defined? @exceptions then
-      if @exception_list.empty? then
-        @exceptions = nil
-      else
-        @exceptions = Regexp.union(*@exception_list)
-      end
+      @exceptions = if @exception_list.empty? then
+                      nil
+                    else
+                      Regexp.union(*@exception_list)
+                    end
     end
 
     @exceptions
