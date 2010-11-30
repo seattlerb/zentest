@@ -18,6 +18,8 @@ example2.rb
 example_dot_autotest.rb
 lib/autotest.rb
 lib/autotest/autoupdate.rb
+lib/autotest/bundler.rb
+lib/autotest/isolate.rb
 lib/autotest/once.rb
 lib/autotest/rcov.rb
 lib/autotest/restart.rb
