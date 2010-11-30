@@ -63,30 +63,27 @@ implementation.
 
   (and other stuff for Test::Rails)
 
+== Windows and Color
+
+Read this: http://blog.mmediasys.com/2010/11/24/we-all-love-colors/
+
 == REQUIREMENTS
 
 * Ruby 1.6+, JRuby 1.1.2+, or rubinius
-* Test::Unit or miniunit (or something else ... I have no idea)
-* Hoe
+* A test/spec framework of your choice.
+* Hoe (development)
 * rubygems
-* diff.exe on windoze. Try http://gnuwin32.sourceforge.net/packages.html
+* diff.exe on windows. Use http://gnuwin32.sourceforge.net/packages.html
 
 == INSTALL
 
-Using Rubygems:
-
 * sudo gem install ZenTest
-
-Using Rake:
-
-* rake test
-* sudo rake install
 
 == LICENSE
 
 (The MIT License)
 
-Copyright (c) 2001-2006 Ryan Davis, Eric Hodel, Zen Spider Software
+Copyright (c) Ryan Davis, Eric Hodel, Zen Spider Software, Seattle.rb
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
