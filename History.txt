@@ -1,3 +1,33 @@
+=== 4.4.1 / 2010-12-01
+
+* 12 minor enhancements:
+
+  * Merged in most things from the autotest gem:
+    * Added --no-full-after-failed. (grosser)
+    * Added --rc path-to-dot-autotest. (grosser)
+    * Added --style autotest-style. (grosser)
+    * Added clarification comments. (grosser)
+    * Added rake task descriptions. (grosser)
+    * Switched to optparse. (grosser)
+    * Switched windoze detection. (grosser, tenderlove)
+    * Did not merge test parallelization. It should be a plugin. Awaiting patch.
+  * Added autotest/bundler plugin.
+  * Added autotest/isolate plugin.
+  * Added capture of skips (for minitest) from result line.
+  * Added focus_re to focus.rb.
+  * Added latest_results hash.
+  * Cleaned up unit_diff matcher by using any?
+  * Enhanced the help/usage for autotest and zentest. (hugh sasse)
+  * Refactored autotest runner discovery.
+  * Refactored ruby_cmd to allow plugins to affect ruby execution.
+  * Removed befuddling override of Dir.[] from 2007. *shrug*
+  * Removed deny method in favor of aliasing refute.
+
+* 2 bug fixes:
+
+  * 1.9 shadowed variable fix
+  * autotest/restart now passes ARGV back through to exec. yay!
+
 === 4.4.0 / 2010-09-01
 
 * 1 major enhancement:
