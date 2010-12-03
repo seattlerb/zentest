@@ -285,6 +285,23 @@ Finished in 0.001655 seconds.
     exp = { "tests" => 12, "assertions" => 18, "failures" => 0, "errors" => 0 }
     assert_equal exp, @a.latest_results
 
+  #when colours are in the error message
+     color_error = "
+      1) \e[31mFailure:\e[0m
+    test_fail1(#{@test_class}) [#{@test}:59]:
+      2) \e[31mFailure:\e[0m
+    test_fail2(#{@test_class}) [#{@test}:60]:
+      3) \e[31mError:\e[0m
+    test_error1(#{@test_class}):
+      3) \e[31mError:\e[0m
+    test_error2(#{@test_class}):
+
+    12 tests, 18 assertions, 2 failures, 2 errors
+    "
+    @a.handle_results(color_error)
+    assert @a.tainted
+
+
     s2 = "
   1) Failure:
 test_fail1(#{@test_class}) [#{@test}:59]:
