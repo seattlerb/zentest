@@ -1,4 +1,6 @@
+# -*- coding: undecided -*-
 require 'tempfile'
+require 'rbconfig'
 
 ##
 # UnitDiff makes reading Test::Unit output easy and fun.  Instead of a
@@ -37,7 +39,8 @@ require 'tempfile'
 
 class UnitDiff
 
-  WINDOZE = /win32/ =~ RUBY_PLATFORM unless defined? WINDOZE
+  WINDOZE = RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
+
   DIFF = if WINDOZE
            'diff.exe'
          else
