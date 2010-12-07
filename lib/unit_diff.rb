@@ -1,4 +1,3 @@
-# -*- coding: undecided -*-
 require 'tempfile'
 require 'rbconfig'
 
