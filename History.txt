@@ -1,3 +1,10 @@
+=== 4.4.2 / 2010-12-10
+
+* 2 bug fixes:
+
+  * Added a temporary hack to deal with rspec(2?) discovery hacks.
+  * Fixed windoze detection for unit_diff (thyresias)
+
 === 4.4.1 / 2010-12-01
 
 * 12 minor enhancements:
