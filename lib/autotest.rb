@@ -195,6 +195,32 @@ class Autotest
   def self.autodiscover
     require 'rubygems'
 
+    # *sigh*
+    #
+    # This is needed for rspec's hacky discovery mechanism. For some
+    # reason rspec2 added generators that create
+    # "autotest/discover.rb" right in the project directory instead of
+    # keeping it in the rspec gem and properly deciding that the
+    # project is an rspec based project or not. See the url for more
+    # details:
+    #
+    # http://rubyforge.org/tracker/?func=detail&atid=1678&aid=28775&group_id=419
+    #
+    # For the record, the sane way to do it is the bacon way:
+    #
+    # "Since version 1.0, there is autotest support. You need to tag
+    # your test directories (test/ or spec/) by creating an .bacon
+    # file there. Autotest then will find it."
+    #
+    # I'm submitting a counter-patch to rspec to fix stuff properly,
+    # but for now I'm stuck with this because their brokenness is
+    # documented in multiple books.
+    #
+    # I'm removing this code once a sane rspec goes out.
+
+    hacky_discovery = Gem.source_index.gems.any? { |n,_| n =~ /^rspec/ }
+    $: << '.' if hacky_discovery
+
     Gem.find_files("autotest/discover").each do |f|
       load f
     end
