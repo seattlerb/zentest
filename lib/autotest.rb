@@ -521,6 +521,7 @@ class Autotest
   # there are failures record this.
 
   def handle_results results
+    results = results.gsub(/\e\[\d+m/, '') # strip ascii color
     failed = results.scan self.failed_results_re
     completed = results[self.completed_re]
 
