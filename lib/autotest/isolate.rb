@@ -9,7 +9,7 @@ module Autotest::Isolate
   end
 
   Autotest.add_hook :initialize do |at|
-    ENV["GEM_PATH"] = dir
+    ENV["GEM_PATH"] = @@dir
     ENV["PATH"]    += ":#{@@dir}/bin"
 
     Gem.clear_paths
