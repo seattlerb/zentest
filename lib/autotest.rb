@@ -81,7 +81,7 @@ class Autotest
 
   @@discoveries = []
 
-  def self.parse_options
+  def self.parse_options args = ARGV
     require 'optparse'
     options = {}
     OptionParser.new do |opts|
@@ -129,7 +129,7 @@ class Autotest
         puts opts
         exit 1
       end
-    end.parse!
+    end.parse args
 
     Autotest.options.merge! options
 
@@ -314,6 +314,7 @@ class Autotest
     hook :initialize
     reset
     add_sigint_handler
+    add_sigquit_handler
 
     self.last_mtime = Time.now if options[:no_full_after_start]
 
@@ -413,6 +414,30 @@ class Autotest
         raise Interrupt, nil # let the run loop catch it
       end
     end
+  end
+
+  ##
+  # Installs a sigquit handler
+
+  def add_sigquit_handler
+    trap 'QUIT' do
+      restart
+    end
+  end
+
+  def restart
+    cmd = [$0, *ARGV]
+
+    index = $LOAD_PATH.index RbConfig::CONFIG["sitelibdir"]
+
+    if index then
+      extra = $LOAD_PATH[0...index]
+      cmd = [Gem.ruby, "-I", extra.join(":")] + cmd
+    end
+
+    puts cmd.join(" ") if options[:verbose]
+
+    exec(*cmd)
   end
 
   ##
@@ -798,5 +823,12 @@ class Autotest
 
   def self.add_hook name, &block
     HOOKS[name] << block
+  end
+
+  add_hook :died do |at, args|
+    err = *args
+    warn "Unhandled exception: #{err}"
+    warn err.backtrace.join("\n  ")
+    warn "Quitting"
   end
 end
