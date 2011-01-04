@@ -45,7 +45,7 @@ require 'open-uri'
 module Multiruby
   def self.env name, fallback; ENV[name] || fallback; end # :nodoc:
 
-  TAGS     = %w(    1_8_6 1_8_7 1_9_1)
+  TAGS     = %w(    1_8_6 1_8_7 1_9_1 1_9_2)
   BRANCHES = %w(1_8 1_8_6 1_8_7 trunk)
 
   VERSIONS = env('VERSIONS', TAGS.join(":").gsub(/_/, '.')).split(/:/)
