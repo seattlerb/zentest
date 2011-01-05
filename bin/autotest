@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-$-w = true
 
 require 'autotest'
 

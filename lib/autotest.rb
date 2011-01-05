@@ -125,6 +125,10 @@ class Autotest
         options[:style] = Array(style)
       end
 
+      opts.on("-w", "--warnings", "Turn on ruby warnings") do
+        $-w = true
+      end
+
       opts.on "-h", "--help", "Show this." do
         puts opts
         exit 1
@@ -268,6 +272,7 @@ class Autotest
     # add/remove/clear accessor methods
     @exception_list = []
     @test_mappings = []
+    @child = nil
 
     self.completed_re =
       /\d+ tests, \d+ assertions, \d+ failures, \d+ errors(, \d+ skips)?/
@@ -314,7 +319,6 @@ class Autotest
     hook :initialize
     reset
     add_sigint_handler
-    add_sigquit_handler
 
     self.last_mtime = Time.now if options[:no_full_after_start]
 
@@ -403,6 +407,8 @@ class Autotest
 
   def add_sigint_handler
     trap 'INT' do
+      Process.kill "KILL", @child if @child
+
       if self.interrupted then
         self.wants_to_quit = true
       else
@@ -426,6 +432,8 @@ class Autotest
   end
 
   def restart
+    Process.kill "KILL", @child if @child
+
     cmd = [$0, *ARGV]
 
     index = $LOAD_PATH.index RbConfig::CONFIG["sitelibdir"]

@@ -21,6 +21,7 @@ lib/autotest/autoupdate.rb
 lib/autotest/bundler.rb
 lib/autotest/isolate.rb
 lib/autotest/once.rb
+lib/autotest/preload.rb
 lib/autotest/rcov.rb
 lib/autotest/restart.rb
 lib/autotest/timestamp.rb
