@@ -1,10 +1,21 @@
-module Autotest::Restart
-  Autotest.add_hook :initialize do |at, *args|
+module Autotest::Preload
+  def self.glob
+    @glob
+  end
+
+  def self.glob= o
+    @glob = o
+  end
+
+  self.glob = "{test,spec}/*{test,spec}_helper.rb"
+
+  Autotest.add_hook :post_initialize do |at, *args|
+    p :glob_initialize
     at.add_sigquit_handler
 
     warn "pre-loading initializers"
     t0 = Time.now
-    Dir['{test,spec}/*{test,spec}_helper.rb'].each do |path|
+    Dir[self.glob].each do |path|
       require path
     end
     warn "done pre-loading initializers in %.2f seconds" % [Time.now - t0]

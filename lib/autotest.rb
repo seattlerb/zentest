@@ -62,8 +62,9 @@ class Autotest
 
   T0 = Time.at 0
 
-  ALL_HOOKS = [ :all_good, :died, :green, :initialize, :interrupt, :quit,
-                :ran_command, :red, :reset, :run_command, :updated, :waiting ]
+  ALL_HOOKS = [ :all_good, :died, :green, :initialize,
+                :post_initialize, :interrupt, :quit, :ran_command,
+                :red, :reset, :run_command, :updated, :waiting ]
 
   def self.options
     @@options ||= {}
@@ -317,6 +318,8 @@ class Autotest
 
   def run
     hook :initialize
+    hook :post_initialize
+
     reset
     add_sigint_handler
 
