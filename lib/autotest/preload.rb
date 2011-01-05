@@ -7,10 +7,9 @@ module Autotest::Preload
     @glob = o
   end
 
-  self.glob = "{test,spec}/*{test,spec}_helper.rb"
+  self.glob = "test/test_helper.rb"
 
   Autotest.add_hook :post_initialize do |at, *args|
-    p :glob_initialize
     at.add_sigquit_handler
 
     warn "pre-loading initializers"
