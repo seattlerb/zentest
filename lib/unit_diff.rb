@@ -71,7 +71,7 @@ class UnitDiff
     output.sync = true
     while line = input.gets
       case line
-      when /^(Loaded suite|Started)/ then
+      when /^(Loaded suite|Started|# Running tests:)/ then
         print_lines = true
         output.puts line
         chars = []
