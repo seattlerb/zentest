@@ -8,6 +8,8 @@ require 'minitest/autorun'
 require 'stringio'
 require 'autotest'
 
+require 'pp'
+
 # NOT TESTED:
 #   class_run
 #   add_sigint_handler
@@ -381,6 +383,32 @@ test_error2(#{@test_class}):
     assert @a.hook(:blah)
   end
 
+  def test_remove_hooks_of_type
+    Autotest.clear_hooks
+    deny @a.hook(:blah)
+    
+    Autotest.add_hook(:blah) { false }
+    Autotest.add_hook(:blah) { true }
+    
+    Autotest.remove_hooks_of_type(:blah)
+    deny @a.hook(:blah)
+  end
+  
+  def test_remove_hook_via
+    Autotest.clear_hooks
+    deny @a.hook(:blah)
+    
+    Autotest.add_hook(:blah) { false }
+    Autotest.add_hook(:blah) { true }
+    
+    assert Autotest::HOOKS[:blah].length == 2, "expect 2 hooks for blah"
+    
+    Autotest.remove_hook_via(:blah, :pop)
+
+    assert Autotest::HOOKS[:blah].length == 1, "popped off 1 hook for blah"
+    
+  end
+  
   def test_make_test_cmd
     f = {
       @test => [],

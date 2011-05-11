@@ -836,6 +836,14 @@ class Autotest
     HOOKS[name] << block
   end
 
+  def self.remove_hooks_of_type name
+    HOOKS.delete name
+  end
+
+  def self.remove_hook_via name, operation
+    HOOKS[name].send(operation)
+  end
+  
   add_hook :died do |at, args|
     err = *args
     warn "Unhandled exception: #{err}"
