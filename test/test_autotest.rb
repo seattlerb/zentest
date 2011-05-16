@@ -400,13 +400,42 @@ test_error2(#{@test_class}):
     
     Autotest.add_hook(:blah) { false }
     Autotest.add_hook(:blah) { true }
+    Autotest.add_hook(:yech) { true }
     
     assert Autotest::HOOKS[:blah].length == 2, "expect 2 hooks for blah"
+    assert Autotest::HOOKS[:yech].length == 1, "expect 1 hooks for yech"
     
     Autotest.remove_hook_via(:blah, :pop)
-
-    assert Autotest::HOOKS[:blah].length == 1, "popped off 1 hook for blah"
     
+    assert Autotest::HOOKS[:blah].length == 1, "popped off 1 hook for blah"
+    assert Autotest::HOOKS[:yech].length == 1, "expect 1 hooks for yech"
+  end
+  
+  def test_remove_hook_via_with_symbol
+    Autotest.clear_hooks
+    assert_equal nil, Autotest.remove_hook_via(:name, :pop), "popping remove hook"
+    Autotest.add_hook(:blah) {true}
+    assert Autotest::HOOKS[:blah].length == 1, "1 hook for blah"
+    item = Autotest.remove_hook_via(:blah, :pop)
+    assert_instance_of Proc, item, "the popped hook"
+    assert Autotest::HOOKS[:blah].length == 0, "no hooks of type blah"
+  end
+  
+  def test_remove_hook_via_with_block
+    Autotest.clear_hooks
+    Autotest.add_hook(:blah) {true}
+    assert Autotest::HOOKS[:blah].length == 1, "1 hook for blah"
+    item = Autotest.remove_hook_via(:blah) {|collection| collection.pop}
+    assert Autotest::HOOKS[:blah].length == 0, "no more hooks for blah"
+    assert_instance_of Proc, item, "the popped hook"
+  end
+  
+  def test_remove_hook_via_with_proc
+    Autotest.clear_hooks
+    Autotest.add_hook(:blog) {true}
+    assert Autotest::HOOKS[:blog].length == 1, "1 hook for blog"
+    item = Autotest.remove_hook_via(:blog, Proc.new {|collection| collection.pop})
+    assert Autotest::HOOKS[:blog].length == 0, "no more hooks for blog"
   end
   
   def test_make_test_cmd

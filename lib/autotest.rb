@@ -840,8 +840,16 @@ class Autotest
     HOOKS.delete name
   end
 
-  def self.remove_hook_via name, operation
-    HOOKS[name].send(operation)
+  def self.remove_hook_via hook, action_or_block = nil
+    collection = HOOKS[hook]
+
+    if block_given?
+      yield(collection)
+    elsif Proc === action_or_block
+      action_or_block.call(collection)
+    elsif collection.respond_to? action_or_block
+      collection.send(action_or_block)
+    end
   end
   
   add_hook :died do |at, args|
