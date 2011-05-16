@@ -394,31 +394,28 @@ test_error2(#{@test_class}):
     deny @a.hook(:blah)
   end
   
-  def test_remove_hook_via
-    Autotest.clear_hooks
-    deny @a.hook(:blah)
-    
-    Autotest.add_hook(:blah) { false }
-    Autotest.add_hook(:blah) { true }
-    Autotest.add_hook(:yech) { true }
-    
-    assert Autotest::HOOKS[:blah].length == 2, "expect 2 hooks for blah"
-    assert Autotest::HOOKS[:yech].length == 1, "expect 1 hooks for yech"
-    
-    Autotest.remove_hook_via(:blah, :pop)
-    
-    assert Autotest::HOOKS[:blah].length == 1, "popped off 1 hook for blah"
-    assert Autotest::HOOKS[:yech].length == 1, "expect 1 hooks for yech"
-  end
-  
   def test_remove_hook_via_with_symbol
     Autotest.clear_hooks
     assert_equal nil, Autotest.remove_hook_via(:name, :pop), "popping remove hook"
-    Autotest.add_hook(:blah) {true}
-    assert Autotest::HOOKS[:blah].length == 1, "1 hook for blah"
+    
+    # add a mix of hooks - check we only remove the required hook
+    Autotest.add_hook(:blah) { false }
+    Autotest.add_hook(:blah) { true }
+    Autotest.add_hook(:yech) { true } 
+    
+    # basic sanity test that the fixture is as required
+    # we'll only check this once in our remove_xxx tests, just to set out mind at ease
+    assert Autotest::HOOKS[:blah].length == 2, "expect 2 hooks for blah"
+    assert Autotest::HOOKS[:yech].length == 1, "expect 1 hooks for yech"
+    
     item = Autotest.remove_hook_via(:blah, :pop)
+    
+    # we got the remove hook back correctly
     assert_instance_of Proc, item, "the popped hook"
-    assert Autotest::HOOKS[:blah].length == 0, "no hooks of type blah"
+    
+    # fixture is how we expect it
+    assert Autotest::HOOKS[:blah].length == 1, "popped off 1 hook for blah"
+    assert Autotest::HOOKS[:yech].length == 1, "still 1 hooks for yech"
   end
   
   def test_remove_hook_via_with_block
