@@ -394,14 +394,18 @@ test_error2(#{@test_class}):
     deny @a.hook(:blah)
   end
   
+  def test_remove_hook_via_with_empty_hook
+    Autotest.clear_hooks
+    assert_equal nil, Autotest.remove_hook_via(:name, :pop), "prove that pop on empty hook works as expected"
+  end
+  
   def test_remove_hook_via_with_symbol
     Autotest.clear_hooks
-    assert_equal nil, Autotest.remove_hook_via(:name, :pop), "popping remove hook"
     
     # add a mix of hooks - check we only remove the required hook
-    Autotest.add_hook(:blah) { false }
-    Autotest.add_hook(:blah) { true }
-    Autotest.add_hook(:yech) { true } 
+    Autotest.add_hook(:blah) { "first blah" }
+    Autotest.add_hook(:blah) { "second blah" }
+    Autotest.add_hook(:yech) { "first yech" }
     
     # basic sanity test that the fixture is as required
     # we'll only check this once in our remove_xxx tests, just to set out mind at ease
@@ -411,7 +415,8 @@ test_error2(#{@test_class}):
     item = Autotest.remove_hook_via(:blah, :pop)
     
     # we got the remove hook back correctly
-    assert_instance_of Proc, item, "the popped hook"
+    assert_instance_of Proc, item, "the popped hook is the proc we added"
+    assert_equal "second blah", item.call, "popped the right item"
     
     # fixture is how we expect it
     assert Autotest::HOOKS[:blah].length == 1, "popped off 1 hook for blah"
@@ -420,19 +425,26 @@ test_error2(#{@test_class}):
   
   def test_remove_hook_via_with_block
     Autotest.clear_hooks
-    Autotest.add_hook(:blah) {true}
+    Autotest.add_hook(:blah) {"block-removed hook"}
     assert Autotest::HOOKS[:blah].length == 1, "1 hook for blah"
+    
     item = Autotest.remove_hook_via(:blah) {|collection| collection.pop}
+    
     assert Autotest::HOOKS[:blah].length == 0, "no more hooks for blah"
     assert_instance_of Proc, item, "the popped hook"
+    assert_equal "block-removed hook", item.call, "removed the right item"
   end
   
   def test_remove_hook_via_with_proc
     Autotest.clear_hooks
-    Autotest.add_hook(:blog) {true}
+    Autotest.add_hook(:blog) {"proc-removed hook"}
     assert Autotest::HOOKS[:blog].length == 1, "1 hook for blog"
+    
     item = Autotest.remove_hook_via(:blog, Proc.new {|collection| collection.pop})
+    
     assert Autotest::HOOKS[:blog].length == 0, "no more hooks for blog"
+    assert_instance_of Proc, item, "the popped hook"
+    assert_equal "proc-removed hook", item.call, "removed the right item"
   end
   
   def test_make_test_cmd
