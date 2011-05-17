@@ -223,7 +223,7 @@ class Autotest
     #
     # I'm removing this code once a sane rspec goes out.
 
-    hacky_discovery = Gem.source_index.gems.any? { |n,_| n =~ /^rspec/ }
+    hacky_discovery = Gem::Specification.any? { |s| s.name =~ /^rspec/ }
     $: << '.' if hacky_discovery
 
     Gem.find_files("autotest/discover").each do |f|
