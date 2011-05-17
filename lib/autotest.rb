@@ -836,12 +836,18 @@ class Autotest
     HOOKS[name] << block
   end
 
+  ##
+  # Remove all hooks added with the given name.
+
   def self.remove_hooks_of_type name
     HOOKS.delete name
   end
 
-  def self.remove_hook_via hook, action_or_block = nil
-    collection = HOOKS[hook]
+  ##
+  # Remove a hook, from the collection of hooks with a given name, using user-supplied block.
+
+  def self.remove_hook_via name, action_or_block = nil
+    collection = HOOKS[name]
 
     if block_given?
       yield(collection)

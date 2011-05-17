@@ -8,8 +8,6 @@ require 'minitest/autorun'
 require 'stringio'
 require 'autotest'
 
-require 'pp'
-
 # NOT TESTED:
 #   class_run
 #   add_sigint_handler
@@ -396,7 +394,7 @@ test_error2(#{@test_class}):
   
   def test_remove_hook_via_with_empty_hook
     Autotest.clear_hooks
-    assert_equal nil, Autotest.remove_hook_via(:name, :pop), "prove that pop on empty hook works as expected"
+    assert_equal nil, Autotest.remove_hook_via(:name, :pop), "prove that an op on empty hook collection works as expected"
   end
   
   def test_remove_hook_via_with_symbol
