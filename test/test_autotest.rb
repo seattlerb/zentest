@@ -389,6 +389,25 @@ test_error2(#{@test_class}):
 
     pre = "#{RUBY} -I.:lib:test -rubygems"
     req = ".each { |f| require f }\""
+
+    expected =
+      [ "#{pre} -e \"%w[test/unit #{@test}]#{req}",
+        "#{pre} test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\""
+      ].join("; ")
+
+    result = @a.make_test_cmd f
+    assert_equal expected, result
+  end
+
+  def test_make_test_cmd_unit_diff
+    @a.unit_diff = "unit_diff -u"
+    f = {
+      @test => [],
+      'test/test_fooby.rb' => [ 'test_something1', 'test_something2' ]
+    }
+
+    pre = "#{RUBY} -I.:lib:test -rubygems"
+    req = ".each { |f| require f }\""
     post = "| unit_diff -u"
 
     expected = [ "#{pre} -e \"%w[test/unit #{@test}]#{req} #{post}",

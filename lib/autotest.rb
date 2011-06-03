@@ -223,7 +223,7 @@ class Autotest
     #
     # I'm removing this code once a sane rspec goes out.
 
-    hacky_discovery = Gem::Specification.all.any? { |s| s.name =~ /^rspec/ }
+    hacky_discovery = Gem::Specification.any? { |s| s.name =~ /^rspec/ }
     $: << '.' if hacky_discovery
 
     Gem.find_files("autotest/discover").each do |f|
@@ -290,7 +290,7 @@ class Autotest
     self.sleep             = 1
     self.testlib           = "test/unit"
     self.find_directories  = ['.']
-    self.unit_diff         = "unit_diff -u"
+    self.unit_diff         = nil
     self.latest_results    = nil
 
     # file in /lib -> run test in /test
@@ -599,16 +599,19 @@ class Autotest
   def make_test_cmd files_to_test
     cmds = []
     full, partial = reorder(files_to_test).partition { |k,v| v.empty? }
+    diff = self.unit_diff
+    diff = " | #{diff}" if diff and diff !~ /^\|/
 
     unless full.empty? then
       classes = full.map {|k,v| k}.flatten.uniq
       classes.unshift testlib
-      cmds << "#{ruby_cmd} -e \"%w[#{classes.join ' '}].each { |f| require f }\" | #{unit_diff}"
+      classes = classes.join " "
+      cmds << "#{ruby_cmd} -e \"%w[#{classes}].each { |f| require f }\"#{diff}"
     end
 
     partial.each do |klass, methods|
       regexp = Regexp.union(*methods).source
-      cmds << "#{ruby_cmd} #{klass} -n \"/^(#{regexp})$/\" | #{unit_diff}"
+      cmds << "#{ruby_cmd} #{klass} -n \"/^(#{regexp})$/\"#{diff}"
     end
 
     cmds.join "#{SEP} "
