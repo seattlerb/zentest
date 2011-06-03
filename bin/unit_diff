@@ -10,7 +10,8 @@
 #    -c contextual diff
 #    -h show usage
 #    -k keep temp diff files around
-#    -u unified diff
+#    -u unified diff [default]
+#    -p plain diff
 #    -v display version
 
 require 'unit_diff'

@@ -33,7 +33,8 @@ require 'rbconfig'
 #     -h show usage
 #     -k keep temp diff files around
 #     -l prefix line numbers on the diffs
-#     -u unified diff
+#     -u unified diff [default]
+#     -p plain diff
 #     -v display version
 
 class UnitDiff
@@ -193,7 +194,8 @@ class UnitDiff
     $b = false unless defined? $b
     $c = false unless defined? $c
     $k = false unless defined? $k
-    $u = false unless defined? $u
+    $u = true  unless defined? $u
+    $p = false unless defined? $p
 
     data, footer = self.parse_input(input, output)
 
@@ -241,7 +243,7 @@ class UnitDiff
         b.write(massage(butwas))
         b.rewind
 
-        diff_flags = $u ? "-u" : $c ? "-c" : ""
+        diff_flags = $p ? "" : $c ? "-c" : "-u"
         diff_flags += " -b" if $b
 
         result = `#{DIFF} #{diff_flags} #{a.path} #{b.path}`
