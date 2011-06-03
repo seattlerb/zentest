@@ -45,8 +45,8 @@ require 'open-uri'
 module Multiruby
   def self.env name, fallback; ENV[name] || fallback; end # :nodoc:
 
-  TAGS     = %w(    1_8_6 1_8_7 1_9_1 1_9_2)
-  BRANCHES = %w(1_8 1_8_6 1_8_7 trunk)
+  TAGS     = %w(    1_8_7 1_9_1 1_9_2)
+  BRANCHES = %w(1_8 1_8_7 1_9 trunk)
 
   VERSIONS = env('VERSIONS', TAGS.join(":").gsub(/_/, '.')).split(/:/)
   MRI_SVN  = env 'MRI_SVN',  'http://svn.ruby-lang.org/repos/ruby'
