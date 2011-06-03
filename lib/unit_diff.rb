@@ -226,7 +226,7 @@ class UnitDiff
     end
 
     if footer then
-      footer.shift if footer.first.strip.empty?# unless footer.first.nil?
+      footer.shift if footer.first.strip.empty?
       output.push footer.compact.map {|line| line.strip}.join("\n")
     end
 
@@ -247,6 +247,9 @@ class UnitDiff
         diff_flags += " -b" if $b
 
         result = `#{DIFF} #{diff_flags} #{a.path} #{b.path}`
+        result.sub!(/^\-\-\- .+/, "--- expected")
+        result.sub!(/^\+\+\+ .+/, "+++ actual")
+
         output = if result.empty? then
                    "[no difference--suspect ==]"
                  else
