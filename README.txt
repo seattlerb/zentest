@@ -1,7 +1,7 @@
 = ZenTest
 
-* http://www.zenspider.com/ZSS/Products/ZenTest/
-* http://rubyforge.org/projects/zentest/
+* http://github.com/seattlerb/zentest
+* http://rubyforge.org/projects/zentest/ (bug tracker)
 * mailto:ryand-ruby@zenspider.com
 
 == DESCRIPTION
@@ -16,6 +16,8 @@ tool anymore but it is the package namesake, so it stays.
 
 unit_diff is a command-line filter to diff expected results from
 actual results and allow you to quickly see exactly what is wrong.
+Do note that minitest 2.2+ provides an enhanced assert_equal obviating
+the need for unit_diff
 
 autotest is a continous testing facility meant to be used during
 development. As soon as you save a file, autotest will run the
