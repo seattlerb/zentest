@@ -287,15 +287,28 @@ backtrace = <<-BACKTRACE
   def test_unit_diff_angles
     header = "Loaded suite ./blah\nStarted\nF\nFinished in 0.035332 seconds.\n\n"
     input = "#{header}  1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n<\"<html>\"> expected but was\n<\"<body>\">.\n\n1 tests, 1 assertions, 1 failures, 0 errors\n"
-    expected = "1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n1c1\n< <html>\n---\n> <body>\n\n1 tests, 1 assertions, 1 failures, 0 errors"
+    expected = "1) Failure:
+test_test1(TestBlah) [./blah.rb:25]:
+--- expected
++++ actual
+@@ -1 +1 @@
+-<html>
++<body>
+
+1 tests, 1 assertions, 1 failures, 0 errors"
 
     util_unit_diff(header, input, expected)
   end
 
   def test_unit_diff1
-    header = "Loaded suite ./blah\nStarted\nF\nFinished in 0.035332 seconds.\n\n"
+    header = "Loaded suite ./blah
+Started
+F
+Finished in 0.035332 seconds.
+
+"
     input = "#{header}  1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n<\"line1\\nline2\\nline3\\n\"> expected but was\n<\"line4\\nline5\\nline6\\n\">.\n\n1 tests, 1 assertions, 1 failures, 0 errors\n"
-    expected = "1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n1,3c1,3\n< line1\n< line2\n< line3\n---\n> line4\n> line5\n> line6\n\n1 tests, 1 assertions, 1 failures, 0 errors"
+    expected = "1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n--- expected\n+++ actual\n@@ -1,4 +1,4 @@\n-line1\n-line2\n-line3\n+line4\n+line5\n+line6\n \n\n1 tests, 1 assertions, 1 failures, 0 errors"
 
     util_unit_diff(header, input, expected)
   end
@@ -303,7 +316,7 @@ backtrace = <<-BACKTRACE
   def test_unit_diff2
     header = "Loaded suite ./blah\nStarted\nFF\nFinished in 0.035332 seconds.\n\n"
     input = "#{header}  1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n<\"line1\\nline2\\nline3\\n\"> expected but was\n<\"line4\\nline5\\nline6\\n\">.\n\n  2) Failure:\ntest_test2(TestBlah) [./blah.rb:29]:\n<\"line1\"> expected but was\n<\"line2\\nline3\\n\\n\">.\n\n2 tests, 2 assertions, 2 failures, 0 errors\n"
-    expected = "1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n1,3c1,3\n< line1\n< line2\n< line3\n---\n> line4\n> line5\n> line6\n\n2) Failure:\ntest_test2(TestBlah) [./blah.rb:29]:\n1c1,4\n< line1\n---\n> line2\n> line3\n> \n> \n\n2 tests, 2 assertions, 2 failures, 0 errors"
+    expected = "1) Failure:\ntest_test1(TestBlah) [./blah.rb:25]:\n--- expected\n+++ actual\n@@ -1,4 +1,4 @@\n-line1\n-line2\n-line3\n+line4\n+line5\n+line6\n \n\n2) Failure:\ntest_test2(TestBlah) [./blah.rb:29]:\n--- expected\n+++ actual\n@@ -1 +1,4 @@\n-line1\n+line2\n+line3\n+\n+\n\n2 tests, 2 assertions, 2 failures, 0 errors"
 
     util_unit_diff(header, input, expected)
   end
@@ -326,9 +339,27 @@ backtrace = <<-BACKTRACE
   end
 
   def test_unit_diff_NOT_suspect_equals
-    header   = "Loaded suite ./blah\nStarted\n.\nFinished in 0.0 seconds.\n\n"
-    input    = "#{header}  1) Failure:\ntest_blah(TestBlah)\n<\"out\"> expected but was\n<\"out\\n\">.\n\n1 tests, 1 assertions, 1 failures, 0 errors"
-    expected = "1) Failure:\ntest_blah(TestBlah)\n1a2\n> \n\n1 tests, 1 assertions, 1 failures, 0 errors"
+    header   = "Loaded suite ./blah
+Started
+.
+Finished in 0.0 seconds.
+
+"
+    input    = "#{header}  1) Failure:
+test_blah(TestBlah)
+<\"out\"> expected but was
+<\"out\\n\">.
+
+1 tests, 1 assertions, 1 failures, 0 errors"
+    expected = "1) Failure:
+test_blah(TestBlah)
+--- expected
++++ actual
+@@ -1 +1,2 @@
+ out
++
+
+1 tests, 1 assertions, 1 failures, 0 errors"
 
     util_unit_diff(header, input, expected)
   end
