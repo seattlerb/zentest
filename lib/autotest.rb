@@ -851,7 +851,7 @@ class Autotest
 
     if block_given?
       yield(collection)
-    elsif Proc === action_or_block
+    elsif action_or_block.respond_to? :call
       action_or_block.call(collection)
     elsif collection.respond_to? action_or_block
       collection.send(action_or_block)
