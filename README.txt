@@ -1,8 +1,7 @@
 = ZenTest
 
-* http://github.com/seattlerb/zentest
-* http://rubyforge.org/projects/zentest/ (bug tracker)
-* mailto:ryand-ruby@zenspider.com
+home :: https://github.com/seattlerb/zentest
+rdoc :: http://zentest.rubyforge.org/ZenTest
 
 == DESCRIPTION
 
@@ -85,7 +84,7 @@ Read this: http://blog.mmediasys.com/2010/11/24/we-all-love-colors/
 
 (The MIT License)
 
-Copyright (c) Ryan Davis, Eric Hodel, Zen Spider Software, Seattle.rb
+Copyright (c) Ryan Davis, Eric Hodel, seattle.rb
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
