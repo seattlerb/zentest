@@ -1,3 +1,7 @@
+if (defined? RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
+  require 'java'
+  JRuby.objectspace=true
+end
 
 $stdlib = {}
 ObjectSpace.each_object(Module) do |m|
