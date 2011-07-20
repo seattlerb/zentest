@@ -289,7 +289,7 @@ class Autotest
     self.prefix            = nil
     self.sleep             = 1
     self.testlib           = "test/unit"
-    self.find_directories  = ['.']
+    self.find_directories  = ARGV.empty? ? ['.'] : ARGV.dup
     self.unit_diff         = nil
     self.latest_results    = nil
 
