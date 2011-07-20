@@ -95,7 +95,7 @@ class ZenTest
   # using ObjectSpace to search for it.
   def get_class(klassname)
     begin
-      klass = Module.const_get(klassname.intern)
+      klass = klassname.split(/::/).inject(Object) { |k,n| k.const_get n }
       puts "# found class #{klass.name}" if $DEBUG
     rescue NameError
       ObjectSpace.each_object(Class) do |cls|
@@ -470,7 +470,6 @@ class ZenTest
     indentunit = "  "
 
     @missing_methods.keys.sort.each do |fullklasspath|
-
       methods = @missing_methods[fullklasspath]
       cls_methods = methods.keys.grep(/^(self\.|test_class_)/)
       methods.delete_if {|k,v| cls_methods.include? k }
@@ -479,16 +478,8 @@ class ZenTest
 
       indent = 0
       is_test_class = self.is_test_class(fullklasspath)
-      klasspath = fullklasspath.split(/::/)
-      klassname = klasspath.pop
 
-      klasspath.each do | modulename |
-        m = self.get_class(modulename)
-        type = m.nil? ? "module" : m.class.name.downcase
-        @result.push indentunit*indent + "#{type} #{modulename}"
-        indent += 1
-      end
-      @result.push indentunit*indent + "class #{klassname}" + (is_test_class ? " < Test::Unit::TestCase" : '')
+      @result.push indentunit*indent + "class #{fullklasspath}" + (is_test_class ? " < Test::Unit::TestCase" : '')
       indent += 1
 
       meths = []
@@ -508,10 +499,6 @@ class ZenTest
 
       indent -= 1
       @result.push indentunit*indent + "end"
-      klasspath.each do | modulename |
-        indent -= 1
-        @result.push indentunit*indent + "end"
-      end
       @result.push ''
     end
 
