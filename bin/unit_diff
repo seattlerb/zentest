@@ -1,5 +1,5 @@
-#!/usr/local/bin/ruby -ws
-# 
+#!/usr/bin/env ruby -ws
+#
 # unit_diff - a ruby unit test filter by Ryan Davis <ryand-ruby@zenspider.com>
 #
 # usage:

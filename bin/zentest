@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby -swI .
+#!/usr/bin/env ruby -swI .
 
 require 'zentest'
 
