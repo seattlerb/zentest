@@ -341,7 +341,7 @@ class Autotest
     end
     hook :quit
   rescue Exception => err
-    hook :died, err
+    hook(:died, err) or raise err
   end
 
   ##
