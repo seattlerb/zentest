@@ -1,3 +1,25 @@
+=== 4.6.0 / 2011-07-22
+
+* 6 minor enhancements:
+
+  * Added -p (plain diff) and made -u (unified diff) the default for unit_diff.
+  * Added ./tmp to default exclusions.
+  * Autotest defaults unit_diff to nil now, to allow minitest's enhanced assert_equal to shine.
+  * Autotest will raise if the :died handler doesn't handle the exception. (ralfebert)
+  * Dropped 1.8.6 as a default tag/branch to build in multiruby.
+  * autotest can now be automatically 'narrowed' on the command-line.
+    * eg: `autotest lib test/test_blah.rb`
+
+* 7 bug fixes:
+
+  * Believe it or not... but some ppl use zentest. Fixed nested class vs module bug
+  * Fix to turn on jruby's support for ObjectSpace. (stepheneb)
+  * Fixed a rubygems deprecation in autotest
+  * Fixed unit_diff scanning for minitest output.
+  * Normalized shebangs to fix problems on windows (luis)
+  * autotest/isolate.rb sets GEM_HOME as well as GEM_PATH.
+  * Fixed 1.9.3 warnings.
+
 === 4.5.0 / 2011-02-18
 
 * 6 minor enhancements:
