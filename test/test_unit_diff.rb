@@ -145,8 +145,6 @@ backtrace = <<-BACKTRACE
   end
 
   def test_unit_diff_empty # simulates broken pipe at the least
-    input = ""
-    expected = ""
     util_unit_diff("", "", "")
   end
 

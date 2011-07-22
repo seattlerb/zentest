@@ -343,7 +343,7 @@ class ZenTest
   def analyze_impl(klassname)
     testklassname = self.convert_class_name(klassname)
     if @test_klasses[testklassname] then
-      methods, testmethods = methods_and_tests(klassname,testklassname)
+      _, testmethods = methods_and_tests(klassname, testklassname)
 
       # check that each method has a test method
       @klasses[klassname].each_key do | methodname |
@@ -353,7 +353,7 @@ class ZenTest
             unless testmethods.keys.find { |m| m =~ /#{testmethodname}(_\w+)+$/ } then
               self.add_missing_method(testklassname, testmethodname)
             end
-          rescue RegexpError => e
+          rescue RegexpError
             puts "# ERROR trying to use '#{testmethodname}' as a regex. Look at #{klassname}.#{methodname}"
           end
         end # testmethods[testmethodname]

@@ -123,7 +123,6 @@ class UnitDiff
     expect = []
     butwas = []
     footer = []
-    found = false
     state = :header
 
     until result.empty? do
@@ -203,9 +202,6 @@ class UnitDiff
 
     # Output
     data.each do |result|
-      first = []
-      second = []
-
       if result.first =~ /Error/ then
         output.push result.join('')
         next
@@ -269,7 +265,6 @@ class UnitDiff
   end
 
   def massage(data)
-    count = 0
     # unescape newlines, strip <> from entire string
     data = data.join
     data = data.gsub(/\\n/, "\n").gsub(/0x[a-f0-9]+/m, '0xXXXXXX') + "\n"
