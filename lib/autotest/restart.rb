@@ -5,8 +5,8 @@ module Autotest::Restart
     false
   end
 
-  Autotest.add_hook :updated do |at, *args|
-    if args.any? {|h| h.keys.grep /\.autotest$/} then
+  Autotest.add_hook :updated do |at, updated|
+    unless updated.keys.grep(/\.autotest$/).empty? then
       warn "Detected change to .autotest, restarting"
       at.restart
     end
