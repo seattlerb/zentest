@@ -84,7 +84,10 @@ class Autotest
 
   def self.parse_options args = ARGV
     require 'optparse'
-    options = {}
+    options = {
+      :args => args.dup
+    }
+
     OptionParser.new do |opts|
       opts.banner = <<-BANNER.gsub(/^        /, '')
         Continuous testing for your ruby app.
@@ -134,7 +137,7 @@ class Autotest
         puts opts
         exit 1
       end
-    end.parse args
+    end.parse! args
 
     Autotest.options.merge! options
 
@@ -438,7 +441,7 @@ class Autotest
   def restart
     Process.kill "KILL", @child if @child
 
-    cmd = [$0, *ARGV]
+    cmd = [$0, *options[:args]]
 
     index = $LOAD_PATH.index RbConfig::CONFIG["sitelibdir"]
 
