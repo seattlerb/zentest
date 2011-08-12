@@ -118,7 +118,7 @@ class Autotest
       end
 
       opts.on("-r", "--rc CONF", String, "Override path to config file") do |o|
-        options[:rc] = o
+        options[:rc] = Array(o)
       end
 
       opts.on("-s", "--style STYLE", String,

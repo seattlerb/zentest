@@ -24,6 +24,10 @@ class Autotest
   def self.clear_hooks
     HOOKS.clear
   end
+
+  def self.reset_options
+    @@options = {}
+  end
 end
 
 class TestAutotest < MiniTest::Unit::TestCase
@@ -463,6 +467,17 @@ test_error2(#{@test_class}):
 
     f = { @test => [], "test/test_fooby.rb" => %w(first second) }
     assert_match @a.testlib, @a.make_test_cmd(f)
+  end
+
+  def test_runner_accepts_rc_options
+    begin
+      Autotest.parse_options(['--rc', 'autotest_rc'])
+      Autotest.new
+    rescue
+      deny $!, "It should not throw #{$!.message}"
+    ensure
+      Autotest.reset_options
+    end
   end
 
   def util_exceptions
