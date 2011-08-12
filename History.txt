@@ -1,3 +1,11 @@
+=== 4.6.1 / 2011-08-11
+
+* 3 bug fixes:
+
+  * Fix for option flags and unhandled error warning in autotest. (dbackeus)
+  * Fix option w/ args handling and restart by storing ARGV in options[:args]
+  * Fixed autotest --rc option handling. (simplybusiness)
+
 === 4.6.0 / 2011-07-22
 
 * 6 minor enhancements:
