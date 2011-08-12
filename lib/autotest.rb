@@ -289,7 +289,8 @@ class Autotest
     self.prefix            = nil
     self.sleep             = 1
     self.testlib           = "test/unit"
-    self.find_directories  = ARGV.empty? ? ['.'] : ARGV.dup
+    specified_directories  = ARGV.reject { |arg| arg.start_with?("-") } # options are not directories
+    self.find_directories  = specified_directories.empty? ? ['.'] : specified_directories
     self.unit_diff         = nil
     self.latest_results    = nil
 
@@ -840,8 +841,7 @@ class Autotest
     HOOKS[name] << block
   end
 
-  add_hook :died do |at, args|
-    err = *args
+  add_hook :died do |at, err|
     warn "Unhandled exception: #{err}"
     warn err.backtrace.join("\n  ")
     warn "Quitting"
