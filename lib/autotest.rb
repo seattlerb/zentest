@@ -840,6 +840,28 @@ class Autotest
     HOOKS[name] << block
   end
 
+  ##
+  # Remove all hooks added with the given name.
+
+  def self.remove_hooks_of_type name
+    HOOKS.delete name
+  end
+
+  ##
+  # Remove a hook, from the collection of hooks with a given name, using user-supplied block.
+
+  def self.remove_hook_via name, action_or_block = nil
+    collection = HOOKS[name]
+
+    if block_given?
+      yield(collection)
+    elsif action_or_block.respond_to? :call
+      action_or_block.call(collection)
+    elsif collection.respond_to? action_or_block
+      collection.send(action_or_block)
+    end
+  end
+  
   add_hook :died do |at, args|
     err = *args
     warn "Unhandled exception: #{err}"
