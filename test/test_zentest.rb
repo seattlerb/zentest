@@ -557,7 +557,9 @@ assert_equal expected, util_testcase("Something2::Blah2", "TestSomething2::TestB
 
   def test_testcase9
     # stupid YAML is breaking my tests. Enters via Test::Rails. order dependent.
-    TrueClass.send :remove_method, :taguri, :taguri=, :to_yaml if defined? YAML
+    if defined? YAML then
+      TrueClass.send :remove_method, :taguri, :taguri=, :to_yaml rescue nil
+    end
 
     expected = "#{HEADER}class TestTrueClass < Test::Unit::TestCase\n  def test_and\n    raise NotImplementedError, 'Need to write test_and'\n  end\n\n  def test_carat\n    raise NotImplementedError, 'Need to write test_carat'\n  end\n\n  def test_or\n    raise NotImplementedError, 'Need to write test_or'\n  end\n\n  def test_to_s\n    raise NotImplementedError, 'Need to write test_to_s'\n  end\nend\n\n# Number of errors detected: 4"
 
