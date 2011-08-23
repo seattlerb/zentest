@@ -1,6 +1,8 @@
 module Autotest::Restart
   Autotest.add_hook :initialize do |at|
-    configs = [File.expand_path('~/.autotest'), './.autotest']
+    configs = [File.expand_path('~/.autotest'), './.autotest'].select { |f|
+      File.exist? f
+    }
     at.extra_files.concat configs
     false
   end
