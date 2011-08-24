@@ -1,3 +1,13 @@
+=== 4.6.2 / 2011-08-24
+
+* 1 minor enhancement:
+
+  * Added Autotest Tips section to Readme
+
+* 1 bug fix:
+
+  * Fixed mri 1.9.3 change to Find.find with autotest/restart and missing files.
+
 === 4.6.1 / 2011-08-11
 
 * 3 bug fixes:
