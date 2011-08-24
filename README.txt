@@ -26,6 +26,16 @@ multiruby runs anything you want on multiple versions of ruby. Great
 for compatibility checking! Use multiruby_setup to manage your
 installed versions.
 
+== FEATURES
+
+* Scans your ruby code and tests and generates missing methods for you.
+* Includes a very helpful filter for Test/Spec output called unit_diff.
+* Continually and intelligently test only those files you change with autotest.
+* Test against multiple versions with multiruby.
+* Includes a LinuxJournal article on testing with ZenTest written by Pat Eyler.
+* See also: http://blog.zenspider.com/archives/zentest/
+* See also: http://blog.segment7.net/articles/category/zentest
+
 == STRATEGERY
 
 There are two strategeries intended for ZenTest: test conformance
@@ -40,16 +50,39 @@ ZenTest can also be used to evaluate generated code and execute your
 tests, allowing for very rapid development of both tests and
 implementation.
 
-== FEATURES
+== AUTOTEST TIPS
 
-* Scans your ruby code and tests and generates missing methods for you.
-* Includes a very helpful filter for Test/Spec output called unit_diff.
-* Continually and intelligently test only those files you change with autotest.
-* Test against multiple versions with multiruby.
-* Enhance and automatically audit your rails tests using Test::Rails.
-* Includes a LinuxJournal article on testing with ZenTest written by Pat Eyler.
-* See also: http://blog.zenspider.com/archives/zentest/
-* See also: http://blog.segment7.net/articles/category/zentest
+Setting up your project with a custom setup is easily done by creating
+a ".autotest" file in your project. Here is an example of adding some
+plugins, using minitest as your test library, and running rcov on full
+passes:
+
+    require 'autotest/restart'
+
+    Autotest.add_hook :initialize do |at|
+      at.testlib = "minitest/autorun"
+    end
+
+    Autotest.add_hook :all_good do |at|
+      system "rake rcov_info"
+    end if ENV['RCOV']
+
+Do note, since minitest ships with ruby19, if you want to use the
+latest minitest gem you need to ensure that the gem activation occurs!
+To do this, add the gem activation and the proper require to a
+separate file (like ".minitest.rb" or even a test helper if you have
+one) and use that for your testlib instead:
+
+.minitest.rb:
+
+    gem "minitest"
+    require "minitest/autorun"
+
+.autotest:
+
+    Autotest.add_hook :initialize do |at|
+      at.testlib = ".minitest"
+    end
 
 == SYNOPSYS
 
@@ -62,15 +95,13 @@ implementation.
   multiruby_setup mri:svn:current
   multiruby ./TestMyProject.rb
 
-  (and other stuff for Test::Rails)
-
 == Windows and Color
 
 Read this: http://blog.mmediasys.com/2010/11/24/we-all-love-colors/
 
 == REQUIREMENTS
 
-* Ruby 1.6+, JRuby 1.1.2+, or rubinius
+* Ruby 1.8+, JRuby 1.1.2+, or rubinius
 * A test/spec framework of your choice.
 * Hoe (development)
 * rubygems
