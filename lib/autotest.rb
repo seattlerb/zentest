@@ -225,8 +225,12 @@ class Autotest
     # documented in multiple books.
     #
     # I'm removing this code once a sane rspec goes out.
-
-    hacky_discovery = Gem::Specification.any? { |s| s.name =~ /^rspec/ }
+    
+    hacky_discovery = case Gem::VERSION.to_f < "1.8".to_f
+    when true then Gem.source_index.gems.any? { |n,_| n =~ /^rspec/ }
+    else Gem::Specification.any? { |s| s.name =~ /^rspec/ }
+    end
+      
     $: << '.' if hacky_discovery
 
     Gem.find_files("autotest/discover").each do |f|
