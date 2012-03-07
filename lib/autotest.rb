@@ -616,7 +616,7 @@ class Autotest
 
     partial.each do |klass, methods|
       regexp = Regexp.union(*methods).source
-      cmds << "#{ruby_cmd} #{klass} -n \"/^(#{regexp})$/\"#{diff}"
+      cmds << "#{ruby_cmd} -r#{testlib} #{klass} -n \"/^(#{regexp})$/\"#{diff}"
     end
 
     cmds.join "#{SEP} "

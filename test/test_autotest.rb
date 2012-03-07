@@ -396,7 +396,7 @@ test_error2(#{@test_class}):
 
     expected =
       [ "#{pre} -e \"%w[test/unit #{@test}]#{req}",
-        "#{pre} test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\""
+        "#{pre} -rtest/unit test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\""
       ].join("; ")
 
     result = @a.make_test_cmd f
@@ -415,7 +415,7 @@ test_error2(#{@test_class}):
     post = "| unit_diff -u"
 
     expected = [ "#{pre} -e \"%w[test/unit #{@test}]#{req} #{post}",
-                 "#{pre} test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\" #{post}" ].join("; ")
+                 "#{pre} -rtest/unit test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\" #{post}" ].join("; ")
 
     result = @a.make_test_cmd f
     assert_equal expected, result
