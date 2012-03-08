@@ -362,14 +362,14 @@ class Autotest
   # Look for files to test then run the tests and handle the results.
 
   def run_tests
-    hook :run_command
-
     new_mtime = self.find_files_to_test
     return unless new_mtime
     self.last_mtime = new_mtime
 
     cmd = self.make_test_cmd self.files_to_test
     return if cmd.empty?
+
+    hook :run_command, cmd
 
     puts cmd unless options[:quiet]
 

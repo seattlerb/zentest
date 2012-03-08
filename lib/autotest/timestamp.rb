@@ -1,9 +1,9 @@
 # -*- ruby -*-
 
 module Autotest::Timestamp
-  Autotest.add_hook :waiting do
+  Autotest.add_hook :ran_command do
     puts
-    puts "# Waiting since #{Time.now.strftime "%Y-%m-%d %H:%M:%S"}"
+    puts "# Finished at #{Time.now.strftime "%Y-%m-%d %H:%M:%S"}"
     puts
   end
 end
