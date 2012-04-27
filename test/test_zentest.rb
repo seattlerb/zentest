@@ -187,7 +187,7 @@ class Something
   end
 end
 
-class TestSomething < Test::Unit::TestCase
+class TestSomething < MiniTest::Unit::TestCase
   def test_class_method3
     raise NotImplementedError, 'Need to write test_class_method3'
   end
@@ -508,13 +508,13 @@ end
   HEADER = "\nrequire 'test/unit/testcase'\nrequire 'test/unit' if $0 == __FILE__\n\n"
 
   def test_testcase1
-    expected = "#{HEADER}class Blah1\n  def missingimpl(*args)\n    raise NotImplementedError, 'Need to write missingimpl'\n  end\nend\n\nclass TestBlah1 < Test::Unit::TestCase\n  def test_missingtest\n    raise NotImplementedError, 'Need to write test_missingtest'\n  end\nend\n\n# Number of errors detected: 2"
+    expected = "#{HEADER}class Blah1\n  def missingimpl(*args)\n    raise NotImplementedError, 'Need to write missingimpl'\n  end\nend\n\nclass TestBlah1 < MiniTest::Unit::TestCase\n  def test_missingtest\n    raise NotImplementedError, 'Need to write test_missingtest'\n  end\nend\n\n# Number of errors detected: 2"
 
     assert_equal expected, util_testcase("Blah1", "TestBlah1")
   end
 
   def test_testcase2
-    expected = "#{HEADER}class Something2::Blah2\n  def missingimpl(*args)\n    raise NotImplementedError, 'Need to write missingimpl'\n  end\nend\n\nclass TestSomething2::TestBlah2 < Test::Unit::TestCase\n  def test_missingtest\n    raise NotImplementedError, 'Need to write test_missingtest'\n  end\nend\n\n# Number of errors detected: 2"
+    expected = "#{HEADER}class Something2::Blah2\n  def missingimpl(*args)\n    raise NotImplementedError, 'Need to write missingimpl'\n  end\nend\n\nclass TestSomething2::TestBlah2 < MiniTest::Unit::TestCase\n  def test_missingtest\n    raise NotImplementedError, 'Need to write test_missingtest'\n  end\nend\n\n# Number of errors detected: 2"
 
 assert_equal expected, util_testcase("Something2::Blah2", "TestSomething2::TestBlah2")
   end
@@ -526,31 +526,31 @@ assert_equal expected, util_testcase("Something2::Blah2", "TestSomething2::TestB
   end
 
   def test_testcase4
-    expected = "#{HEADER}class TestBlah4 < Test::Unit::TestCase\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\n\n  def test_missingtest2\n    raise NotImplementedError, 'Need to write test_missingtest2'\n  end\nend\n\n# Number of errors detected: 3"
+    expected = "#{HEADER}class TestBlah4 < MiniTest::Unit::TestCase\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\n\n  def test_missingtest2\n    raise NotImplementedError, 'Need to write test_missingtest2'\n  end\nend\n\n# Number of errors detected: 3"
 
     assert_equal expected, util_testcase("Blah4")
   end
 
   def test_testcase5
-    expected = "#{HEADER}class TestMyHash5 < Test::Unit::TestCase\n  def test_index\n    raise NotImplementedError, 'Need to write test_index'\n  end\n\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\nend\n\n# Number of errors detected: 3"
+    expected = "#{HEADER}class TestMyHash5 < MiniTest::Unit::TestCase\n  def test_index\n    raise NotImplementedError, 'Need to write test_index'\n  end\n\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\nend\n\n# Number of errors detected: 3"
 
     assert_equal expected, util_testcase("MyHash5")
   end
 
   def test_testcase6
-    expected = "#{HEADER}class TestMyModule6::TestMyClass6 < Test::Unit::TestCase\n  def test_index\n    raise NotImplementedError, 'Need to write test_index'\n  end\n\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\nend\n\n# Number of errors detected: 3"
+    expected = "#{HEADER}class TestMyModule6::TestMyClass6 < MiniTest::Unit::TestCase\n  def test_index\n    raise NotImplementedError, 'Need to write test_index'\n  end\n\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\nend\n\n# Number of errors detected: 3"
 
     assert_equal expected, util_testcase("MyModule6::MyClass6")
   end
 
   def test_testcase7
-    expected = "#{HEADER}class TestMyModule7::TestMyClass7 < Test::Unit::TestCase\n  def test_index\n    raise NotImplementedError, 'Need to write test_index'\n  end\n\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\nend\n\n# Number of errors detected: 3"
+    expected = "#{HEADER}class TestMyModule7::TestMyClass7 < MiniTest::Unit::TestCase\n  def test_index\n    raise NotImplementedError, 'Need to write test_index'\n  end\n\n  def test_missingtest1\n    raise NotImplementedError, 'Need to write test_missingtest1'\n  end\nend\n\n# Number of errors detected: 3"
 
     assert_equal expected, util_testcase("MyModule7::MyClass7")
   end
 
   def test_testcase8
-    expected = "#{HEADER}class TestMyClass8 < Test::Unit::TestCase\n  def test_class_foobar\n    raise NotImplementedError, 'Need to write test_class_foobar'\n  end\n\n  def test_class_foobaz\n    raise NotImplementedError, 'Need to write test_class_foobaz'\n  end\nend\n\n# Number of errors detected: 3"
+    expected = "#{HEADER}class TestMyClass8 < MiniTest::Unit::TestCase\n  def test_class_foobar\n    raise NotImplementedError, 'Need to write test_class_foobar'\n  end\n\n  def test_class_foobaz\n    raise NotImplementedError, 'Need to write test_class_foobaz'\n  end\nend\n\n# Number of errors detected: 3"
 
     assert_equal expected, util_testcase("MyClass8")
   end
@@ -561,7 +561,7 @@ assert_equal expected, util_testcase("Something2::Blah2", "TestSomething2::TestB
       TrueClass.send :remove_method, :taguri, :taguri=, :to_yaml rescue nil
     end
 
-    expected = "#{HEADER}class TestTrueClass < Test::Unit::TestCase\n  def test_and\n    raise NotImplementedError, 'Need to write test_and'\n  end\n\n  def test_carat\n    raise NotImplementedError, 'Need to write test_carat'\n  end\n\n  def test_or\n    raise NotImplementedError, 'Need to write test_or'\n  end\n\n  def test_to_s\n    raise NotImplementedError, 'Need to write test_to_s'\n  end\nend\n\n# Number of errors detected: 4"
+    expected = "#{HEADER}class TestTrueClass < MiniTest::Unit::TestCase\n  def test_and\n    raise NotImplementedError, 'Need to write test_and'\n  end\n\n  def test_carat\n    raise NotImplementedError, 'Need to write test_carat'\n  end\n\n  def test_or\n    raise NotImplementedError, 'Need to write test_or'\n  end\n\n  def test_to_s\n    raise NotImplementedError, 'Need to write test_to_s'\n  end\nend\n\n# Number of errors detected: 4"
 
     assert_equal expected, util_testcase("TestTrueClass")
   end

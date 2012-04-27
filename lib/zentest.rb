@@ -12,6 +12,7 @@ require 'zentest_mapping'
 
 $:.unshift( *$I.split(/:/) ) if defined? $I and String === $I
 $r = false unless defined? $r # reverse mapping for testclass names
+$t ||= false # test/unit instead of minitest
 
 if $r then
   # all this is needed because rails is retarded
@@ -34,7 +35,7 @@ end
 ##
 # ZenTest scans your target and unit-test code and writes your missing
 # code based on simple naming rules, enabling XP at a much quicker
-# pace. ZenTest only works with Ruby and Test::Unit.
+# pace. ZenTest only works with Ruby and Minitest or Test::Unit.
 #
 # == RULES
 #
@@ -483,7 +484,10 @@ class ZenTest
       indent = 0
       is_test_class = self.is_test_class(fullklasspath)
 
-      @result.push indentunit*indent + "class #{fullklasspath}" + (is_test_class ? " < Test::Unit::TestCase" : '')
+      clsname = $t ? "Test::Unit::TestCase" : "MiniTest::Unit::TestCase"
+      superclass = is_test_class ? " < #{clsname}" : ''
+
+      @result.push indentunit*indent + "class #{fullklasspath}#{superclass}"
       indent += 1
 
       meths = []
@@ -522,7 +526,7 @@ usage: #{File.basename $0} [options] test-and-implementation-files...
 
 ZenTest scans your target and unit-test code and writes your missing
 code based on simple naming rules, enabling XP at a much quicker
-pace. ZenTest only works with Ruby and Test::Unit.
+pace. ZenTest only works with Ruby and Minitest or Test::Unit.
 
 ZenTest uses the following rules to figure out what code should be
 generated:
@@ -544,6 +548,7 @@ options:
   -v display version information
   -r Reverse mapping (ClassTest instead of TestClass)
   -e (Rapid XP) eval the code generated instead of printing it
+  -t test/unit generation (default is minitest).
 
     EO_USAGE
   end

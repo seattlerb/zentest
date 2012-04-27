@@ -8,10 +8,11 @@ rdoc :: http://zentest.rubyforge.org/ZenTest
 ZenTest provides 4 different tools: zentest, unit_diff, autotest, and
 multiruby.
 
-ZenTest scans your target and unit-test code and writes your missing
-code based on simple naming rules, enabling XP at a much quicker
-pace. ZenTest only works with Ruby and Test::Unit. Nobody uses this
-tool anymore but it is the package namesake, so it stays.
+zentest scans your target and unit-test code and writes your missing
+code based on simple naming rules, enabling XP at a much quicker pace.
+zentest only works with Ruby and Minitest or Test::Unit. There is
+enough evidence to show that this is still proving useful to users, so
+it stays.
 
 unit_diff is a command-line filter to diff expected results from
 actual results and allow you to quickly see exactly what is wrong.
