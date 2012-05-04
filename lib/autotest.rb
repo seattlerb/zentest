@@ -45,7 +45,7 @@ $TESTING = false unless defined? $TESTING
 # * Test class names must start with Test
 # * Implementation files must be stored in lib/
 # * Implementation files must match up with a test file named
-#   test_.*implementation.rb
+#   test_.*<impl-name>.rb
 #
 # Strategy:
 #
@@ -513,10 +513,11 @@ class Autotest
       order = []
       Find.find target do |f|
         Find.prune if f =~ self.exceptions
+        Find.prune if f =~ /^\.\/tmp/    # temp dir, used by isolate
 
-        next if test ?d, f
+        next unless File.file? f
         next if f =~ /(swp|~|rej|orig)$/ # temporary/patch files
-        next if f =~ /^\.\/tmp/          # temporary dir, used by isolate
+        next if f =~ /(,v)$/             # RCS files
         next if f =~ /\/\.?#/            # Emacs autosave/cvs merge files
 
         filename = f.sub(/^\.\//, '')
