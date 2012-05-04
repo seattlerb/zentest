@@ -1,3 +1,13 @@
+=== 4.8.0 / 2012-05-04
+
+* 1 minor enhancement:
+
+  * Added Minitest generation to zentest (use -t to generate for test/unit)
+
+* 1 bug fix:
+
+  * Fixes and clarifications to Autotest#find_file. (hugh sasse)
+
 === 4.7.0 / 2012-03-15
 
 * 2 minor enhancements:
