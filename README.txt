@@ -105,7 +105,7 @@ Read this: http://blog.mmediasys.com/2010/11/24/we-all-love-colors/
 * Ruby 1.8+, JRuby 1.1.2+, or rubinius
 * A test/spec framework of your choice.
 * Hoe (development)
-* rubygems
+* rubygems, 1.8+
 * diff.exe on windows. Use http://gnuwin32.sourceforge.net/packages.html
 
 == INSTALL
