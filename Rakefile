@@ -13,7 +13,8 @@ Hoe.spec "ZenTest" do
   developer 'Ryan Davis', 'ryand-ruby@zenspider.com'
   developer 'Eric Hodel', 'drbrain@segment7.net'
 
-  require_rubygems_version "~> 1.8"
+  dependency "rdoc", "~> 3", :development
+  dependency "minitest", "~> 2", :development
 end
 
 desc "run autotest on itself"
