@@ -327,7 +327,7 @@ module Multiruby
       tags = File.read(cache).split(/\n/).grep(/^v/).reject {|s| s =~ /preview/}
     end
 
-    tags = tags.sort_by { |s| s.scan(/\d+/).map { |s| s.to_i } }
+    tags = tags.sort_by { |t| t.scan(/\d+/).map { |s| s.to_i } }
   end
 
   def self.update
@@ -388,7 +388,7 @@ module Multiruby
     html = URI.parse(GEM_URL).read
 
     versions = html.scan(/href="rubygems-update-(\d+(?:\.\d+)+).gem/i).flatten
-    latest = versions.sort_by { |s| s.scan(/\d+/).map { |s| s.to_i } }.last
+    latest = versions.sort_by { |v| v.scan(/\d+/).map { |s| s.to_i } }.last
 
     Multiruby.in_versions_dir do
       file = "rubygems-#{latest}.tgz"
