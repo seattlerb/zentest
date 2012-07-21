@@ -60,14 +60,14 @@ module Multiruby
     HELP << line.sub(/^# ?/, '')
   end
 
-  def self.build_and_install
+  def build_and_install
     ENV.delete 'RUBYOPT'
 
     root_dir = self.root_dir
     versions = []
 
     Dir.chdir root_dir do
-      self.setup_dirs
+      setup_dirs
 
       rubygems = Dir["versions/rubygems*.tgz"]
       abort "You should delete all but one rubygem tarball" if rubygems.size > 1
@@ -120,8 +120,8 @@ module Multiruby
     versions
   end
 
-  def self.clean
-    self.each_scm_build_dir do |style|
+  def clean
+    each_scm_build_dir do |style|
       case style
       when :svn then
         if File.exist? "Rakefile" then
@@ -135,8 +135,8 @@ module Multiruby
     end
   end
 
-  def self.each_scm_build_dir
-    Multiruby.in_build_dir do
+  def each_scm_build_dir
+    in_build_dir do
       Dir["*"].each do |dir|
         next unless File.directory? dir
         Dir.chdir dir do
@@ -150,7 +150,7 @@ module Multiruby
     end
   end
 
-  def self.matching_versions url, matching=nil
+  def matching_versions url, matching=nil
     file = URI.parse(url).read
 
     map = {
@@ -170,7 +170,7 @@ module Multiruby
     versions
   end
 
-  def self.fetch_tar v
+  def fetch_tar v
     in_versions_dir do
       warn "  Determining latest version for #{v}"
       ver = v[/\d+\.\d+/]
@@ -188,7 +188,7 @@ module Multiruby
     end
   end
 
-  def self.gnu_utils_build inst_dir
+  def gnu_utils_build inst_dir
     run "autoconf" unless test ?f, "configure"
     run "./configure --enable-shared --prefix #{inst_dir} #{ENV['CONFIGURE']}", "log.configure" unless
       test ?f, "Makefile"
@@ -196,41 +196,41 @@ module Multiruby
     run "make install", "log.install"
   end
 
-  def self.help
+  def help
     puts HELP.join
   end
 
-  def self.in_build_dir
+  def in_build_dir
     in_root_dir "build" do
       yield
     end
   end
 
-  def self.in_install_dir
+  def in_install_dir
     in_root_dir "install" do
       yield
     end
   end
 
-  def self.in_root_dir subdir = ""
-    Dir.chdir File.join(self.root_dir, subdir) do
+  def in_root_dir subdir = ""
+    Dir.chdir File.join(root_dir, subdir) do
       yield
     end
   end
 
-  def self.in_tmp_dir
+  def in_tmp_dir
     in_root_dir "tmp" do
       yield
     end
   end
 
-  def self.in_versions_dir
+  def in_versions_dir
     in_root_dir "versions" do
       yield
     end
   end
 
-  def self.list
+  def list
     puts "Known versions:"
     in_install_dir do
       Dir["*"].sort.each do |d|
@@ -239,7 +239,7 @@ module Multiruby
     end
   end
 
-  def self.merge_rubygems
+  def merge_rubygems
     in_install_dir do
       gems = Dir["*/lib/ruby/gems"]
 
@@ -254,24 +254,24 @@ module Multiruby
     end
   end
 
-  def self.mri_latest_tag v
-    Multiruby.tags.grep(/#{v}/).last
+  def mri_latest_tag v
+    tags.grep(/#{v}/).last
   end
 
-  def self.rake_build inst_dir
+  def rake_build inst_dir
     run "rake", "log.build"
     FileUtils.ln_sf "../build/#{File.basename Dir.pwd}", inst_dir
   end
 
-  def self.rm name
-    Multiruby.in_root_dir do
+  def rm name
+    in_root_dir do
       FileUtils.rm_rf Dir["*/#{name}"]
       f = "versions/ruby-#{name}.tar.gz"
       File.unlink f if test ?f, f
     end
   end
 
-  def self.root_dir
+  def root_dir
     root_dir = File.expand_path(ENV['MULTIRUBY'] ||
                                 File.join(ENV['HOME'], ".multiruby"))
 
@@ -283,14 +283,14 @@ module Multiruby
     root_dir
   end
 
-  def self.run base_cmd, log = nil
+  def run base_cmd, log = nil
     cmd = base_cmd
     cmd += " > #{log} 2>&1" if log
     puts "Running command: #{cmd}"
     raise "ERROR: Command failed with exit code #{$?}" unless system cmd
   end
 
-  def self.setup_dirs download = true
+  def setup_dirs download = true
     %w(build install versions tmp).each do |dir|
       unless test ?d, dir then
         puts "creating #{dir}"
@@ -298,7 +298,7 @@ module Multiruby
         if dir == "versions" && download then
           warn "  Downloading initial ruby tarballs to ~/.multiruby/versions:"
           VERSIONS.each do |v|
-            self.fetch_tar v
+            fetch_tar v
           end
           warn "  ...done"
           warn "  Put other ruby tarballs in ~/.multiruby/versions to use them."
@@ -307,16 +307,16 @@ module Multiruby
     end
   end
 
-  def self.svn_co url, dir
-    Multiruby.in_versions_dir do
-      Multiruby.run "svn co #{url} #{dir}" unless File.directory? dir
+  def svn_co url, dir
+    in_versions_dir do
+      run "svn co #{url} #{dir}" unless File.directory? dir
       FileUtils.ln_sf "../versions/#{dir}", "../build/#{dir}"
     end
   end
 
-  def self.tags
+  def tags
     tags = nil
-    Multiruby.in_tmp_dir do
+    in_tmp_dir do
       cache = "svn.tag.cache"
       File.unlink cache if Time.now - File.mtime(cache) > 3600 rescue nil
 
@@ -330,7 +330,7 @@ module Multiruby
     tags = tags.sort_by { |t| t.scan(/\d+/).map { |s| s.to_i } }
   end
 
-  def self.update
+  def update
     # TODO:
     # update will look at the dir name and act accordingly rel_.* will
     # figure out latest tag on that name and svn sw to it trunk and
@@ -338,7 +338,7 @@ module Multiruby
 
     clean = []
 
-    self.each_scm_build_dir do |style|
+    each_scm_build_dir do |style|
       dir = File.basename(Dir.pwd)
       warn dir
 
@@ -359,7 +359,7 @@ module Multiruby
         when /mri_rel_(.+)/ then
           ver = $1
           url = `svn info`[/^URL: (.*)/, 1]
-          latest = self.mri_latest_tag(ver).chomp('/')
+          latest = mri_latest_tag(ver).chomp('/')
           new_url = File.join(File.dirname(url), latest)
           if new_url != url then
             run "svn sw #{new_url}"
@@ -383,14 +383,14 @@ module Multiruby
     end
   end
 
-  def self.update_rubygems
+  def update_rubygems
     warn "  Determining latest version for rubygems"
     html = URI.parse(GEM_URL).read
 
     versions = html.scan(/href="rubygems-update-(\d+(?:\.\d+)+).gem/i).flatten
     latest = versions.sort_by { |v| v.scan(/\d+/).map { |s| s.to_i } }.last
 
-    Multiruby.in_versions_dir do
+    in_versions_dir do
       file = "rubygems-#{latest}.tgz"
       unless File.file? file then
         warn "    Fetching rubygems-#{latest}.tgz via HTTP."
@@ -401,12 +401,14 @@ module Multiruby
       end
     end
 
-    Multiruby.in_build_dir do
+    in_build_dir do
       FileUtils.rm_rf Dir["rubygems*"]
     end
 
-    Multiruby.in_install_dir do
+    in_install_dir do
       FileUtils.rm_rf Dir["*"]
     end
   end
+
+  extend self
 end
