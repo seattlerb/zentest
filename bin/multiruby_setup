@@ -22,7 +22,7 @@ ARGV.each do |spec|
     help
     exit 0
   when "the_usual" then # TODO: update #help
-    ARGV.push(*TAGS.map { |v| "mri:tar:#{v.gsub(/_/, '.')}" })
+    ARGV.push(*VERSIONS.map { |v| "mri:tar:#{v.gsub(/_/, '.')}" })
     ARGV << "build" << "update:rubygems"
     system "multigem install --no-ri --no-rdoc rake minitest ZenTest gemcutter rubyforge hoe"
   when "build" then
