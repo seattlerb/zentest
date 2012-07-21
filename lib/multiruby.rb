@@ -21,6 +21,7 @@ require 'open-uri'
 #   specs:
 #
 #     the_usual              = alias for latest versions from tar + rubygems
+#     the_usual:gems         = install common gems in all installed versions
 #     mri:svn:current        = alias for mri:svn:releases and mri:svn:branches.
 #     mri:svn:releases       = alias for supported releases of mri ruby.
 #     mri:svn:branches       = alias for active branches of mri ruby.
