@@ -190,7 +190,7 @@ module Multiruby
 
   def self.gnu_utils_build inst_dir
     run "autoconf" unless test ?f, "configure"
-    run "./configure --enable-shared --prefix #{inst_dir}", "log.configure" unless
+    run "./configure --enable-shared --prefix #{inst_dir} #{ENV['CONFIGURE']}", "log.configure" unless
       test ?f, "Makefile"
     run "(nice make -j4; nice make)", "log.build"
     run "make install", "log.install"

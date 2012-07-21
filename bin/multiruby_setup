@@ -4,6 +4,12 @@ require 'multiruby'
 
 ENV.delete 'RUBYOPT'
 
+# Take build parameters from ARGV after --
+if idx = ARGV.index('--')
+  ENV['CONFIGURE'] = ARGV[idx+1..-1].join(' ')
+  ARGV.replace ARGV[0...idx]
+end
+
 ARGV << "help" if ARGV.empty?
 
 Dir.chdir Multiruby.root_dir
