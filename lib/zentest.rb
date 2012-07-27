@@ -58,7 +58,7 @@ end
 
 class ZenTest
 
-  VERSION = '4.8.1'
+  VERSION = '4.8.2'
 
   include ZenTestMapping
 

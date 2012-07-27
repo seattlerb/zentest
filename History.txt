@@ -1,3 +1,9 @@
+=== 4.8.2 / 2012-07-26
+
+* 1 bug fix:
+
+  * Fixed 1.9+ warnings in multiruby. (bhenderson)
+
 === 4.8.1 / 2012-06-01
 
 * 1 bug fix:
