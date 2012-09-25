@@ -92,8 +92,8 @@ class Autotest
       opts.banner = <<-BANNER.gsub(/^        /, '')
         Continuous testing for your ruby app.
 
-          Autotest automatically tests code that has changed. It
-          assumes the code is in lib, and tests are in tests. Autotest
+          Autotest automatically tests code that has changed. It assumes
+          the code is in lib, and tests are in test/test_*.rb. Autotest
           uses plugins to control what happens. You configure plugins
           with require statements in the .autotest file in your
           project base directory, and a default configuration for all
