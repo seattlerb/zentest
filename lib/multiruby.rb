@@ -192,8 +192,8 @@ module Multiruby
     run "autoconf" unless test ?f, "configure"
     run "./configure --enable-shared --prefix #{inst_dir}", "log.configure" unless
       test ?f, "Makefile"
-    run "(nice make -j4; nice make)", "log.build"
-    run "make install", "log.install"
+    run "(nice make -j4 main; nice make main)", "log.build"
+    run "make install-nodoc", "log.install"
   end
 
   def self.help
