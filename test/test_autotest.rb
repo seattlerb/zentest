@@ -34,7 +34,7 @@ class TestAutotest < MiniTest::Unit::TestCase
 
   alias :deny :refute
 
-  RUBY = File.join(RbConfig::CONFIG['bindir'], RbConfig::CONFIG['ruby_install_name']) unless defined? RUBY
+  RUBY = File.join(RbConfig::CONFIG['bindir'], RbConfig::CONFIG['ruby_install_name'])
 
   def setup
     @test_class = 'TestBlah'

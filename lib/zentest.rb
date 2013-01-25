@@ -4,8 +4,14 @@ if (defined? RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
 end
 
 $stdlib = {}
-ObjectSpace.each_object(Module) do |m|
-  $stdlib[m.name] = true if m.respond_to? :name
+if ObjectSpace.respond_to?(:loaded_classes, true) then
+  ObjectSpace.loaded_classes(true).each do |m|
+    $stdlib[m.name] = true if m.respond_to? :name
+  end
+else
+  ObjectSpace.each_object(Module) do |m|
+    $stdlib[m.name] = true if m.respond_to? :name
+  end
 end
 
 require 'zentest_mapping'
@@ -96,21 +102,13 @@ class ZenTest
     end
   end
 
-  # obtain the class klassname, either from Module or
-  # using ObjectSpace to search for it.
+  # obtain the class klassname
   def get_class(klassname)
+    klass = nil
     begin
       klass = klassname.split(/::/).inject(Object) { |k,n| k.const_get n }
       puts "# found class #{klass.name}" if $DEBUG
     rescue NameError
-      ObjectSpace.each_object(Class) do |cls|
-        if cls.name =~ /(^|::)#{klassname}$/ then
-          klass = cls
-          klassname = cls.name
-          break
-        end
-      end
-      puts "# searched and found #{klass.name}" if klass and $DEBUG
     end
 
     if klass.nil? and not $TESTING then
