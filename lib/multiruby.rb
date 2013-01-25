@@ -79,7 +79,6 @@ module Multiruby
 
           build_dir = File.basename tarball, ".tar.gz"
           version = build_dir.sub(/^ruby-?/, '')
-          versions << version
           inst_dir = "#{root_dir}/install/#{version}"
 
           unless test ?d, inst_dir then
@@ -115,6 +114,8 @@ module Multiruby
           end
         end
       end
+
+      versions = Dir["install/*"].map { |path| File.basename path }
     end
 
     versions
