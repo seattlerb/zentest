@@ -85,7 +85,7 @@ one) and use that for your testlib instead:
       at.testlib = ".minitest"
     end
 
-== SYNOPSYS
+== SYNOPSIS
 
   ZenTest MyProject.rb TestMyProject.rb > missing.rb
 
