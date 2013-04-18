@@ -1,3 +1,10 @@
+=== 4.9.1 / 2013-04-18
+
+* 2 minor enhancements:
+
+  * Make banner more explicit about correct test file location. (rue)
+  * Switched to #failed for calculating red/green hook. (bhenderson)
+
 === 4.9.0 / 2013-02-07
 
 * 1 minor enhancement:
