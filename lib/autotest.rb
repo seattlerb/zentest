@@ -573,7 +573,7 @@ class Autotest
       self.latest_results = Hash[*completed.flatten]
       self.files_to_test  = consolidate_failures failed
 
-      color = self.files_to_test.empty? ? :green : :red
+      color = failed.empty? ? :green : :red
       hook color unless $TESTING
     else
       self.latest_results = nil
