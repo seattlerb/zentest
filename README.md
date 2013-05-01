@@ -1,9 +1,9 @@
-= ZenTest
+# ZenTest
 
 home :: https://github.com/seattlerb/zentest
 rdoc :: http://zentest.rubyforge.org/ZenTest
 
-== DESCRIPTION
+## DESCRIPTION
 
 ZenTest provides 4 different tools: zentest, unit_diff, autotest, and
 multiruby.
@@ -27,7 +27,7 @@ multiruby runs anything you want on multiple versions of ruby. Great
 for compatibility checking! Use multiruby_setup to manage your
 installed versions.
 
-== FEATURES
+## FEATURES
 
 * Scans your ruby code and tests and generates missing methods for you.
 * Includes a very helpful filter for Test/Spec output called unit_diff.
@@ -37,7 +37,7 @@ installed versions.
 * See also: http://blog.zenspider.com/archives/zentest/
 * See also: http://blog.segment7.net/articles/category/zentest
 
-== STRATEGERY
+## STRATEGERY
 
 There are two strategeries intended for ZenTest: test conformance
 auditing and rapid XP.
@@ -51,7 +51,7 @@ ZenTest can also be used to evaluate generated code and execute your
 tests, allowing for very rapid development of both tests and
 implementation.
 
-== AUTOTEST TIPS
+## AUTOTEST TIPS
 
 Setting up your project with a custom setup is easily done by creating
 a ".autotest" file in your project. Here is an example of adding some
@@ -85,7 +85,7 @@ one) and use that for your testlib instead:
       at.testlib = ".minitest"
     end
 
-== SYNOPSIS
+## SYNOPSIS
 
   ZenTest MyProject.rb TestMyProject.rb > missing.rb
 
@@ -96,11 +96,11 @@ one) and use that for your testlib instead:
   multiruby_setup mri:svn:current
   multiruby ./TestMyProject.rb
 
-== Windows and Color
+## Windows and Color
 
 Read this: http://blog.mmediasys.com/2010/11/24/we-all-love-colors/
 
-== REQUIREMENTS
+## REQUIREMENTS
 
 * Ruby 1.8+, JRuby 1.1.2+, or rubinius
 * A test/spec framework of your choice.
@@ -108,11 +108,11 @@ Read this: http://blog.mmediasys.com/2010/11/24/we-all-love-colors/
 * rubygems, 1.8+
 * diff.exe on windows. Use http://gnuwin32.sourceforge.net/packages.html
 
-== INSTALL
+## INSTALL
 
 * sudo gem install ZenTest
 
-== LICENSE
+## LICENSE
 
 (The MIT License)
 
