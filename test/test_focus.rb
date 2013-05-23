@@ -2,7 +2,7 @@ require 'rubygems'
 require 'minitest/autorun'
 require 'focus'
 
-class TestFocus < MiniTest::Unit::TestCase
+class TestFocus < Minitest::Test
   def setup
     @x = 1
   end

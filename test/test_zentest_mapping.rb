@@ -10,7 +10,7 @@ class Dummy
   include ZenTestMapping
 end
 
-class TestZentestMapping < MiniTest::Unit::TestCase
+class TestZentestMapping < Minitest::Test
   def setup
     @tester = Dummy.new
   end

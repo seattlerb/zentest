@@ -9,7 +9,7 @@ $TESTING = true
 
 require 'unit_diff'
 
-class TestUnitDiff < MiniTest::Unit::TestCase
+class TestUnitDiff < Minitest::Test
 
   def setup
     @diff = UnitDiff.new

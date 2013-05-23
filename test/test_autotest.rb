@@ -30,7 +30,7 @@ class Autotest
   end
 end
 
-class TestAutotest < MiniTest::Unit::TestCase
+class TestAutotest < Minitest::Test
 
   alias :deny :refute
 
