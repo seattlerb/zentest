@@ -482,7 +482,7 @@ class ZenTest
       indent = 0
       is_test_class = self.is_test_class(fullklasspath)
 
-      clsname = $t ? "Test::Unit::TestCase" : "MiniTest::Unit::TestCase"
+      clsname = $t ? "Test::Unit::TestCase" : "Minitest::Test"
       superclass = is_test_class ? " < #{clsname}" : ''
 
       @result.push indentunit*indent + "class #{fullklasspath}#{superclass}"
