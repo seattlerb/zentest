@@ -291,7 +291,7 @@ class Autotest
     self.output            = $stderr
     self.prefix            = nil
     self.sleep             = 1
-    self.testlib           = "test/unit"
+    self.testlib           = "minitest/autorun"
     specified_directories  = ARGV.reject { |arg| arg.start_with?("-") } # options are not directories
     self.find_directories  = specified_directories.empty? ? ['.'] : specified_directories
     self.unit_diff         = nil

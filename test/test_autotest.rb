@@ -395,7 +395,7 @@ test_error2(#{@test_class}):
     req = ".each { |f| require f }\""
 
     expected =
-      [ "#{pre} -e \"%w[test/unit #{@test}]#{req}",
+      [ "#{pre} -e \"%w[minitest/autorun #{@test}]#{req}",
         "#{pre} test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\""
       ].join("; ")
 
@@ -414,7 +414,7 @@ test_error2(#{@test_class}):
     req = ".each { |f| require f }\""
     post = "| unit_diff -u"
 
-    expected = [ "#{pre} -e \"%w[test/unit #{@test}]#{req} #{post}",
+    expected = [ "#{pre} -e \"%w[minitest/autorun #{@test}]#{req} #{post}",
                  "#{pre} test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\" #{post}" ].join("; ")
 
     result = @a.make_test_cmd f
@@ -460,7 +460,7 @@ test_error2(#{@test_class}):
   end
 
   def test_testlib
-    assert_equal "test/unit", @a.testlib
+    assert_equal "minitest/autorun", @a.testlib
 
     @a.testlib = "MONKEY"
     assert_equal "MONKEY", @a.testlib
