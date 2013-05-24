@@ -85,6 +85,17 @@ one) and use that for your testlib instead:
       at.testlib = ".minitest"
     end
 
+If you prefer to suffix test files with "_test.rb" (instead of the
+default which prefixes test files with "test_") you can change the
+mapping by installing the autotest-suffix plugin. To do this first
+install the autotest-suffix gem:
+
+    $ gem install autotest-suffix
+
+Then add the following to the ".autotest" file:
+
+    require "autotest/suffix"
+
 == SYNOPSIS
 
   ZenTest MyProject.rb TestMyProject.rb > missing.rb
