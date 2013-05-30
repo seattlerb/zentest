@@ -1,3 +1,10 @@
+=== 4.9.2 / 2013-05-29
+
+* 2 minor enhancements:
+
+  * Added autotest-suffix description to readme. (blowmage)
+  * zentest now outputs test classes for minitest 5
+
 === 4.9.1 / 2013-04-18
 
 * 2 minor enhancements:
