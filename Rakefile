@@ -14,6 +14,8 @@ Hoe.spec "ZenTest" do
   developer 'Eric Hodel', 'drbrain@segment7.net'
 
   require_rubygems_version [">= 1.8", "< 2.1"]
+
+  self.testlib = :none
 end
 
 desc "run autotest on itself"
