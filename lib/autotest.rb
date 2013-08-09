@@ -608,17 +608,24 @@ class Autotest
     diff = self.unit_diff
     diff = " | #{diff}" if diff and diff !~ /^\|/
 
+    classes, all_methods = [], []
     unless full.empty? then
       classes = full.map {|k,v| k}.flatten.uniq
-      classes.unshift testlib
-      classes = classes.join " "
-      cmds << "#{ruby_cmd} -e \"%w[#{classes}].each { |f| require f }\"#{diff}"
     end
 
     partial.each do |klass, methods|
-      regexp = Regexp.union(*methods).source
-      cmds << "#{ruby_cmd} #{klass} -n \"/^(#{regexp})$/\"#{diff}"
+      classes     |= [klass]
+      all_methods |= methods
     end
+
+    unless all_methods.empty?
+      regexp = Regexp.union(*all_methods).source
+      cmd_opts = " -- -n \"/^(#{regexp})$/\""
+    end
+
+    classes.unshift testlib
+    classes = classes.join " "
+    cmds << "#{ruby_cmd} -e \"%w[#{classes}].each { |f| require f }\"#{cmd_opts}#{diff}"
 
     cmds.join "#{SEP} "
   end

@@ -395,9 +395,22 @@ test_error2(#{@test_class}):
     req = ".each { |f| require f }\""
 
     expected =
-      [ "#{pre} -e \"%w[minitest/autorun #{@test}]#{req}",
-        "#{pre} test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\""
-      ].join("; ")
+      "#{pre} -e \"%w[minitest/autorun #{@test} test/test_fooby.rb]#{req} -- -n \"/^(test_something1|test_something2)$/\""
+
+    result = @a.make_test_cmd f
+    assert_equal expected, result
+  end
+
+  def test_make_test_cmd_full
+    f = {
+      @test => [],
+    }
+
+    pre = "#{RUBY} -I.:lib:test -rubygems"
+    req = ".each { |f| require f }\""
+
+    expected =
+      "#{pre} -e \"%w[minitest/autorun #{@test}]#{req}"
 
     result = @a.make_test_cmd f
     assert_equal expected, result
@@ -414,8 +427,8 @@ test_error2(#{@test_class}):
     req = ".each { |f| require f }\""
     post = "| unit_diff -u"
 
-    expected = [ "#{pre} -e \"%w[minitest/autorun #{@test}]#{req} #{post}",
-                 "#{pre} test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\" #{post}" ].join("; ")
+    expected =
+      "#{pre} -e \"%w[minitest/autorun #{@test} test/test_fooby.rb]#{req} -- -n \"/^(test_something1|test_something2)$/\" #{post}"
 
     result = @a.make_test_cmd f
     assert_equal expected, result
