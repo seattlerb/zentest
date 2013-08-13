@@ -112,6 +112,10 @@ class Autotest
         options[:no_full_after_failed] = true
       end
 
+      opts.on "-d", "--debug", "Debug mode, for reporting bugs." do
+        options[:debug] = true
+      end
+
       opts.on "-v", "--verbose", "Be annoyingly verbose (debugs .autotest)." do
         options[:verbose] = true
       end
@@ -279,10 +283,10 @@ class Autotest
     @child = nil
 
     self.completed_re =
-      /\d+ tests, \d+ assertions, \d+ failures, \d+ errors(, \d+ skips)?/
+      /\d+ (tests|runs), \d+ assertions, \d+ failures, \d+ errors(, \d+ skips)?/
     self.extra_class_map   = {}
     self.extra_files       = []
-    self.failed_results_re = /^\s+\d+\) (?:Failure|Error):\n(.*?)\((.*?)\)/
+    self.failed_results_re = /^\s+\d+\) (?:Failure|Error):\n(.*?)[\(\[](.*?)[\)\]]/
     self.files_to_test     = new_hash_of_arrays
     self.find_order        = []
     self.known_files       = nil
@@ -316,6 +320,30 @@ class Autotest
     end
   end
 
+  def debug
+    require "pp"
+    find_files_to_test
+
+    puts "Known test files:"
+    puts
+    pp files_to_test.keys.sort
+
+    class_map = self.class_map
+
+    puts
+    puts "Known class map:"
+    puts
+    pp class_map
+  end
+
+  def class_map
+    class_map = Hash[*self.find_order.grep(/^test/).map { |f| # TODO: ugly
+                       [path_to_classname(f), f]
+                     }.flatten]
+    class_map.merge! self.extra_class_map
+    class_map
+  end
+
   ##
   # Repeatedly run failed tests, then all tests, then wait for changes
   # and carry on until killed.
@@ -328,6 +356,8 @@ class Autotest
     add_sigint_handler
 
     self.last_mtime = Time.now if options[:no_full_after_start]
+
+    self.debug if options[:debug]
 
     loop do
       begin # ^c handler
@@ -344,6 +374,7 @@ class Autotest
       end
     end
     hook :quit
+    puts
   rescue Exception => err
     hook(:died, err) or raise err
   end
@@ -483,10 +514,7 @@ class Autotest
   def consolidate_failures failed
     filters = new_hash_of_arrays
 
-    class_map = Hash[*self.find_order.grep(/^test/).map { |f| # TODO: ugly
-                       [path_to_classname(f), f]
-                     }.flatten]
-    class_map.merge! self.extra_class_map
+    class_map = self.class_map
 
     failed.each do |method, klass|
       if class_map.has_key? klass then
@@ -564,7 +592,11 @@ class Autotest
 
   def handle_results results
     results = results.gsub(/\e\[\d+m/, '') # strip ascii color
-    failed = results.scan self.failed_results_re
+    failed = results.scan(self.failed_results_re).map { |m, k|
+      k, m = $1, $2 if m =~ /(\w+)\#(\w+)/ # minitest 5 output
+      [m, k]
+    }
+
     completed = results[self.completed_re]
 
     if completed then
@@ -603,6 +635,13 @@ class Autotest
   # Generate the commands to test the supplied files
 
   def make_test_cmd files_to_test
+    if options[:debug] then
+      puts "Files to test:"
+      puts
+      pp files_to_test
+      puts
+    end
+
     cmds = []
     full, partial = reorder(files_to_test).partition { |k,v| v.empty? }
     diff = self.unit_diff
