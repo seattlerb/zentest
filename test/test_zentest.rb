@@ -451,11 +451,11 @@ end
   end
 
   def test_load_file
-    # HACK raise NotImplementedError, 'Need to write test_load_file'
+    skip 'Need to write test_load_file'
   end
 
   def test_scan_files
-    # HACK raise NotImplementedError, 'Need to write test_scan_files'
+    skip 'Need to write test_scan_files'
   end
 
   def test_process_class
