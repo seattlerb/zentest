@@ -1,3 +1,14 @@
+=== 4.9.3 / 2013-08-12
+
+* 1 minor enhancement:
+
+  * Added --debug option. Probably need to add more to help bug reports.
+
+* 2 bug fixes:
+
+  * Fixed completed_re and failed_results_re to match minitest 5 (and still mt 4).
+  * Fixed handle_results to deal with minitest 5 output (eg ClassName#method_name).
+
 === 4.9.2 / 2013-05-29
 
 * 2 minor enhancements:
