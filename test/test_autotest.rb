@@ -470,14 +470,11 @@ test_error2(#{@test_class}):
   end
 
   def test_runner_accepts_rc_options
-    begin
-      Autotest.parse_options(['--rc', 'autotest_rc'])
-      Autotest.new
-    rescue
-      deny $!, "It should not throw #{$!.message}"
-    ensure
-      Autotest.reset_options
-    end
+    exp = {:rc=>["autotest_rc"], :args=>["--rc", "autotest_rc"]}
+    assert_equal exp, Autotest.parse_options(['--rc', 'autotest_rc'])
+    assert_kind_of Autotest, Autotest.new
+  ensure
+    Autotest.reset_options
   end
 
   def util_exceptions
