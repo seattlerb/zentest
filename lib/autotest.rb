@@ -286,7 +286,7 @@ class Autotest
       /\d+ (tests|runs), \d+ assertions, \d+ failures, \d+ errors(, \d+ skips)?/
     self.extra_class_map   = {}
     self.extra_files       = []
-    self.failed_results_re = /^\s+\d+\) (?:Failure|Error):\n(.*?)[\(\[](.*?)[\)\]]/
+    self.failed_results_re = /^\s*\d+\) (?:Failure|Error):\n(.*?)(?: [\(\[](.*?)[\)\]])?:$/
     self.files_to_test     = new_hash_of_arrays
     self.find_order        = []
     self.known_files       = nil
@@ -728,16 +728,22 @@ class Autotest
   # proc.
 
   def test_files_for filename
-    result = @test_mappings.find { |file_re, ignored| filename =~ file_re }
+    result = []
 
-    p :test_file_for => [filename, result.first] if result and $DEBUG
+    @test_mappings.each do |file_re, proc|
+      if filename =~ file_re then
+        result = [proc.call(filename, $~)].
+          flatten.sort.uniq.select { |f| known_files[f] }
+        break unless result.empty?
+      end
+    end
 
-    result = result.nil? ? [] : [result.last.call(filename, $~)].flatten
+    p :test_file_for => [filename, result.first] if result and options[:debug]
 
     output.puts "No tests matched #{filename}" if
       (options[:verbose] or $TESTING) and result.empty?
 
-    result.sort.uniq.select { |f| known_files[f] }
+    return result
   end
 
   ##

@@ -265,6 +265,8 @@ class TestAutotest < Minitest::Test
   end
 
   def test_handle_results
+    skip "this is minitest 4 output... needs to work in both"
+
     @a.files_to_test.clear
     @files.clear
     @files[@impl] = Time.at(1)
@@ -349,6 +351,34 @@ test_error2(#{@test_class}):
     @a.handle_results(s1)
     assert_equal empty, @a.files_to_test
     deny @a.tainted
+  end
+
+  def test_handle_results_minitest5
+    @a.files_to_test.clear
+    @files.clear
+    @files[@impl] = Time.at(1)
+    @files[@test] = Time.at(2)
+
+    @a.find_order = @files.keys.sort
+
+    empty = {}
+    assert_equal empty, @a.files_to_test, "must start empty"
+
+    s2 = "
+  1) Error:
+#{@test_class}#test_error1:
+  1) Failure:
+#{@test_class}#test_fail1 [./test/test_autotest.rb:375]:
+
+12 tests, 18 assertions, 1 failures, 1 errors
+"
+
+    @a.handle_results(s2)
+    expected = { @test => %w( test_error1 test_fail1 ) }
+    assert_equal expected, @a.files_to_test
+    assert @a.tainted
+    exp = { "tests" => 12, "assertions" => 18, "failures" => 1, "errors" => 1 }
+    assert_equal exp, @a.latest_results
   end
 
   def test_hook_overlap_returning_false
