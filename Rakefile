@@ -13,7 +13,7 @@ Hoe.spec "ZenTest" do
   developer 'Ryan Davis', 'ryand-ruby@zenspider.com'
   developer 'Eric Hodel', 'drbrain@segment7.net'
 
-  require_rubygems_version [">= 1.8", "< 2.1"]
+  require_rubygems_version [">= 1.8", "< 2.2"]
 end
 
 desc "run autotest on itself"
