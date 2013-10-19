@@ -595,8 +595,8 @@ class Autotest
   def handle_results results
     results = results.gsub(/\e\[\d+m/, '') # strip ascii color
     failed = results.scan(self.failed_results_re)
-    self.failed_examples_count = failed[0][0].scan(/([0-9]+) failures/)[0][0]
-    p self.failed_examples_count
+    p failed
+    self.failed_examples_count = failed.empty? ? 0 : failed[0][0].scan(/([0-9]+) failure/)[0][0]
     failed = failed.map { |m, k|
       k, m = $1, $2 if m =~ /(\w+)\#(\w+)/ # minitest 5 output
       [m, k]
