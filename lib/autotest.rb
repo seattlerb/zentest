@@ -253,6 +253,7 @@ class Autotest
                 :extra_class_map,
                 :extra_files,
                 :failed_results_re,
+                :failed_results_count,
                 :files_to_test,
                 :find_order,
                 :interrupted,
@@ -393,6 +394,7 @@ class Autotest
   # Look for files to test then run the tests and handle the results.
 
   def run_tests
+    self.failed_results_count = 0
     new_mtime = self.find_files_to_test
     return unless new_mtime
     self.last_mtime = new_mtime
@@ -592,7 +594,9 @@ class Autotest
 
   def handle_results results
     results = results.gsub(/\e\[\d+m/, '') # strip ascii color
-    failed = results.scan(self.failed_results_re).map { |m, k|
+    failed = results.scan(self.failed_results_re)
+    self.failed_results_count = failed.empty? ? 0 : failed[0][0].scan(/([0-9]+) failure/)[0][0]
+    failed = failed.map { |m, k|
       k, m = $1, $2 if m =~ /(\w+)\#(\w+)/ # minitest 5 output
       [m, k]
     }
@@ -601,10 +605,8 @@ class Autotest
 
     if completed then
       completed = completed.scan(/(\d+) (\w+)/).map { |v, k| [k, v.to_i] }
-
       self.latest_results = Hash[*completed.flatten]
       self.files_to_test  = consolidate_failures failed
-
       color = failed.empty? ? :green : :red
       hook color unless $TESTING
     else
