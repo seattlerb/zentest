@@ -1,3 +1,9 @@
+=== 4.9.5 / 2013-11-01
+
+* 1 bug fix:
+
+  * Updated require_rubygems_version AGAIN... going too fast. (zzak)
+
 === 4.9.4 / 2013-09-20
 
 * 2 bug fixes:
