@@ -96,6 +96,16 @@ Then add the following to the ".autotest" file:
 
     require "autotest/suffix"
 
+If you prefer minitest/spec to minitest/unit, you can still use autotest
+by installing the autotest-spec plugin.
+To do this first install the autotest-spec gem:
+
+    $ gem install autotest-spec
+
+Then add the following to the ".autotest" file:
+
+    require "autotest/spec"
+
 == SYNOPSIS
 
   ZenTest MyProject.rb TestMyProject.rb > missing.rb
