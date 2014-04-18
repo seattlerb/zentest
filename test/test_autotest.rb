@@ -1,7 +1,5 @@
 #!/usr/local/bin/ruby -w
 
-$TESTING = true
-
 require 'rubygems'
 require 'minitest/autorun'
 
@@ -19,7 +17,7 @@ require 'autotest'
 #   run_tests
 
 class Autotest
-  attr_reader :test_mappings, :exception_list
+  attr_reader :exception_list
 
   def self.clear_hooks
     HOOKS.clear
@@ -130,7 +128,7 @@ class TestAutotest < Minitest::Test
   end
 
   def test_consolidate_failures_multiple_possibilities
-   @files[@other_test] = Time.at(42)
+    @files[@other_test] = Time.at(42)
     result = @a.consolidate_failures([['test_unmatched', @test_class]])
     expected = { @test => ['test_unmatched']}
     assert_equal expected, result
@@ -192,8 +190,12 @@ class TestAutotest < Minitest::Test
     empty = {}
 
     files = { "fooby.rb" => Time.at(42) }
-    assert @a.find_files_to_test(files)  # we find fooby,
-    assert_equal empty, @a.files_to_test # but it isn't something to test
+    @a.options[:verbose] = true
+
+    capture_io do
+      assert @a.find_files_to_test(files)  # we find fooby,
+      assert_equal empty, @a.files_to_test # but it isn't something to test
+    end
     assert_equal "No tests matched fooby.rb\n", @a.output.string
   end
 
@@ -425,12 +427,13 @@ test_error2(#{@test_class}):
     req = ".each { |f| require f }\""
 
     expected =
-      [ "#{pre} -e \"%w[minitest/autorun #{@test}]#{req}",
+      [ "#{pre} -e \"gem 'minitest'",
+        "%w[minitest/autorun #{@test}]#{req}",
         "#{pre} test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\""
       ].join("; ")
 
     result = @a.make_test_cmd f
-    assert_equal expected, result
+    assert_equal expected.gsub(/ /, "\n"), result.gsub(/ /, "\n")
   end
 
   def test_make_test_cmd_unit_diff
@@ -444,7 +447,8 @@ test_error2(#{@test_class}):
     req = ".each { |f| require f }\""
     post = "| unit_diff -u"
 
-    expected = [ "#{pre} -e \"%w[minitest/autorun #{@test}]#{req} #{post}",
+    expected = [ "#{pre} -e \"gem 'minitest'",
+                 "%w[minitest/autorun #{@test}]#{req} #{post}",
                  "#{pre} test/test_fooby.rb -n \"/^(test_something1|test_something2)$/\" #{post}" ].join("; ")
 
     result = @a.make_test_cmd f
@@ -515,8 +519,10 @@ test_error2(#{@test_class}):
     t = @a.last_mtime
     files = { f => t + 1 }
 
-    assert @a.find_files_to_test(files)
-    assert_equal expected, @a.files_to_test
+    capture_io do
+      assert @a.find_files_to_test(files)
+      assert_equal expected, @a.files_to_test
+    end
     assert_equal t,        @a.last_mtime
     assert_equal "",       @a.output.string
   end

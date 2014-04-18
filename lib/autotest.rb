@@ -1,7 +1,5 @@
-require 'find'
-require 'rbconfig'
-
-$TESTING = false unless defined? $TESTING
+require "find"
+require "rbconfig"
 
 ##
 # Autotest continuously scans the files in your project for changes
@@ -75,6 +73,7 @@ class Autotest
   end
 
   HOOKS = Hash.new { |h,k| h[k] = [] }
+
   unless defined? WINDOZE then
     WINDOZE = /mswin|mingw/ =~ RbConfig::CONFIG['host_os']
     SEP = WINDOZE ? '&' : ';'
@@ -113,6 +112,7 @@ class Autotest
       end
 
       opts.on "-d", "--debug", "Debug mode, for reporting bugs." do
+        require "pp"
         options[:debug] = true
       end
 
@@ -249,26 +249,28 @@ class Autotest
   end
 
   attr_writer :known_files
-  attr_accessor(:completed_re,
-                :extra_class_map,
-                :extra_files,
-                :failed_results_re,
-                :files_to_test,
-                :find_order,
-                :interrupted,
-                :latest_results,
-                :last_mtime,
-                :libs,
-                :order,
-                :output,
-                :prefix,
-                :results,
-                :sleep,
-                :tainted,
-                :testlib,
-                :find_directories,
-                :unit_diff,
-                :wants_to_quit)
+  attr_accessor :completed_re
+  attr_accessor :extra_class_map
+  attr_accessor :extra_files
+  attr_accessor :failed_results_re
+  attr_accessor :files_to_test
+  attr_accessor :find_directories
+  attr_accessor :find_order
+  attr_accessor :interrupted
+  attr_accessor :last_mtime
+  attr_accessor :latest_results
+  attr_accessor :libs
+  attr_accessor :order # TODO: deprecate and remove
+  attr_accessor :output
+  attr_accessor :prefix
+  attr_accessor :results
+  attr_accessor :sleep
+  attr_accessor :tainted
+  attr_accessor :test_mappings
+  attr_accessor :testlib
+  attr_accessor :testprefix
+  attr_accessor :unit_diff
+  attr_accessor :wants_to_quit
 
   alias tainted? tainted
 
@@ -279,8 +281,8 @@ class Autotest
     # these two are set directly because they're wrapped with
     # add/remove/clear accessor methods
     @exception_list = []
-    @test_mappings = []
     @child = nil
+    self.test_mappings = []
 
     self.completed_re =
       /\d+ (tests|runs), \d+ assertions, \d+ failures, \d+ errors(, \d+ skips)?/
@@ -295,7 +297,9 @@ class Autotest
     self.output            = $stderr
     self.prefix            = nil
     self.sleep             = 1
-    self.testlib           = "minitest/autorun"
+    self.testlib           = "minitest/autorun" # TODO: rename
+    self.testprefix        = "gem 'minitest'" # TODO: rename
+
     specified_directories  = ARGV.reject { |arg| arg.start_with?("-") } # options are not directories
     self.find_directories  = specified_directories.empty? ? ['.'] : specified_directories
     self.unit_diff         = nil
@@ -303,7 +307,7 @@ class Autotest
 
     # file in /lib -> run test in /test
     self.add_mapping(/^lib\/.*\.rb$/) do |filename, _|
-      possible = File.basename(filename).gsub '_', '_?' # ' stupid emacs
+      possible = File.basename(filename).gsub '_', '_?'
       files_matching %r%^test/.*#{possible}$%
     end
 
@@ -321,7 +325,6 @@ class Autotest
   end
 
   def debug
-    require "pp"
     find_files_to_test
 
     puts "Known test files:"
@@ -606,7 +609,7 @@ class Autotest
       self.files_to_test  = consolidate_failures failed
 
       color = failed.empty? ? :green : :red
-      hook color unless $TESTING
+      hook color
     else
       self.latest_results = nil
     end
@@ -625,13 +628,6 @@ class Autotest
   end
 
   ##
-  # Returns the base of the ruby command.
-
-  def ruby_cmd
-    "#{prefix}#{ruby} -I#{libs} -rubygems"
-  end
-
-  ##
   # Generate the commands to test the supplied files
 
   def make_test_cmd files_to_test
@@ -644,6 +640,7 @@ class Autotest
 
     cmds = []
     full, partial = reorder(files_to_test).partition { |k,v| v.empty? }
+
     diff = self.unit_diff
     diff = " | #{diff}" if diff and diff !~ /^\|/
 
@@ -651,7 +648,7 @@ class Autotest
       classes = full.map {|k,v| k}.flatten.uniq
       classes.unshift testlib
       classes = classes.join " "
-      cmds << "#{ruby_cmd} -e \"%w[#{classes}].each { |f| require f }\"#{diff}"
+      cmds << "#{ruby_cmd} -e \"#{testprefix}; %w[#{classes}].each { |f| require f }\"#{diff}"
     end
 
     partial.each do |klass, methods|
@@ -723,6 +720,13 @@ class Autotest
   end
 
   ##
+  # Returns the base of the ruby command.
+
+  def ruby_cmd
+    "#{prefix}#{ruby} -I#{libs} -rubygems"
+  end
+
+  ##
   # Return the name of the file with the tests for filename by finding
   # a +test_mapping+ that matches the file and executing the mapping's
   # proc.
@@ -730,7 +734,7 @@ class Autotest
   def test_files_for filename
     result = []
 
-    @test_mappings.each do |file_re, proc|
+    self.test_mappings.each do |file_re, proc|
       if filename =~ file_re then
         result = [proc.call(filename, $~)].
           flatten.sort.uniq.select { |f| known_files[f] }
@@ -738,10 +742,10 @@ class Autotest
       end
     end
 
-    p :test_file_for => [filename, result.first] if result and options[:debug]
+    pp :test_file_for => [filename, result.first] if result and options[:debug]
 
     output.puts "No tests matched #{filename}" if
-      (options[:verbose] or $TESTING) and result.empty?
+      options[:verbose] and result.empty?
 
     return result
   end
