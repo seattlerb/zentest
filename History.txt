@@ -1,3 +1,10 @@
+=== 4.10.0 / 2014-04-23
+
+* 2 minor enhancements:
+
+  * Added test_mappings accessor methods (ivar already there).
+  * Added test_prefix to allow you to run code ahead of test loading. (default: gem minitest)
+
 === 4.9.5 / 2013-11-01
 
 * 1 bug fix:
