@@ -174,8 +174,7 @@ class TestZenTest < Minitest::Test
     }
     @tester.inherited_methods = @tester.test_klasses.merge(@tester.klasses)
     @generated_code = "
-require 'test/unit/testcase'
-require 'test/unit' if $0 == __FILE__
+require 'minitest/autorun'
 
 class Something
   def self.method4(*args)
@@ -505,7 +504,7 @@ end
     assert_equal expected, util_testcase("Blah0", "TestBlah0")
   end
 
-  HEADER = "\nrequire 'test/unit/testcase'\nrequire 'test/unit' if $0 == __FILE__\n\n"
+  HEADER = "\nrequire 'minitest/autorun'\n\n"
 
   def test_testcase1
     expected = "#{HEADER}class Blah1\n  def missingimpl(*args)\n    raise NotImplementedError, 'Need to write missingimpl'\n  end\nend\n\nclass TestBlah1 < Minitest::Test\n  def test_missingtest\n    raise NotImplementedError, 'Need to write test_missingtest'\n  end\nend\n\n# Number of errors detected: 2"
