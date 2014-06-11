@@ -465,8 +465,12 @@ class ZenTest
 
     if @missing_methods.size > 0 then
       @result.push ""
-      @result.push "require 'test/unit/testcase'"
-      @result.push "require 'test/unit' if $0 == __FILE__"
+      if $t then
+        @result.push "require 'test/unit/testcase'"
+        @result.push "require 'test/unit' if $0 == __FILE__"
+      else
+        @result.push "require 'minitest/autorun'"
+      end
       @result.push ""
     end
 
