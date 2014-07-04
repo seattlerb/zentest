@@ -622,7 +622,8 @@ class Autotest
 
   def known_files
     unless @known_files then
-      @known_files = Hash[*find_order.map { |f| [f, true] }.flatten]
+      @known_files = {}
+      find_order.each {|f| @known_files[f] = true }
     end
     @known_files
   end
