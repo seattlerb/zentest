@@ -1,3 +1,10 @@
+=== 4.10.1 / 2014-07-07
+
+* 2 bug fixes:
+
+  * Change require to minitest/autorun for non-test/unit style
+  * Change the way files are gathered to avoid StackOverflow exception if you have a TOOON of files. (joshwand)
+
 === 4.10.0 / 2014-04-23
 
 * 2 minor enhancements:
