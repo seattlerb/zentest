@@ -1,7 +1,7 @@
 = ZenTest
 
 home :: https://github.com/seattlerb/zentest
-rdoc :: http://zentest.rubyforge.org/ZenTest
+rdoc :: http://docs.seattlerb.org/ZenTest
 
 == DESCRIPTION
 
