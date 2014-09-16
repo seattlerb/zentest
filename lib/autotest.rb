@@ -379,7 +379,11 @@ class Autotest
     hook :quit
     puts
   rescue Exception => err
-    hook(:died, err) or raise err
+    hook(:died, err) or (
+      warn "Unhandled exception: #{err}"
+      warn err.backtrace.join("\n  ")
+      warn "Quitting"
+    )
   end
 
   ##
@@ -893,11 +897,5 @@ class Autotest
 
   def self.add_hook name, &block
     HOOKS[name] << block
-  end
-
-  add_hook :died do |at, err|
-    warn "Unhandled exception: #{err}"
-    warn err.backtrace.join("\n  ")
-    warn "Quitting"
   end
 end
