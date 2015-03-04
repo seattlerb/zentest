@@ -233,7 +233,7 @@ class Autotest
     hacky_discovery = Gem::Specification.any? { |s| s.name =~ /^rspec/ }
     $: << '.' if hacky_discovery
 
-    Gem.find_files("autotest/discover").each do |f|
+    Gem.find_files("autotest/discover*").each do |f|
       load f
     end
 
