@@ -482,7 +482,6 @@ end
                      "method1="=>true,
                      "method1?"=>true,
                      "method1!"=>true,
-                     "method1"=>true,
                      "attrib"=>true}}, @tester.klasses)
     @tester.klasses= {"whoopie" => {}}
     assert_equal({"whoopie"=> {}}, @tester.klasses)
@@ -565,7 +564,17 @@ assert_equal expected, util_testcase("Something2::Blah2", "TestSomething2::TestB
     pims = TrueClass.public_instance_methods(false)
     TrueClass.send :remove_method, :inspect if pims.include? :inspect # 2.0 only
 
-    expected = "#{HEADER}class TestTrueClass < Minitest::Test\n  def test_and\n    raise NotImplementedError, 'Need to write test_and'\n  end\n\n  def test_carat\n    raise NotImplementedError, 'Need to write test_carat'\n  end\n\n  def test_or\n    raise NotImplementedError, 'Need to write test_or'\n  end\n\n  def test_to_s\n    raise NotImplementedError, 'Need to write test_to_s'\n  end\nend\n\n# Number of errors detected: 4"
+    is_ruby_23 = RUBY_VERSION >= "2.3"
+
+    count = "4"
+    extra = ""
+
+    if is_ruby_23 then
+      count = "5"
+      extra = "  def test_equals3\n    raise NotImplementedError, 'Need to write test_equals3'\n  end\n\n"
+    end
+
+    expected = "#{HEADER}class TestTrueClass < Minitest::Test\n  def test_and\n    raise NotImplementedError, 'Need to write test_and'\n  end\n\n  def test_carat\n    raise NotImplementedError, 'Need to write test_carat'\n  end\n\n#{extra}  def test_or\n    raise NotImplementedError, 'Need to write test_or'\n  end\n\n  def test_to_s\n    raise NotImplementedError, 'Need to write test_to_s'\n  end\nend\n\n# Number of errors detected: #{count}"
 
     assert_equal expected, util_testcase("TestTrueClass")
   end
