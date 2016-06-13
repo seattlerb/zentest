@@ -27,6 +27,10 @@ multiruby runs anything you want on multiple versions of ruby. Great
 for compatibility checking! Use multiruby_setup to manage your
 installed versions.
 
+*NOTE:* The next major release of zentest will not include autotest
+(use minitest-autotest instead) and multiruby will use rbenv /
+ruby-build for version management.
+
 == FEATURES
 
 * Scans your ruby code and tests and generates missing methods for you.
