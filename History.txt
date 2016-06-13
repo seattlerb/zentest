@@ -1,3 +1,9 @@
+=== 4.11.1 / 2016-06-13
+
+* 1 minor enhancement:
+
+  * Expand autotest to load 'autotest/discover*' for discovery.
+
 === 4.11.0 / 2014-09-26
 
 * 1 minor enhancement:
