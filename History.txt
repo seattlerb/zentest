@@ -1,3 +1,9 @@
+=== 4.11.2 / 2019-01-02
+
+* 1 bug fix:
+
+  * Removed unneeded and out-of-date require_rubygems_version.
+
 === 4.11.1 / 2016-06-13
 
 * 1 minor enhancement:
