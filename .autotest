@@ -7,7 +7,6 @@ Autotest.add_hook :initialize do |at|
   at.add_exception 'coverage.info'
 
   at.libs << ':../../minitest/dev/lib'
-  at.testlib = ".minitest"
 
   %w(TestZenTest).each do |klass|
     at.extra_class_map[klass] = "test/test_zentest.rb"
