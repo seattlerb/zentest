@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby -w
 
-exec "multiruby", "-S", "gem", *ARGV
+multiruby = File.expand_path "../multiruby", __FILE__
 
+exec multiruby, "-S", "gem", *ARGV
