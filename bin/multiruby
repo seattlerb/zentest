@@ -62,7 +62,7 @@ versions.each do |version|
   ruby = "#{dir}/bin/ruby"
 
   puts
-  puts "VERSION = #{version}"
+  puts "VERSION = #{version.delete_prefix "ruby-"}"
   cmd = [ruby, ARGV].flatten.map { |s| s =~ /\"/ ? "'#{s}'" : s }.join(' ')
   cmd.sub!(/#{ENV['HOME']}/, '~')
   puts "CMD     = #{cmd}"
