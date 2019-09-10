@@ -60,9 +60,10 @@ results = {}
 versions.each do |version|
   dir  = "#{root_dir}/#{version}"
   ruby = "#{dir}/bin/ruby"
+  ver  = version.delete_prefix "ruby-"
 
   puts
-  puts "VERSION = #{version.delete_prefix "ruby-"}"
+  puts "VERSION = #{ver}"
   cmd = [ruby, ARGV].flatten.map { |s| s =~ /\"/ ? "'#{s}'" : s }.join(' ')
   cmd.sub!(/#{ENV['HOME']}/, '~')
   puts "CMD     = #{cmd}"
@@ -73,7 +74,7 @@ versions.each do |version|
   system ruby, *ARGV
   puts
   puts "RESULT = #{$?}"
-  results[version] = $?
+  results[ver] = $?
 
   # restore the path to original state
   ENV['PATH'] = original_path
