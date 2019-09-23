@@ -7,7 +7,6 @@ articles/Article.css
 articles/how_to_use_zentest.txt
 bin/multigem
 bin/multiruby
-bin/multiruby_setup
 bin/unit_diff
 bin/zentest
 example.txt
@@ -15,7 +14,6 @@ example1.rb
 example2.rb
 lib/focus.rb
 lib/functional_test_matrix.rb
-lib/multiruby.rb
 lib/unit_diff.rb
 lib/zentest.rb
 lib/zentest_mapping.rb
