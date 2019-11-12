@@ -554,8 +554,6 @@ assert_equal expected, util_testcase("Something2::Blah2", "TestSomething2::TestB
   end
 
   def test_testcase9
-    skip "doesn't define to_s on TrueClass?!?" if maglev?
-
     # stupid YAML is breaking my tests. Enters via Test::Rails. order dependent.
     if defined? YAML then
       TrueClass.send :remove_method, :taguri, :taguri=, :to_yaml rescue nil
