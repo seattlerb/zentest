@@ -6,11 +6,11 @@ end
 $stdlib = {}
 if ObjectSpace.respond_to?(:loaded_classes, true) then
   ObjectSpace.loaded_classes(true).each do |m|
-    $stdlib[m.name] = true if m.respond_to? :name
+    $stdlib[Module.instance_method(:name).bind(m).call] = true
   end
 else
   ObjectSpace.each_object(Module) do |m|
-    $stdlib[m.name] = true if m.respond_to? :name
+    $stdlib[Module.instance_method(:name).bind(m).call] = true
   end
 end
 
