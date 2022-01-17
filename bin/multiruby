@@ -42,9 +42,19 @@ if ARGV.first == "-1" then
   exec "#{dir}/bin/ruby", *ARGV
 end
 
+def maybe_load_yaml_file config
+  if config then
+    if YAML.respond_to? :safe_load_file then
+      YAML.safe_load_file config, permitted_classes: [Regexp, Symbol]
+    else
+      YAML.load_file config
+    end
+  end
+end
+
 rcpath = File.expand_path "~/.hoerc"
 skip = if File.exist? rcpath then
-         conf = YAML.load File.read rcpath
+         conf = maybe_load_yaml_file rcpath
          conf["multiruby_skip"] || []
        end
 excl = (ENV["EXCLUDED_VERSIONS"] || "").split(/:/) + skip
