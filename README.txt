@@ -41,9 +41,9 @@ ruby-build for version management.
 * See also: http://blog.zenspider.com/archives/zentest/
 * See also: http://blog.segment7.net/articles/category/zentest
 
-== STRATEGERY
+== STRATEGY
 
-There are two strategeries intended for ZenTest: test conformance
+There are two strategies intended for ZenTest: test conformance
 auditing and rapid XP.
 
 For auditing, ZenTest provides an excellent means of finding methods
