@@ -363,8 +363,8 @@ test_blah(TestBlah)
   end
 
   def util_unit_diff(header, input, expected, msg=:unit_diff)
-    output = StringIO.new("")
-    actual = @diff.send(msg, StringIO.new(input), output)
+    output = StringIO.new(+"")
+    actual = @diff.send(msg, StringIO.new(input.dup), output)
     assert_equal header, output.string, "header output"
     assert_equal expected, actual
   end

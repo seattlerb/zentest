@@ -143,24 +143,25 @@ class UnitDiff
           state = :footer
           result.shift
         when /^Expected (.*?)$/ then
-          expect << "#{$1}\n"
+          expect << "#{$1}\n".dup
           result.shift
         when /^to equal / then
           state = :spec_butwas
           bw = result.shift.sub(/^to equal (.*):?$/, '\1')
           butwas << bw
         else
-          state = :butwas if result.first.sub!(/ expected( but was|, not)/, '')
-          expect << result.shift
+          ex = result.shift.dup
+          state = :butwas if ex.sub!(/ expected( but was|, not)/, '')
+          expect << ex
         end
       when :butwas then
-        butwas = result[0..-1]
+        butwas = result[0..-1].map(&:dup)
         result.clear
       when :spec_butwas then
         if result.first =~ /^\s+\S+ at |^:\s*$/
           state = :footer
         else
-          butwas << result.shift
+          butwas << result.shift.dup
         end
       when :footer then
         butwas.last.sub!(/:$/, '')
