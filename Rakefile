@@ -1,11 +1,6 @@
 # -*- ruby -*-
 
-$LOAD_PATH << 'lib'
-
-require 'rubygems'
 require 'hoe'
-
-Hoe.add_include_dirs("../../minitest/dev/lib")
 
 Hoe.plugin :seattlerb
 
